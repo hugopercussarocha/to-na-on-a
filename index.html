@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu App de Estudos</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #f4f4f9; }
+        .card { background: white; padding: 20px; border-radius: 10px; shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        button { display: block; width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 5px; background: #007AFF; color: white; font-size: 16px; cursor: pointer; }
+        .errada { background: #ff3b30; }
+        .correta { background: #4cd964; }
+        #feedback { display: none; margin-top: 20px; padding: 15px; border-left: 5px solid #007AFF; background: #eef; }
+    </style>
+</head>
+<body>
+
+<div id="app" class="card">
+    <h2 id="titulo">Selecione uma Matéria</h2>
+    <div id="conteudo"></div>
+    <div id="feedback">
+        <strong id="res-status"></strong><br>
+        <p id="fundamentacao"></p>
+        <small id="localizacao"></small>
+        <button onclick="proximaQuestao()" style="background: #333;">Próxima Questão</button>
+    </div>
+</div>
+
+<script>
+// Exemplo de Banco de Dados
+const dados = {
+    "Português": {
+        "Verbos": [
+            { q: "Qual o modo verbal de 'Eu fiz'?", opcoes: ["Indicativo", "Subjuntivo", "Imperativo"], correta: 0, fund: "O pretérito perfeito expressa um fato concluído no passado.", loc: "Pág 45" }
+        ],
+        "Sílaba": []
+    },
+    "Regência": {
+        "Teoria": [
+            { q: "Ricardo Rocha define a formação do regente como...", opcoes: ["Inato", "Próprio e Adquirido", "Técnico"], correta: 1, fund: "O que é nato é próprio; o que é estudado é adquirido.", loc: "Pág 15" }
+        ]
+    }
+};
+
+let materiaAtual = "";
+let assuntoAtual = "";
+let questaoIndex = 0;
+
+const titulo = document.getElementById('titulo');
+const conteudo = document.getElementById('conteudo');
+const feedback = document.getElementById('feedback');
+
+function carregarMaterias() {
+    titulo.innerText = "Matérias";
+    conteudo.innerHTML = "";
+    Object.keys(dados).forEach(m => {
+        conteudo.innerHTML += `<button onclick="carregarAssuntos('${m}')">${m}</button>`;
+    });
+}
+
+function carregarAssuntos(m) {
+    materiaAtual = m;
+    titulo.innerText = "Assuntos de " + m;
+    conteudo.innerHTML = "";
+    Object.keys(dados[m]).forEach(a => {
+        conteudo.innerHTML += `<button onclick="iniciarQuestoes('${a}')">${a}</button>`;
+    });
+    conteudo.innerHTML += `<button onclick="carregarMaterias()" style="background:#888">Voltar</button>`;
+}
+
+function iniciarQuestoes(a) {
+    assuntoAtual = a;
+    questaoIndex = 0;
+    mostrarQuestao();
+}
+
+function mostrarQuestao() {
+    const q = dados[materiaAtual][assuntoAtual][questaoIndex];
+    if (!q) {
+        alert("Fim das questões deste assunto!");
+        return carregarMaterias();
+    }
+    feedback.style.display = "none";
+    titulo.innerText = q.q;
+    conteudo.innerHTML = "";
+    q.opcoes.forEach((opt, index) => {
+        conteudo.innerHTML += `<button onclick="verificar(${index})">${opt}</button>`;
+    });
+}
+
+function verificar(index) {
+    const q = dados[materiaAtual][assuntoAtual][questaoIndex];
+    const botoes = conteudo.querySelectorAll('button');
+    
+    if (index === q.correta) {
+        botoes[index].classList.add('correta');
+        document.getElementById('res-status').innerText = "✅ ACERTOU!";
+    } else {
+        botoes[index].classList.add('errada');
+        botoes[q.correta].classList.add('correta');
+        document.getElementById('res-status').innerText = "❌ ERROU!";
+    }
+    
+    document.getElementById('fundamentacao').innerText = q.fund;
+    document.getElementById('localizacao').innerText = "Localização: " + q.loc;
+    feedback.style.display = "block";
+}
+
+function proximaQuestao() {
+    questaoIndex++;
+    mostrarQuestao();
+}
+
+// Inicia o app
+carregarMaterias();
+</script>
+
+</body>
+</html>
