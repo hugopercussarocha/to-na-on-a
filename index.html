@@ -5,39 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu App de Estudos</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; background: #f4f4f9; }
-        .card { background: white; padding: 20px; border-radius: 10px; shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        button { display: block; width: 100%; padding: 15px; margin: 10px 0; border: none; border-radius: 5px; background: #007AFF; color: white; font-size: 16px; cursor: pointer; }
-        .errada { background: #ff3b30; }
-        .correta { background: #4cd964; }
-        #feedback { display: none; margin-top: 20px; padding: 15px; border-left: 5px solid #007AFF; background: #eef; }
+        /* Estilo para parecer um app de celular */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 20px; background: #f0f2f5; color: #1c1e21; line-height: 1.6; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
+        h2 { font-size: 1.2rem; color: #0056b3; margin-bottom: 20px; text-align: center; }
+        button { display: block; width: 100%; padding: 15px; margin: 12px 0; border: 1px solid #ddd; border-radius: 10px; background: #fff; color: #333; font-size: 16px; cursor: pointer; text-align: left; transition: 0.2s; }
+        button:active { transform: scale(0.98); background: #f8f9fa; }
+        .menu-btn { background: #007AFF; color: white; text-align: center; font-weight: bold; border: none; }
+        .errada { background: #ff3b30 !important; color: white !important; border: none; }
+        .correta { background: #4cd964 !important; color: white !important; border: none; }
+        #feedback { display: none; margin-top: 20px; padding: 15px; border-radius: 10px; background: #f8f9fa; border: 1px solid #eee; }
+        .voltar-btn { background: #6c757d; color: white; text-align: center; margin-top: 30px; }
+        .header-info { font-size: 0.9rem; color: #666; margin-bottom: 10px; text-align: center; }
     </style>
 </head>
 <body>
 
 <div id="app" class="card">
+    <div id="header" class="header-info"></div>
     <h2 id="titulo">Selecione uma Matéria</h2>
     <div id="conteudo"></div>
+    
     <div id="feedback">
         <strong id="res-status"></strong><br>
         <p id="fundamentacao"></p>
-        <small id="localizacao"></small>
-        <button onclick="proximaQuestao()" style="background: #333;">Próxima Questão</button>
+        <small id="localizacao" style="color: #666; font-style: italic;"></small>
+        <button onclick="proximaQuestao()" class="menu-btn" style="background: #333; margin-top: 20px;">Próxima Questão</button>
     </div>
 </div>
 
 <script>
-// Exemplo de Banco de Dados
+// --- SEU BANCO DE DADOS DE QUESTÕES ---
 const dados = {
-    "Português": {
-        "Verbos": [
-            { q: "Qual o modo verbal de 'Eu fiz'?", opcoes: ["Indicativo", "Subjuntivo", "Imperativo"], correta: 0, fund: "O pretérito perfeito expressa um fato concluído no passado.", loc: "Pág 45" }
+    "Regência: uma arte complexa": {
+        "Capítulo 1": [
+            { 
+                q: "Ricardo Rocha define a formação do regente como um 'bem patrimonial'. Esse patrimônio é classificado como:", 
+                opcoes: ["Exclusivamente técnico e auditivo.", "Inato e imutável.", "Próprio e adquirido.", "Teórico e prático.", "Individual e coletivo."], 
+                correta: 2, 
+                fund: "Rocha utiliza a metáfora do 'patrimônio' para classificar as competências. O que é nato chama-se Próprio; o que é desenvolvido pelo estudo chama-se Adquirido.", 
+                loc: "Página 15, primeiro parágrafo" 
+            }
         ],
-        "Sílaba": []
-    },
-    "Regência": {
-        "Teoria": [
-            { q: "Ricardo Rocha define a formação do regente como...", opcoes: ["Inato", "Próprio e Adquirido", "Técnico"], correta: 1, fund: "O que é nato é próprio; o que é estudado é adquirido.", loc: "Pág 15" }
+        "Capítulo 2": [
+            // Você vai adicionar questões aqui depois seguindo o modelo acima
+        ],
+        "Capítulo 3": [
+            // Você vai adicionar questões aqui depois
         ]
     }
 };
@@ -49,23 +63,27 @@ let questaoIndex = 0;
 const titulo = document.getElementById('titulo');
 const conteudo = document.getElementById('conteudo');
 const feedback = document.getElementById('feedback');
+const header = document.getElementById('header');
 
 function carregarMaterias() {
+    header.innerText = "";
     titulo.innerText = "Matérias";
     conteudo.innerHTML = "";
+    feedback.style.display = "none";
     Object.keys(dados).forEach(m => {
-        conteudo.innerHTML += `<button onclick="carregarAssuntos('${m}')">${m}</button>`;
+        conteudo.innerHTML += `<button class="menu-btn" onclick="carregarAssuntos('${m}')">${m}</button>`;
     });
 }
 
 function carregarAssuntos(m) {
     materiaAtual = m;
-    titulo.innerText = "Assuntos de " + m;
+    header.innerText = m;
+    titulo.innerText = "Escolha o Capítulo";
     conteudo.innerHTML = "";
     Object.keys(dados[m]).forEach(a => {
         conteudo.innerHTML += `<button onclick="iniciarQuestoes('${a}')">${a}</button>`;
     });
-    conteudo.innerHTML += `<button onclick="carregarMaterias()" style="background:#888">Voltar</button>`;
+    conteudo.innerHTML += `<button class="voltar-btn" onclick="carregarMaterias()">← Voltar</button>`;
 }
 
 function iniciarQuestoes(a) {
@@ -75,14 +93,19 @@ function iniciarQuestoes(a) {
 }
 
 function mostrarQuestao() {
-    const q = dados[materiaAtual][assuntoAtual][questaoIndex];
+    const lista = dados[materiaAtual][assuntoAtual];
+    const q = lista[questaoIndex];
+    
     if (!q) {
-        alert("Fim das questões deste assunto!");
-        return carregarMaterias();
+        alert("Fim das questões deste capítulo!");
+        return carregarAssuntos(materiaAtual);
     }
+    
     feedback.style.display = "none";
+    header.innerText = `${materiaAtual} > ${assuntoAtual}`;
     titulo.innerText = q.q;
     conteudo.innerHTML = "";
+    
     q.opcoes.forEach((opt, index) => {
         conteudo.innerHTML += `<button onclick="verificar(${index})">${opt}</button>`;
     });
@@ -92,17 +115,22 @@ function verificar(index) {
     const q = dados[materiaAtual][assuntoAtual][questaoIndex];
     const botoes = conteudo.querySelectorAll('button');
     
+    // Desabilitar botões após o clique
+    botoes.forEach(btn => btn.onclick = null);
+    
     if (index === q.correta) {
         botoes[index].classList.add('correta');
         document.getElementById('res-status').innerText = "✅ ACERTOU!";
+        document.getElementById('res-status').style.color = "#4cd964";
     } else {
         botoes[index].classList.add('errada');
         botoes[q.correta].classList.add('correta');
         document.getElementById('res-status').innerText = "❌ ERROU!";
+        document.getElementById('res-status').style.color = "#ff3b30";
     }
     
     document.getElementById('fundamentacao').innerText = q.fund;
-    document.getElementById('localizacao').innerText = "Localização: " + q.loc;
+    document.getElementById('localizacao').innerText = "LOCALIZAÇÃO: " + q.loc;
     feedback.style.display = "block";
 }
 
@@ -111,7 +139,7 @@ function proximaQuestao() {
     mostrarQuestao();
 }
 
-// Inicia o app
+// Iniciar o App
 carregarMaterias();
 </script>
 
