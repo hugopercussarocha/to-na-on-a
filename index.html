@@ -3,176 +3,291 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu App de Estudos - Pro</title>
+    <title>Titanium Quiz - Master</title>
     <style>
+        :root {
+            --primary: #007AFF;
+            --bg: #F2F2F7;
+            --card-bg: #FFFFFF;
+            --text-main: #1C1C1E;
+            --text-sec: #8E8E93;
+            --success: #34C759;
+            --danger: #FF3B30;
+        }
+
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            padding: 20px; 
-            background: #f0f2f5; 
-            color: #1c1e21; 
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto; 
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
         }
-        .card { 
-            background: white; 
-            padding: 25px; 
-            border-radius: 15px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
-            max-width: 600px; 
-            margin: auto; 
+
+        .container { 
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
-        
-        /* 1. Fonte menor, acadêmica e justificada */
+
+        .header-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-box {
+            padding: 4px 10px;
+            border-radius: 8px;
+            background: #f8f8f8;
+        }
+
+        .stat-err { color: var(--danger); cursor: pointer; border: 1px solid #ff3b3033; }
+        .stat-acc { color: var(--success); }
+
+        /* 1. Fonte da questão ainda menor e estilo acadêmico */
         #titulo { 
-            font-family: "Georgia", serif;
-            font-size: 1.05rem; 
-            color: #333; 
-            margin-bottom: 20px; 
-            text-align: justify; 
-            line-height: 1.5;
+            font-family: "Times New Roman", Times, serif;
+            font-size: 0.88rem; 
+            line-height: 1.45;
+            text-align: justify;
+            color: #2c3e50;
+            background: #fdfdfd;
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+            margin-bottom: 20px;
         }
 
-        .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .stats-bar { font-size: 0.85rem; font-weight: bold; }
-        .acertos { color: #28a745; }
-        .erros { color: #dc3545; cursor: pointer; text-decoration: underline; }
-
-        button { 
-            display: block; width: 100%; padding: 12px; margin: 8px 0; 
-            border: 1px solid #ddd; border-radius: 8px; background: #fff; 
-            color: #333; font-size: 15px; cursor: pointer; text-align: left; 
+        .option-btn {
+            background: #FFFFFF;
+            border: 1px solid #E5E5EA;
+            border-radius: 14px;
+            padding: 14px 18px;
+            margin-bottom: 10px;
+            width: 100%;
+            text-align: left;
+            font-size: 0.92rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: flex-start;
         }
+
+        .option-btn:hover { border-color: var(--primary); background: #f0f7ff; }
         
-        .menu-btn { background: #007AFF; color: white; text-align: center; font-weight: bold; border: none; }
-        .voltar-topo { width: auto; padding: 5px 15px; font-size: 0.8rem; background: #6c757d; color: white; margin: 0; }
-        
-        .errada { background: #ff3b30 !important; color: white !important; }
-        .correta { background: #4cd964 !important; color: white !important; }
-        
-        #feedback { display: none; margin-top: 20px; padding: 15px; border-radius: 10px; background: #f8f9fa; border: 1px solid #eee; }
+        .letter {
+            font-weight: 800;
+            color: var(--primary);
+            margin-right: 12px;
+            min-width: 20px;
+        }
+
+        .correta { background: var(--success) !important; color: white !important; border: none; }
+        .errada { background: var(--danger) !important; color: white !important; border: none; }
+
+        .btn-action {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .voltar-link {
+            color: var(--text-sec);
+            text-decoration: none;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        #feedback {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: #F2F2F7;
+            border-radius: 12px;
+            font-size: 0.82rem;
+            text-align: justify;
+        }
     </style>
 </head>
 <body>
 
-<div id="app" class="card">
-    <div class="header-container">
-        <button class="voltar-topo" id="btnVoltarTopo" onclick="carregarMaterias()" style="display:none;">← Início</button>
-        <div class="stats-bar">
-            <span class="acertos" id="stat-acertos">Acertos: 0</span> | 
-            <span class="erros" id="stat-erros" onclick="revisarErros()">Erros: 0 (revisar)</span>
+<div class="container">
+    <div class="header-nav">
+        <div class="voltar-link" id="btnVoltar" onclick="carregarMaterias()" style="visibility: hidden;">
+            ❮ Início
+        </div>
+        <div class="stats">
+            <div class="stat-box stat-acc" id="stat-acertos">0 Acertos</div>
+            <div class="stat-box stat-err" id="stat-erros" onclick="revisarErros()">0 Erros</div>
         </div>
     </div>
 
-    <div id="header" style="font-size: 0.8rem; color: #666; text-align: center;"></div>
-    <h2 id="titulo">Selecione uma Matéria</h2>
-    <div id="conteudo"></div>
+    <div id="sub-header" style="font-size: 0.7rem; color: var(--text-sec); text-align: center; margin-bottom: 5px;"></div>
+    <div id="titulo">Selecione uma matéria.</div>
     
+    <div id="conteudo"></div>
+
     <div id="feedback">
-        <strong id="res-status"></strong><br>
-        <p id="fundamentacao" style="font-size: 0.9rem; text-align: justify;"></p>
-        <small id="localizacao" style="color: #666; font-style: italic;"></small>
-        <button onclick="proximaQuestao()" class="menu-btn" style="background: #333; margin-top: 20px; text-align: center;">Próxima Questão</button>
+        <b id="res-status"></b>
+        <p id="fundamentacao" style="margin: 8px 0; color: #444;"></p>
+        <div id="localizacao" style="font-size: 0.75rem; color: var(--text-sec); font-style: italic;"></div>
+        <button class="btn-action" id="btnProxima" onclick="proximaQuestao()" style="margin-top: 15px;">Próxima Questão</button>
     </div>
 </div>
 
 <script>
-// --- BANCO DE DADOS ---
+// BANCO DE DADOS ORIGINAL - SEM NENHUMA ALTERAÇÃO NOS TEXTOS
 const dados = {
     "Regência: uma arte complexa": {
         "Capítulo 1": [
-            { id: "R1C1Q1", q: "Q1. No que tange à gênese do regente, o 'Patrimônio Próprio' é definido como o conjunto de faculdades biopsicológicas inatas. Segundo Rocha, qual elemento integra este patrimônio, sendo condição fundamental para a autenticidade do regente?", opcoes: ["A vocação, entendida como um apelo interior e compromisso ético-existencial.", "A proficiência técnica nos instrumentos de transposição da família das madeiras.", "O domínio das correntes estéticas do século XX e suas aplicações práticas.", "A capacidade administrativa de gerir escalas e recursos humanos da banda.", "O conhecimento profundo das regras de etiqueta e protocolo das forças armadas."], correta: 0, fund: "Rocha distingue o patrimônio inato (próprio) do adquirido. A vocação é tratada como a força motriz inalienável que sustenta a ética do regente.", loc: "Pág. 21" },
-            { id: "R1C1Q2", q: "Q2. O 'Poliglota Musical' é o regente que, na sua formação, buscou:", opcoes: ["O aprendizado de idiomas estrangeiros para compreender tratados clássicos.", "A compreensão profunda das técnicas, limites e idiossincrasias de cada instrumento.", "A tradução de todos os termos técnicos e expressivos da partitura para o vernáculo.", "O domínio da oratória para realizar preleções motivacionais antes dos concertos.", "A memorização de gírias e jargões específicos de músicos de diversos naipes."], correta: 1, fund: "Ser poliglota musical é falar a 'língua' de cada instrumentista, permitindo orientações técnicas precisas e respeitáveis.", loc: "Pág. 27" },
-            { id: "R1C1Q3", q: "Q3. Sobre o conceito de 'Catalisador', Rocha propõe que a função do regente no pódio é:", opcoes: ["Substituir a vontade dos músicos pela sua interpretação particular e soberana.", "Corrigir mecanicamente as notas erradas através de um rigor punitivo.", "Unificar as energias dispersas do grupo em prol de uma síntese interpretativa.", "Centralizar as decisões administrativas para garantir o sucesso do concerto.", "Atuar como elemento neutro, permitindo que a orquestra toque de forma intuitiva."], correta: 2, fund: "O regente não toca; ele provoca a reação sonora. Ser catalisador é transformar vontades individuais em unidade artística coesa.", loc: "Pág. 38" },
-            // ... (Abaixo seguem as outras questões conforme o padrão do ID)
+            { id: "Q1", q: "Q1. No que tange à gênese do regente, o 'Patrimônio Próprio' é definido como o conjunto de faculdades biopsicológicas inatas. Segundo Rocha, qual elemento integra este patrimônio, sendo condição fundamental para a autenticidade do regente?", opcoes: ["A vocação, entendida como um apelo interior e compromisso ético-existencial.", "A proficiência técnica nos instrumentos de transposição da família das madeiras.", "O domínio das correntes estéticas do século XX e suas aplicações práticas.", "A capacidade administrativa de gerir escalas e recursos humanos da banda.", "O conhecimento profundo das regras de etiqueta e protocolo das forças armadas."], correta: 0, fund: "Rocha distingue o patrimônio inato (próprio) do adquirido. A vocação é tratada como a força motriz inalienável que sustenta a ética do regente.", loc: "Pág. 21" },
+            { id: "Q2", q: "Q2. O 'Poliglota Musical' é o regente que, na sua formação, buscou:", opcoes: ["O aprendizado de idiomas estrangeiros para compreender tratados clássicos.", "A compreensão profunda das técnicas, limites e idiossincrasias de cada instrumento.", "A tradução de todos os termos técnicos e expressivos da partitura para o vernáculo.", "O domínio da oratória para realizar preleções motivacionais antes dos concertos.", "A memorização de gírias e jargões específicos de músicos de diversos naipes."], correta: 1, fund: "Ser poliglota musical é falar a 'língua' de cada instrumentista, permitindo orientações técnicas precisas e respeitáveis.", loc: "Pág. 27" },
+            { id: "Q3", q: "Q3. Sobre o conceito de 'Catalisador', Rocha propõe que a função do regente no pódio é:", opcoes: ["Substituir a vontade dos músicos pela sua interpretação particular e soberana.", "Corrigir mecanicamente as notas erradas através de um rigor punitivo.", "Unificar as energias dispersas do grupo em prol de uma síntese interpretativa.", "Centralizar as decisões administrativas para garantir o sucesso do concerto.", "Atuar como elemento neutro, permitindo que a orquestra toque de forma intuitiva."], correta: 2, fund: "O regente não toca; ele provoca a reação sonora. Ser catalisador é transformar vontades individuais em unidade artística coesa.", loc: "Pág. 38" },
+            { id: "Q4", q: "Q4. Rocha discorre sobre o 'Regente de CD', indivíduo que mimetiza interpretações consagradas. A carência de qual pilar da formação torna o regente vulnerável a esse vício?", opcoes: ["Da independência de pensamento gerada pelo substrato analítico e cultural.", "Da cultura humanística voltada para as artes plásticas e arquitetura.", "Do autodomínio psicológico necessário para enfrentar a solidão do pódio.", "Da mecanização gestual que permite a liberdade de audição crítica.", "Do senso de reality para avaliar a competência técnica do grupo liderado."], correta: 0, fund: "Sem a formação intelectual que permite a análise própria, o regente torna-se um mero repetidor de ideias externas.", loc: "Pág. 29" },
+            { id: "Q5", q: "Q5. No Capítulo 1, a 'Autoridade Técnica' do regente é validada perante o grupo quando:", opcoes: ["O maestro demonstra possuir soluções práticas para os problemas musicais.", "O regente utiliza sua patente militar para silenciar questionamentos.", "O grupo percebe que o regente possui o apoio da diretoria institucional.", "O maestro evita fazer correções para não desgastar sua imagem de líder.", "O regente apresenta um currículo com extensos cursos internacionais."], correta: 0, fund: "No pódio, o Saber é a moeda de troca. O respeito emana da capacidade de resolver o problema técnico do liderado.", loc: "Pág. 43" },
+            { id: "Q6", q: "Q6. A finalidade última de todos os pilares da formação do regente abordados no Capítulo 1 é:", opcoes: ["O prestígio institucional da banda militar perante a sociedade civil.", "O sucesso pessoal e a ascensão na carreira profissional do regente.", "A unidade estética e a excelência na realização sonora da obra de arte.", "A preservação da ordem e da disciplina dentro das corporações musicais.", "O entretenimento eficaz do público através de performances visualmente ricas."], correta: 2, fund: "Todos os pilares (técnico, físico, psíquico) convergem para um único ponto: a perfeição da obra de arte sonora.", loc: "Pág. 52" },
+            { id: "Q7", q: "Q7. Na administração de conflitos, o regente deve atuar como um 'Bom Juiz', o que requer:", opcoes: ["Rigor inflexível e punição imediata para qualquer desvio rítmico ou melódico.", "Parcialidade em favor dos músicos de sopro, dada a natureza da banda militar.", "Omissão diplomática, deixando que o tempo resolva os atritos interpessoais.", "Isenção, justiça e o foco na preservação da unidade e da qualidade artística.", "Autoritarismo benevolente, onde a decisão é tomada sem ouvir as partes."], correta: 3, fund: "O regente deve ser um mediador técnico. Suas decisões devem visar o bem da música, nunca o bem de indivíduos.", loc: "Pág. 48" },
+            { id: "Q8", q: "Q8. O regente que domina a 'Audição Interna' possui um termômetro de correção no ensaio. Essa faculdade consiste na capacidade de:", opcoes: ["Memorizar o som de gravações de referência para reproduzir no pódio.", "Identificar conversas paralelas entre os músicos durante a execução da obra.", "Comparar o som ideal concebido mentalmente com o som real produzido pelo grupo.", "Perceber variações de temperatura que afetam a afinação dos metais.", "Ouvir os batimentos cardíacos para assegurar a manutenção do tempo metronômico."], correta: 2, fund: "É o processo de 'pré-ouvir' a partitura. Sem isso, o regente apenas reage ao som.", loc: "Pág. 26" },
+            { id: "Q9", q: "Q9. A 'Estilística' na formação do regente provê o ferramental teórico necessário para:", opcoes: ["Escolher o vestuário e a batuta que melhor se adaptam ao estilo do concerto.", "Criar uma assinatura gestual única que o diferencie de outros regentes.", "Decidir quais notas da partitura podem ser omitidas para facilitar o ensaio.", "Aplicar as convenções interpretativas pertinentes a cada período da história.", "Promover o marketing da banda de acordo com o estilo musical predominante."], correta: 3, fund: "A estilística garante que o regente não cometa anacronismos interpretativos.", loc: "Pág. 25" },
+            { id: "Q10", q: "Q10. O 'Investimento nas Virtudes' é uma estratégia pedagógica de liderança que visa elevar o patamar do conjunto através:", opcoes: ["Do fortalecimento dos pontos positivos para que o alto padrão minimize os defeitos.", "Do isolamento dos músicos menos talentosos durante as sessões de ensaio.", "Do pagamento de gratificações por desempenho técnico aos solistas.", "Da substituição imediata de instrumentistas que cometem erros reincidentes.", "Do elogio indiscriminado a todos os membros para evitar conflitos."], correta: 0, fund: "Focar na excelência das virtudes contagia o padrão geral do grupo.", loc: "Pág. 44" },
+            { id: "Q11", q: "Q11. A liderança integral na regência é consolidada na síntese harmônica entre:", opcoes: ["O Gesto (estética do movimento) e o Som (resultado acústico final).", "A Patente (hierarquia militar) e a Função (liderança artística).", "O Ser (integridade ética e caráter) e o Saber (profundo domínio técnico).", "A Tradição (respeito aos mestres) e a Inovação (linguagens contemporâneas).", "O Talento (dom natural) e a Sorte (oportunidades de carreira)."], correta: 2, fund: "A liderança real exige a união de caráter e técnica.", loc: "Pág. 50" },
+            { id: "Q12", q: "Q12. No Capítulo 1, a 'Cultura Humanística' permite que o regente consiga:", opcoes: ["Penetrar no espírito da obra e compreender as razões estéticas da criação.", "Redigir prefácios e programas de concerto com rigor gramatical.", "Obter vantagens curriculares em processos seletivos e promoções militares.", "Argumentar filosoficamente contra decisões administrativas da diretoria.", "Memorizar datas e fatos biográficos dos compositores."], correta: 0, fund: "Conhecer história e artes ajuda a traduzir o contexto emocional da partitura.", loc: "Pág. 28" },
+            { id: "Q13", q: "Q13. A 'Solidão do Pódio', conceito abordado na esfera psicológica, traduz-se como:", opcoes: ["A falta de interação social do regente com os músicos da orquestra.", "A necessidade de estudar a partitura em isolamento absoluto.", "O sentimento de abandono quando o regente não é aplaudido.", "A distância física obrigatória que o regente deve manter em cerimônias.", "A responsabilidade final e solitária do líder sobre as decisões artísticas."], correta: 4, fund: "No momento crítico, o regente assume o risco final perante o grupo.", loc: "Pág. 32" },
+            { id: "Q14", q: "Q14. Ao analisar o 'Caráter' do regente no Capítulo 1, Rocha sugere que a autoridade moral é fundamental para:", opcoes: ["Garantir que os músicos não se atrasem para os ensaios.", "Estabelecer uma relação de confiança e respeito mútuo com o grupo.", "Facilitar a interlocução com autoridades civis e militares.", "Impor sua interpretação sem a necessidade de fundamentação técnica.", "Assegurar que sua imagem pública seja preservada de críticas."], correta: 1, fund: "A autoridade moral (Caráter) é o que sustenta a liderança técnica a longo prazo.", loc: "Pág. 51" },
+            { id: "Q15", q: "Q15. O 'Senso de Realidade' permite ao regente evitar o 'delírio artístico' de:", opcoes: ["Estudar obras de compositores contemporâneos com linguagens complexas.", "Exigir resultados estéticos incompatíveis com o nível técnico e o tempo disponível.", "Recusar a utilização de batutas que não sejam de materiais nobres.", "Aceitar a crítica técnica de músicos que possuem menor tempo de serviço.", "Propor a realização de concertos em espaços públicos."], correta: 1, fund: "O regente deve ser pragmático para não gerar frustração no conjunto.", loc: "Pág. 31" },
+            { id: "Q16", q: "Q16. Ao tratar da 'Prevenção de Conflitos', Rocha sugere que o regente atua como um estrategista que:", opcoes: ["Aplica o regulamento disciplinar militar na primeira falha técnica.", "Identifica tensões latentes no grupo e age preventivamente.", "Mantém-se inacessível aos músicos para evitar desgaste da autoridade.", "Delega a resolução de atritos exclusivamente aos chefes de naipe.", "Proíbe o diálogo entre os instrumentistas durante o ensaio."], correta: 1, fund: "A liderança proativa detecta o clima e intervém antes da crise.", loc: "Pág. 41" },
+            { id: "Q17", q: "Q17. O 'Sentido de Reconhecimento', enquanto virtude de liderança, tem como finalidade:", opcoes: ["Identificar os músicos que merecem promoção por tempo de serviço.", "Validar o esforço do liderado, gerando engajamento cooperativo.", "Permitir que o regente seja reconhecido como autoridade máxima.", "Saber diferenciar os timbres de instrumentos nacionais e importados.", "Garantir que o nome do regente figure com destaque no programa."], correta: 1, fund: "O líder que reconhece o mérito ganha um aliado na busca pela excelência.", loc: "Pág. 46" },
+            { id: "Q18", q: "Q18. Na Formação Física, qual a finalidade última da automação gestual?", opcoes: ["Reduzir o impacto visual do maestro perante os músicos.", "Demonstrar o virtuosismo físico necessário para a legitimação.", "Permitir a marcação de andamentos complexos sem partitura.", "Evitar o desgaste das articulações em ensaios de longa duração.", "Liberar a carga cognitiva para o exercício pleno da escuta crítica."], correta: 4, fund: "A automação libera o cérebro para focar na 'escuta interpretativa'.", loc: "Pág. 34" },
+            { id: "Q19", q: "Q19. O domínio da 'Análise Musical' é o que permite ao regente:", opcoes: ["Organizar a logística de transporte dos instrumentos pesados.", "Identificar a arquitetura da obra e as hierarquias sonoras.", "Fiscalizar o preenchimento correto dos mapas de ensaio.", "Reduzir o tempo de ensaio através da imposição de silêncio.", "Substituir o uso da batuta pela regência com as mãos livres."], correta: 1, fund: "Analisar é desmontar a obra para entender como ela se sustenta.", loc: "Pág. 24" },
+            { id: "Q20", q: "Q20. O 'Autodomínio' é vital para evitar que:", opcoes: ["O regente perca o controle rítmico.", "A batuta sofra danos físicos.", "O regente seja questionado por músicos acadêmicos.", "Oscilações emocionais do líder desestabilizem o conjunto.", "O tempo do concerto exceda o planejado."], correta: 3, fund: "O controle emocional do líder garante a estabilidade do conjunto.", loc: "Pág. 30" },
+            { id: "Q21", q: "Q21. 'A palavra convence, o exemplo arrasta'. No contexto do Capítulo 1, essa máxima militar aplica-se à:", opcoes: ["Pontualidade e dedicação do regente ao estudo da partitura.", "Capacidade do maestro de tocar todos os instrumentos da banda.", "Habilidade de realizar discursos eloquentes antes das apresentações.", "Necessidade de manter o uniforme sempre impecável nas cerimônias.", "Prática de punir os erros para que sirvam de exemplo aos demais."], correta: 0, fund: "A liderança pelo exemplo é a forma mais sólida de autoridade.", loc: "Pág. 49" },
+            { id: "Q22", q: "Q22. A 'Vontade de Realização' diferencia o regente burocrata do artista, pois foca na:", opcoes: ["Manutenção dos processos administrativos vigentes.", "Superação dos obstáculos em prol do resultado artístico.", "Busca por cargos de chefia e direção institucional.", "Obediência estrita às ordens superiores sem questionamento.", "Economia de recursos públicos durante a temporada."], correta: 1, fund: "A vontade de realização é o motor que não se contenta com o 'médio'.", loc: "Pág. 33" },
+            { id: "Q23", q: "Q23. Para Rocha, o 'Regente Educador' entende que o ensaio é:", opcoes: ["Um momento de lazer e descontração para os músicos da banda.", "Um processo contínuo de aprimoramento técnico e estético do grupo.", "Uma obrigação burocrática necessária para o cumprimento da escala.", "O local exclusivo para a aplicação de sanções disciplinares.", "Uma oportunidade para o regente demonstrar sua superioridade técnica."], correta: 1, fund: "O ensaio é, por definição, um espaço pedagógico.", loc: "Pág. 45" },
+            { id: "Q24", q: "Q24. A 'Comunicação Não-Verbal' na regência é potencializada quando o maestro:", opcoes: ["Utiliza megafones para ser ouvido em ambientes externos.", "Sincroniza seu olhar e sua expressão facial com o gesto e a música.", "Apresenta cartazes com indicações dinâmicas durante a execução.", "Escreve todas as orientações no quadro negro antes do ensaio.", "Cria um sistema de sinais manuais para substituir a partitura."], correta: 1, fund: "O rosto e o olhar são as extensões mais poderosas do gesto.", loc: "Pág. 36" },
+            { id: "Q25", q: "Q25. O conceito de 'Leitura à Vista' para o regente, segundo o texto, exige:", opcoes: ["A memorização completa da obra em poucos minutos.", "A compreensão imediata da estrutura e do caráter geral da obra.", "A capacidade de tocar a partitura no piano sem erros.", "O conhecimento biográfico do compositor antes de abrir a página.", "A tradução instantânea dos termos em italiano para o português."], correta: 1, fund: "Leitura à vista é a capacidade de síntese estrutural rápida.", loc: "Pág. 26" },
+            { id: "Q26", q: "Q26. A 'Ética Profissional' do regente impede que ele:", opcoes: ["Estude partituras de compositores que não sejam brasileiros.", "Realize críticas destrutivas a colegas de profissão perante os músicos.", "Utilize fones de ouvido durante as sessões de ensaio técnico.", "Modifique o andamento sugerido pelo compositor na partitura.", "Promova ensaios extras fora do horário de expediente militar."], correta: 1, fund: "A ética protege a dignidade da profissão e do colega.", loc: "Pág. 50" },
+            { id: "Q27", q: "Q27. O 'Equilíbrio Psíquico' é testado especialmente em situações de:", opcoes: ["Sucesso absoluto e aclamação unânime por parte do público.", "Ensaios com obras simples e de fácil execução técnica.", "Crises, imprevistos e alta pressão por resultados performáticos.", "Promoções e homenagens dentro da estrutura militar.", "Férias e períodos de afastamento das atividades musicais."], correta: 2, fund: "O equilíbrio é a âncora do líder na tempestade.", loc: "Pág. 32" },
+            { id: "Q28", q: "Q28. Rocha afirma que a 'Voz do Regente' no ensaio deve ser:", opcoes: ["Autoritária, alta e utilizada de forma constante para manter o foco.", "Sussurrada, para exigir que os músicos façam silêncio absoluto.", "Econômica, precisa e carregar a mesma autoridade do gesto.", "Substituída por apitos ou sinais sonoros de percussão.", "Utilizada apenas para contar os tempos iniciais de cada música."], correta: 2, fund: "Falar pouco e bem é uma virtude técnica do regente.", loc: "Pág. 40" },
+            { id: "Q29", q: "Q29. A 'Humildade Perante a Obra' significa que o regente deve:", opcoes: ["Sentir-se inferior aos músicos que possuem mestrado ou doutorado.", "Colocar sua técnica e ego a serviço das intenções do compositor.", "Evitar reger obras de grandes mestres da história da música.", "Pedir desculpas ao grupo sempre que cometer um erro de marcação.", "Aceitar qualquer sugestão de alteração na partitura vinda dos músicos."], correta: 1, fund: "O regente é o servo da obra, não o seu dono.", loc: "Pág. 51" },
+            { id: "Q30", q: "Q30. Ao concluir o Capítulo 1, Rocha reforça que a 'Excelência' é:", opcoes: ["Um destino final a ser alcançado e mantido sem esforço.", "Um dom gratuito concedido apenas aos grandes gênios da regência.", "Um hábito construído através da disciplina e do estudo incessante.", "Uma exigência burocrática dos manuais de instrução militar.", "O resultado exclusivo da sorte e das circunstâncias favoráveis."], correta: 2, fund: "Excelência não é ato, é hábito (Aristóteles/Rocha).", loc: "Pág. 53" }
         ]
     }
 };
 
-// 4, 5 e 6. Lógica de Persistência (LocalStorage)
-let progresso = JSON.parse(localStorage.getItem('appEstudos_progresso')) || { respondidas: [], acertos: 0, erros: 0, listaErros: [] };
+let progresso = JSON.parse(localStorage.getItem('quiz_titanium_master')) || { respondidas: [], acertos: 0, erros: 0, listaErros: [] };
 let revisandoErros = false;
+let materiaAtual, assuntoAtual, questaoIndex, listaAtual;
 
 function salvarProgresso() {
-    localStorage.setItem('appEstudos_progresso', JSON.stringify(progresso));
+    localStorage.setItem('quiz_titanium_master', JSON.stringify(progresso));
     atualizarPlacar();
 }
 
 function atualizarPlacar() {
-    document.getElementById('stat-acertos').innerText = `Acertos: ${progresso.acertos}`;
-    document.getElementById('stat-erros').innerText = `Erros: ${progresso.erros} (revisar)`;
+    document.getElementById('stat-acertos').innerText = `${progresso.acertos} Acertos`;
+    document.getElementById('stat-erros').innerText = `${progresso.listaErros.length} Erros (Revisar)`;
 }
-
-let materiaAtual = "";
-let assuntoAtual = "";
-let questaoIndex = 0;
-let listaAtual = [];
 
 function carregarMaterias() {
     revisandoErros = false;
-    document.getElementById('btnVoltarTopo').style.display = "none";
-    document.getElementById('header').innerText = "";
-    document.getElementById('titulo').innerText = "Selecione a Matéria";
-    document.getElementById('conteudo').innerHTML = "";
+    document.getElementById('btnVoltar').style.visibility = "hidden";
+    document.getElementById('sub-header').innerText = "";
+    document.getElementById('titulo').innerText = "Selecione uma matéria:";
     document.getElementById('feedback').style.display = "none";
+    
+    let html = "";
     Object.keys(dados).forEach(m => {
-        document.getElementById('conteudo').innerHTML += `<button class="menu-btn" onclick="carregarAssuntos('${m}')">${m}</button>`;
+        html += `<button class="option-btn" onclick="carregarCapitulos('${m}')" style="justify-content: center; font-weight: bold;">${m}</button>`;
     });
+    document.getElementById('conteudo').innerHTML = html;
 }
 
-function carregarAssuntos(m) {
+function carregarCapitulos(m) {
     materiaAtual = m;
-    document.getElementById('btnVoltarTopo').style.display = "block";
-    document.getElementById('header').innerText = m;
-    document.getElementById('titulo').innerText = "Escolha o Capítulo";
-    document.getElementById('conteudo').innerHTML = "";
-    Object.keys(dados[m]).forEach(a => {
-        document.getElementById('conteudo').innerHTML += `<button onclick="iniciarQuestoes('${a}')">${a}</button>`;
+    document.getElementById('btnVoltar').style.visibility = "visible";
+    document.getElementById('titulo').innerText = "Escolha o Capítulo:";
+    
+    let html = "";
+    Object.keys(dados[m]).forEach(cap => {
+        html += `<button class="option-btn" onclick="iniciarQuiz('${cap}')">${cap}</button>`;
     });
+    document.getElementById('conteudo').innerHTML = html;
 }
 
-function iniciarQuestoes(a) {
-    assuntoAtual = a;
+function iniciarQuiz(cap) {
+    assuntoAtual = cap;
     questaoIndex = 0;
-    // 4. Filtrar para não repetir questões já respondidas (exceto se estiver revisando erros)
     listaAtual = dados[materiaAtual][assuntoAtual].filter(q => !progresso.respondidas.includes(q.id));
+    
+    if(listaAtual.length === 0) {
+        alert("Capítulo concluído! Para refazer, use o modo Revisão ou limpe os dados.");
+        return carregarMaterias();
+    }
     mostrarQuestao();
 }
 
 function revisarErros() {
-    if (progresso.listaErros.length === 0) return alert("Você não tem erros para revisar!");
+    if (progresso.listaErros.length === 0) return alert("Nenhum erro para revisar.");
     revisandoErros = true;
     listaAtual = [...progresso.listaErros];
     questaoIndex = 0;
-    document.getElementById('btnVoltarTopo').style.display = "block";
+    document.getElementById('btnVoltar').style.visibility = "visible";
     mostrarQuestao();
 }
 
 function mostrarQuestao() {
     const q = listaAtual[questaoIndex];
     if (!q) {
-        alert(revisandoErros ? "Revisão concluída!" : "Você terminou todas as questões novas deste capítulo!");
+        alert(revisandoErros ? "Revisão de erros concluída!" : "Capítulo finalizado!");
         return carregarMaterias();
     }
 
     document.getElementById('feedback').style.display = "none";
-    document.getElementById('header').innerText = revisandoErros ? "REVISANDO ERROS" : `${materiaAtual} > ${assuntoAtual}`;
+    document.getElementById('sub-header').innerText = revisandoErros ? "REVISANDO ERROS" : `${materiaAtual} • ${assuntoAtual}`;
     document.getElementById('titulo').innerText = q.q;
-    document.getElementById('conteudo').innerHTML = "";
-
+    
+    let html = "";
     const letras = ["A", "B", "C", "D", "E"];
-    q.opcoes.forEach((opt, index) => {
-        // 2. Adicionado letras A, B, C, D, E
-        document.getElementById('conteudo').innerHTML += `<button onclick="verificar(${index})"><strong>${letras[index]}.</strong> ${opt}</button>`;
+    q.opcoes.forEach((opt, i) => {
+        html += `<button class="option-btn" onclick="verificar(${i})"><span class="letter">${letras[i]}</span> <span>${opt}</span></button>`;
     });
+    document.getElementById('conteudo').innerHTML = html;
 }
 
 function verificar(index) {
     const q = listaAtual[questaoIndex];
-    const botoes = document.getElementById('conteudo').querySelectorAll('button');
-    botoes.forEach(btn => btn.onclick = null);
+    const botoes = document.getElementById('conteudo').querySelectorAll('.option-btn');
+    botoes.forEach(b => b.onclick = null);
 
     if (index === q.correta) {
         botoes[index].classList.add('correta');
         document.getElementById('res-status').innerText = "✅ ACERTOU!";
-        document.getElementById('res-status').style.color = "#4cd964";
+        document.getElementById('res-status').style.color = "var(--success)";
+        
         if (!revisandoErros) {
             progresso.acertos++;
             progresso.respondidas.push(q.id);
@@ -184,16 +299,17 @@ function verificar(index) {
         botoes[index].classList.add('errada');
         botoes[q.correta].classList.add('correta');
         document.getElementById('res-status').innerText = "❌ ERROU!";
-        document.getElementById('res-status').style.color = "#ff3b30";
+        document.getElementById('res-status').style.color = "var(--danger)";
+        
         if (!revisandoErros) {
             progresso.erros++;
             progresso.respondidas.push(q.id);
             progresso.listaErros.push(q);
         }
     }
-    
+
     document.getElementById('fundamentacao').innerText = q.fund;
-    document.getElementById('localizacao').innerText = "FONTE: " + q.loc;
+    document.getElementById('localizacao').innerText = "Fonte: " + q.loc;
     document.getElementById('feedback').style.display = "block";
     salvarProgresso();
 }
@@ -203,9 +319,10 @@ function proximaQuestao() {
     mostrarQuestao();
 }
 
-// Inicializar placar
+// Início
 atualizarPlacar();
 carregarMaterias();
 </script>
+
 </body>
 </html>
