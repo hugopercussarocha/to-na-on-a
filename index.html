@@ -36,7 +36,6 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
 
-        /* Header e Navegação */
         .header-nav {
             display: flex;
             justify-content: space-between;
@@ -55,7 +54,6 @@
         .stat-err { color: var(--danger); cursor: pointer; border: 1px solid #ff3b3033; }
         .stat-acc { color: var(--success); }
 
-        /* Typography */
         #titulo { 
             font-family: "Times New Roman", Times, serif;
             font-size: 0.88rem; 
@@ -69,7 +67,6 @@
             margin-bottom: 20px;
         }
 
-        /* Botões */
         .option-btn {
             background: #FFFFFF;
             border: 1px solid #E5E5EA;
@@ -86,9 +83,7 @@
         }
 
         .option-btn:hover { border-color: var(--primary); background: #f0f7ff; }
-        
         .letter { font-weight: 800; color: var(--primary); margin-right: 12px; min-width: 20px; }
-
         .correta { background: var(--success) !important; color: white !important; border: none; }
         .errada { background: var(--danger) !important; color: white !important; border: none; }
 
@@ -106,7 +101,6 @@
 
         .voltar-link { color: var(--text-sec); font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 5px; }
 
-        /* Dashboard Styles */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
         .mini-card { background: #f8f9fa; padding: 10px; border-radius: 12px; text-align: center; }
         .mini-card small { font-size: 0.6rem; color: var(--text-sec); text-transform: uppercase; }
@@ -114,7 +108,6 @@
 
         .chart-container { margin: 20px 0; background: #fff; border: 1px solid #eee; padding: 10px; border-radius: 15px; }
         .insight-box { background: #eef7ff; padding: 15px; border-radius: 12px; font-size: 0.8rem; border-left: 4px solid var(--primary); margin-bottom: 15px; }
-
         #feedback { display: none; margin-top: 15px; padding: 15px; background: #F2F2F7; border-radius: 12px; font-size: 0.82rem; text-align: justify; }
     </style>
 </head>
@@ -131,16 +124,13 @@
 
     <div id="view-home">
         <h2 style="margin-top:0">Bons estudos!</h2>
-        
         <div class="stats-grid">
             <div class="mini-card"><small>Feitas</small><div id="dash-total">0</div></div>
             <div class="mini-card"><small>Precisão</small><div id="dash-perc">0%</div></div>
             <div class="mini-card"><small>T. Médio</small><div id="dash-tempo">0s</div></div>
         </div>
-
         <div class="insight-box" id="dash-insight">Responda questões para ver seu diagnóstico.</div>
-
-        <button class="btn-action" onclick="carregarMaterias()">🚀 Começar Simulado</button>
+        <button class="btn-action" onclick="carregarMaterias()">🚀 Responder Questões</button>
         <button class="btn-action" style="background:#333" onclick="verEstatisticasDetalhadas()">📊 Ver Estatísticas Detalhadas</button>
     </div>
 
@@ -166,7 +156,6 @@
 </div>
 
 <script>
-// --- BANCO DE DADOS (30 Questões Originais) ---
 const dados = {
     "Regência: uma arte complexa": {
         "Capítulo 1": [
@@ -204,13 +193,11 @@ const dados = {
     }
 };
 
-// --- VARIÁVEIS DE CONTROLE ---
 let progresso = JSON.parse(localStorage.getItem('titanium_quiz_v2')) || { respondidas: [], acertos: 0, erros: 0, listaErros: [], historico: [] };
 let revisandoErros = false;
 let materiaAtual, assuntoAtual, questaoIndex, listaAtual, tempoInicio;
 let chartObj = null;
 
-// --- FUNÇÕES DE NAVEGAÇÃO ---
 function irParaHome() {
     document.getElementById('view-home').style.display = "block";
     document.getElementById('view-quiz').style.display = "none";
@@ -223,11 +210,9 @@ function carregarMaterias() {
     document.getElementById('view-home').style.display = "none";
     document.getElementById('view-quiz').style.display = "block";
     document.getElementById('btnVoltar').style.visibility = "visible";
-    
     document.getElementById('sub-header').innerText = "";
     document.getElementById('titulo').innerText = "Selecione uma matéria:";
     document.getElementById('feedback').style.display = "none";
-    
     let html = "";
     Object.keys(dados).forEach(m => {
         html += `<button class="option-btn" onclick="carregarCapitulos('${m}')" style="justify-content: center; font-weight: bold;">${m}</button>`;
@@ -237,8 +222,8 @@ function carregarMaterias() {
 
 function carregarCapitulos(m) {
     materiaAtual = m;
-    document.getElementById('titulo').innerText = "Escolha o Capítulo:";
-    let html = "";
+    document.getElementById('titulo').innerText = "Escolha o Conteúdo:";
+    let html = `<button class="option-btn" onclick="iniciarQuizTudo()" style="background: #eef7ff; border-color: var(--primary); font-weight: bold;">✨ Todas as Questões (Aleatório)</button>`;
     Object.keys(dados[m]).forEach(cap => {
         html += `<button class="option-btn" onclick="iniciarQuiz('${cap}')">${cap}</button>`;
     });
@@ -250,27 +235,37 @@ function iniciarQuiz(cap) {
     revisandoErros = false;
     questaoIndex = 0;
     listaAtual = dados[materiaAtual][assuntoAtual].filter(q => !progresso.respondidas.includes(q.id));
-    
-    if(listaAtual.length === 0) {
-        alert("Capítulo concluído!");
-        return irParaHome();
-    }
+    if(listaAtual.length === 0) { alert("Capítulo concluído!"); return irParaHome(); }
     mostrarQuestao();
 }
 
-// --- LÓGICA DO QUIZ ---
+function iniciarQuizTudo() {
+    assuntoAtual = "Tudo";
+    revisandoErros = false;
+    questaoIndex = 0;
+    
+    // Junta todas as questões da matéria que ainda não foram respondidas
+    let todas = [];
+    Object.keys(dados[materiaAtual]).forEach(cap => {
+        todas = todas.concat(dados[materiaAtual][cap]);
+    });
+    
+    listaAtual = todas.filter(q => !progresso.respondidas.includes(q.id));
+    
+    // Embaralha a lista
+    listaAtual.sort(() => Math.random() - 0.5);
+
+    if(listaAtual.length === 0) { alert("Todas as questões desta matéria foram concluídas!"); return irParaHome(); }
+    mostrarQuestao();
+}
+
 function mostrarQuestao() {
     const q = listaAtual[questaoIndex];
-    if (!q) {
-        alert("Fim da sessão!");
-        return irParaHome();
-    }
-
+    if (!q) { alert("Fim da sessão!"); return irParaHome(); }
     tempoInicio = Date.now();
     document.getElementById('feedback').style.display = "none";
     document.getElementById('sub-header').innerText = revisandoErros ? "REVISANDO ERROS" : `${materiaAtual} • ${assuntoAtual}`;
     document.getElementById('titulo').innerText = q.q;
-    
     let html = "";
     const letras = ["A", "B", "C", "D", "E"];
     q.opcoes.forEach((opt, i) => {
@@ -284,7 +279,6 @@ function verificar(index) {
     const tempoGasto = Math.round((Date.now() - tempoInicio) / 1000);
     const botoes = document.getElementById('conteudo').querySelectorAll('.option-btn');
     botoes.forEach(b => b.onclick = null);
-
     const correta = (index === q.correta);
 
     if (correta) {
@@ -309,11 +303,17 @@ function verificar(index) {
         }
     }
 
-    // Salvar no histórico para estatísticas
     if (!revisandoErros) {
+        // Encontrar a qual capítulo pertence a questão para salvar no histórico corretamente
+        let capReal = assuntoAtual;
+        if(assuntoAtual === "Tudo") {
+            Object.keys(dados[materiaAtual]).forEach(cap => {
+                if(dados[materiaAtual][cap].some(quest => quest.id === q.id)) capReal = cap;
+            });
+        }
         progresso.historico.push({
             materia: materiaAtual,
-            assunto: assuntoAtual,
+            assunto: capReal,
             correta: correta,
             tempo: tempoGasto,
             data: new Date().toISOString()
@@ -342,26 +342,22 @@ function revisarErros() {
     mostrarQuestao();
 }
 
-// --- ESTATÍSTICAS E DASHBOARD ---
 function atualizarDashboard() {
     const hist = progresso.historico;
     const total = hist.length;
     const acertos = hist.filter(h => h.correta).length;
     const perc = total > 0 ? Math.round((acertos / total) * 100) : 0;
     const tMedio = total > 0 ? Math.round(hist.reduce((acc, curr) => acc + curr.tempo, 0) / total) : 0;
-
     document.getElementById('dash-total').innerText = total;
     document.getElementById('dash-perc').innerText = perc + "%";
     document.getElementById('dash-tempo').innerText = tMedio + "s";
     document.getElementById('top-acertos').innerText = `${progresso.acertos} Acertos`;
     document.getElementById('top-erros').innerText = `${progresso.listaErros.length} Erros`;
-
-    // Diagnóstico Simples
-    let msg = "Responda mais questões para uma análise precisa.";
+    let msg = "Responda questões para ver seu diagnóstico.";
     if(total > 5) {
         if(perc >= 75) msg = "🚀 Excelente desempenho! Mantenha o ritmo.";
         else if(perc >= 50) msg = "📈 Bom caminho, mas revise os pontos vermelhos.";
-        else msg = "⚠️ Atenção: Reforce a base teórica dos capítulos com baixo acerto.";
+        else msg = "⚠️ Atenção: Reforce a base teórica.";
     }
     document.getElementById('dash-insight').innerText = msg;
 }
@@ -370,49 +366,33 @@ function verEstatisticasDetalhadas() {
     document.getElementById('view-home').style.display = "none";
     document.getElementById('view-stats').style.display = "block";
     document.getElementById('btnVoltar').style.visibility = "visible";
-
     const hist = progresso.historico;
     const materiasData = {};
-
     hist.forEach(h => {
         if(!materiasData[h.materia]) materiasData[h.materia] = { acertos: 0, total: 0 };
         materiasData[h.materia].total++;
         if(h.correta) materiasData[h.materia].acertos++;
     });
-
     const labels = Object.keys(materiasData);
     const scores = labels.map(l => {
         const p = (materiasData[l].acertos / materiasData[l].total) * 100;
-        return p * Math.log10(materiasData[l].total + 1); // Score Inteligente
+        return p * Math.log10(materiasData[l].total + 1);
     });
-
     if(chartObj) chartObj.destroy();
     const ctx = document.getElementById('chartMaterias').getContext('2d');
     chartObj = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: labels,
-            datasets: [{
-                label: 'Score de Desempenho',
-                data: scores,
-                backgroundColor: '#007AFF',
-                borderRadius: 8
-            }]
+            datasets: [{ label: 'Score de Desempenho', data: scores, backgroundColor: '#007AFF', borderRadius: 8 }]
         },
         options: { indexAxis: 'y', plugins: { legend: { display: false } } }
     });
-
-    // Ranking Pontos Fracos (Assuntos)
     const assuntosErros = {};
-    hist.forEach(h => {
-        if(!h.correta) {
-            assuntosErros[h.assunto] = (assuntosErros[h.assunto] || 0) + 1;
-        }
-    });
+    hist.forEach(h => { if(!h.correta) assuntosErros[h.assunto] = (assuntosErros[h.assunto] || 0) + 1; });
     const ranking = Object.entries(assuntosErros).sort((a,b) => b[1] - a[1]).slice(0, 5);
     document.getElementById('lista-pontos-fracos').innerHTML = ranking.length > 0 ? 
-        ranking.map(r => `<div style="padding:8px; border-bottom:1px solid #eee">❌ ${r[0]} (${r[1]} erros)</div>`).join('') :
-        "Nenhum erro registrado ainda.";
+        ranking.map(r => `<div style="padding:8px; border-bottom:1px solid #eee">❌ ${r[0]} (${r[1]} erros)</div>`).join('') : "Nenhum erro registrado ainda.";
 }
 
 function salvarESincronizar() {
@@ -420,7 +400,6 @@ function salvarESincronizar() {
     atualizarDashboard();
 }
 
-// Iniciar
 irParaHome();
 </script>
 </body>
