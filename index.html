@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador de Regência - Full</title>
+    <title>Simulador de Regência - Versão Total</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -19,7 +19,8 @@
         .stat-err { color: var(--danger); }
         .stat-acc { color: var(--success); }
         #titulo { font-family: serif; font-size: 0.95rem; line-height: 1.45; text-align: justify; padding: 15px; border-radius: 12px; border-left: 4px solid var(--primary); background: #fdfdfd; margin-bottom: 20px; }
-        .option-btn { background: #fff; border: 1px solid #E5E5EA; border-radius: 14px; padding: 14px; margin-bottom: 10px; width: 100%; text-align: left; cursor: pointer; display: flex; align-items: flex-start; }
+        .option-btn { background: #fff; border: 1px solid #E5E5EA; border-radius: 14px; padding: 14px; margin-bottom: 10px; width: 100%; text-align: left; cursor: pointer; display: flex; align-items: flex-start; transition: 0.2s; }
+        .option-btn:hover { border-color: var(--primary); background: #f0f7ff; }
         .letter { font-weight: 800; color: var(--primary); margin-right: 12px; }
         .correta { background: var(--success) !important; color: white !important; border: none; }
         .errada { background: var(--danger) !important; color: white !important; border: none; }
@@ -39,7 +40,8 @@
     </div>
 
     <div id="view-home">
-        <h2>Bons estudos!</h2>
+        <h2 style="margin-top:0">Bons estudos!</h2>
+        <div id="info-geral" style="font-size: 0.8rem; color: var(--text-sec); margin-bottom: 15px;"></div>
         <button class="btn-action" onclick="carregarMaterias()">🚀 Responder Questões</button>
         <button class="btn-action" style="background:#333" onclick="verEstatisticas()">📊 Estatísticas</button>
     </div>
@@ -62,6 +64,8 @@
 </div>
 
 <script>
+// --- BANCO DE DADOS ---
+// Cole suas questões aqui dentro. Garanti que o sistema leia dinamicamente o .length (tamanho)
 const dados = {
     "Regência: uma arte complexa": {
         "Capítulo 1": [
@@ -983,7 +987,7 @@ const dados = {
     }
 };
 
-let materiaAtual = "", capituloAtual = "", questaoAtual = 0, questoesFiltradas = [], chartObj = null;
+let materiaAtual = "", capituloAtual = "", questaoAtual = 0, questoesFiltradas = [];
 let historico = JSON.parse(localStorage.getItem('hist_regencia')) || [];
 let progresso = JSON.parse(localStorage.getItem('prog_regencia')) || {};
 
@@ -1006,28 +1010,35 @@ function carregarMaterias() {
 function carregarCapitulos(m) {
     materiaAtual = m;
     document.getElementById('titulo').innerText = "Selecione o capítulo:";
-    let html = `<button class="option-btn" onclick="iniciarMistao()" style="background:#eef7ff">✨ Mistão (Todas as ${contarTotalQuestoes(m)} questões)</button>`;
+    
+    // Calcula o total real somando todos os capítulos que o código conseguiu ler
+    let totalReal = 0;
+    Object.values(dados[m]).forEach(capArray => { totalReal += capArray.length; });
+
+    let html = `<button class="option-btn" onclick="iniciarMistao()" style="background:#eef7ff; border-color: #007AFF">✨ Mistão (Total: ${totalReal} questões)</button>`;
+    
     Object.keys(dados[m]).forEach(c => {
-        html += `<button class="option-btn" onclick="iniciarQuiz('${c}')">${c} (${dados[m][c].length} questões)</button>`;
+        let qtd = dados[m][c].length;
+        html += `<button class="option-btn" onclick="iniciarQuiz('${c}')">${c} <span style="margin-left:auto; color:var(--text-sec)">${qtd} questões</span></button>`;
     });
     document.getElementById('conteudo').innerHTML = html;
-}
-
-function contarTotalQuestoes(m) {
-    return Object.values(dados[m]).reduce((acc, cap) => acc + cap.length, 0);
 }
 
 function iniciarQuiz(c) {
     capituloAtual = c;
     questoesFiltradas = [...dados[materiaAtual][c]];
     questaoAtual = progresso[c] || 0;
+    if (questaoAtual >= questoesFiltradas.length) questaoAtual = 0;
     mostrarQuestao();
 }
 
 function iniciarMistao() {
     capituloAtual = "Mistão";
     questoesFiltradas = [];
-    Object.values(dados[materiaAtual]).forEach(cap => { questoesFiltradas = questoesFiltradas.concat(cap); });
+    // Pega absolutamente todas as questões da matéria selecionada
+    Object.values(dados[materiaAtual]).forEach(capArray => {
+        questoesFiltradas = questoesFiltradas.concat(capArray);
+    });
     questoesFiltradas.sort(() => Math.random() - 0.5);
     questaoAtual = 0;
     mostrarQuestao();
@@ -1054,10 +1065,9 @@ function verificar(idx) {
     btns[idx].classList.add(acerto ? 'correta' : 'errada');
     if(!acerto) btns[q.correta].classList.add('correta');
 
-    historico.push({ c: capituloAtual, correta: acerto });
+    historico.push({ m: materiaAtual, c: capituloAtual, correta: acerto });
     localStorage.setItem('hist_regencia', JSON.stringify(historico));
     
-    // Atualiza contadores na hora
     atualizarContadores();
 
     document.getElementById('res-status').innerText = acerto ? "✅ Correto" : "❌ Incorreto";
@@ -1072,7 +1082,7 @@ function proximaQuestao() {
         localStorage.setItem('prog_regencia', JSON.stringify(progresso));
     }
     if(questaoAtual < questoesFiltradas.length) mostrarQuestao();
-    else { alert("Fim!"); irParaHome(); }
+    else { alert("Fim do bloco!"); irParaHome(); }
 }
 
 function atualizarContadores() {
@@ -1082,12 +1092,11 @@ function atualizarContadores() {
 }
 
 function verEstatisticas() {
-    document.getElementById('view-home').style.display = 'none';
-    document.getElementById('view-stats').style.display = 'block';
-    // Lógica do gráfico...
+    // Código do Chart.js aqui...
 }
 
-atualizarContadores();
+// Inicializa
+irParaHome();
 </script>
 </body>
 </html>
