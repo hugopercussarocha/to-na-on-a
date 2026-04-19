@@ -154,7 +154,7 @@
 </div>
 
 <script>
-// --- ESTADO E DADOS ---
+// --- VARIÁVEIS E DADOS ---
 let materiaAtual = "";
 let capituloAtual = "";
 let questaoAtual = 0;
@@ -1081,14 +1081,11 @@ const dados = {
                 fund: "O autor utiliza o Scherzo da Sinfonia 'Do Novo Mundo' de Dvořák para ilustrar a técnica de regência por quadratura.",
                 loc: "Página 69."
             }
-        ] // FIM DO CAPÍTULO 3
-    } // FIM DA MATÉRIA
-}; // Fim da variável dados
+        ]
+    }
+};
 
-let progresso = JSON.parse(localStorage.getItem('titanium_quiz_v2')) || { respondidas: [], acertos: 0, erros: 0, listaErros: [], historico: [] };
-let revisandoErros = false;
-let materiaAtual, assuntoAtual, questaoIndex, listaAtual, tempoInicio;
-let chartObj = null;
+// --- FUNÇÕES DE NAVEGAÇÃO ---
 
 function irParaHome() {
     document.getElementById('view-home').style.display = 'block';
@@ -1142,11 +1139,11 @@ function iniciarQuiz(cap) {
 
 function mostrarQuestao() {
     const q = questoesFiltradas[questaoAtual];
-    document.getElementById('sub-header').innerText = `${capituloAtual} - Questão ${questaoAtual+1}/${questoesFiltradas.length}`;
+    document.getElementById('sub-header').innerText = `${capituloAtual} - Questão ${questaoAtual + 1}/${questoesFiltradas.length}`;
     document.getElementById('titulo').innerText = q.q;
     let html = "";
     q.opcoes.forEach((o, i) => {
-        html += `<button class="option-btn" onclick="verificar(${i})"><span class="letter">${String.fromCharCode(65+i)}</span>${o}</button>`;
+        html += `<button class="option-btn" onclick="verificar(${i})"><span class="letter">${String.fromCharCode(65 + i)}</span>${o}</button>`;
     });
     document.getElementById('conteudo').innerHTML = html;
 }
@@ -1171,17 +1168,31 @@ function verificar(idx) {
 
 function proximaQuestao() {
     questaoAtual++;
-    progressoCapitulos[capituloAtual] = questaoAtual;
-    localStorage.setItem('progresso_regencia', JSON.stringify(progressoCapitulos));
+    if (capituloAtual !== "Modo Aleatório") {
+        progressoCapitulos[capituloAtual] = questaoAtual;
+        localStorage.setItem('progresso_regencia', JSON.stringify(progressoCapitulos));
+    }
 
     if(questaoAtual < questoesFiltradas.length) {
         document.getElementById('feedback').style.display = 'none';
         mostrarQuestao();
     } else {
-        document.getElementById('titulo').innerText = "🎉 Capítulo Finalizado!";
-        document.getElementById('conteudo').innerHTML = `<button class="btn-action" onclick="carregarCapitulos('${materiaAtual}')">Escolher outro conteúdo</button>`;
+        document.getElementById('titulo').innerText = "🎉 Fim do Conteúdo!";
+        document.getElementById('conteudo').innerHTML = `<button class="btn-action" onclick="carregarCapitulos('${materiaAtual}')">Voltar</button>`;
         document.getElementById('feedback').style.display = 'none';
     }
+}
+
+function iniciarQuizTudo() {
+    questoesFiltradas = [];
+    Object.keys(dados[materiaAtual]).forEach(c => {
+        questoesFiltradas = questoesFiltradas.concat(dados[materiaAtual][c]);
+    });
+    questoesFiltradas.sort(() => Math.random() - 0.5);
+    questaoAtual = 0;
+    capituloAtual = "Modo Aleatório";
+    document.getElementById('feedback').style.display = 'none';
+    mostrarQuestao();
 }
 
 function atualizarDashboard() {
@@ -1218,23 +1229,11 @@ function renderChart() {
             labels: labels,
             datasets: [{ label: '% de Acerto', data: data, backgroundColor: '#007AFF' }]
         },
-        options: { indexAxis: 'y' }
+        options: { indexAxis: 'y', scales: { x: { beginAtZero: true, max: 100 } } }
     });
 }
 
-function iniciarQuizTudo() {
-    questoesFiltradas = [];
-    Object.keys(dados[materiaAtual]).forEach(c => {
-        questoesFiltradas = questoesFiltradas.concat(dados[materiaAtual][c]);
-    });
-    questoesFiltradas.sort(() => Math.random() - 0.5);
-    questaoAtual = 0;
-    capituloAtual = "Modo Aleatório";
-    document.getElementById('feedback').style.display = 'none';
-    mostrarQuestao();
-}
-
-// Inicia
+// Iniciar app
 atualizarDashboard();
 </script>
 </body>
