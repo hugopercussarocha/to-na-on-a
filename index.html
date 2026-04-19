@@ -1647,7 +1647,7 @@ function verificar(idx) {
     atualizarContadores();
 
     document.getElementById('res-status').innerText = acerto ? "✅ Correto" : "❌ Incorreto";
-    document.getElementById('fundamentacao').innerText = q.fund;
+    document.getElementById('fundamentacao').innerHTML = `${q.fund} <br><br><small><strong>${q.loc}</strong></small>`;
     document.getElementById('feedback').style.display = 'block';
 }
 
