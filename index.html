@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Questões de Prova - Regência</title>
+    <title>Simulador de Regência</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -14,13 +14,11 @@
             --text-sec: #8E8E93;
             --success: #34C759;
             --danger: #FF3B30;
-            --warning: #FFCC00;
         }
 
         body { 
             font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto; 
             background-color: var(--bg);
-            color: var(--text-main);
             margin: 0;
             display: flex;
             justify-content: center;
@@ -56,7 +54,7 @@
 
         #titulo { 
             font-family: "Times New Roman", Times, serif;
-            font-size: 0.88rem; 
+            font-size: 0.95rem; 
             line-height: 1.45;
             text-align: justify;
             color: #2c3e50;
@@ -106,14 +104,12 @@
         .mini-card small { font-size: 0.6rem; color: var(--text-sec); text-transform: uppercase; }
         .mini-card div { font-weight: 800; font-size: 1rem; color: var(--primary); }
 
-        .chart-container { margin: 20px 0; background: #fff; border: 1px solid #eee; padding: 10px; border-radius: 15px; }
-        .insight-box { background: #eef7ff; padding: 15px; border-radius: 12px; font-size: 0.8rem; border-left: 4px solid var(--primary); margin-bottom: 15px; }
-        #feedback { display: none; margin-top: 15px; padding: 15px; background: #F2F2F7; border-radius: 12px; font-size: 0.82rem; text-align: justify; }
+        #feedback { display: none; margin-top: 15px; padding: 15px; background: #F2F2F7; border-radius: 12px; font-size: 0.85rem; }
     </style>
 </head>
 <body>
 
-<div class="container" id="main-container">
+<div class="container">
     <div class="header-nav">
         <div class="voltar-link" id="btnVoltar" onclick="irParaHome()" style="visibility: hidden;">❮ Início</div>
         <div class="stats-summary">
@@ -127,16 +123,15 @@
         <div class="stats-grid">
             <div class="mini-card"><small>Feitas</small><div id="dash-total">0</div></div>
             <div class="mini-card"><small>Precisão</small><div id="dash-perc">0%</div></div>
-            <div class="mini-card"><small>T. Médio</small><div id="dash-tempo">0s</div></div>
+            <div class="mini-card"><small>Progresso</small><div id="dash-progresso">0%</div></div>
         </div>
-        <div class="insight-box" id="dash-insight">Responda questões para ver seu diagnóstico.</div>
         <button class="btn-action" onclick="carregarMaterias()">🚀 Responder Questões</button>
-        <button class="btn-action" style="background:#333" onclick="verEstatisticasDetalhadas()">📊 Ver Estatísticas Detalhadas</button>
+        <button class="btn-action" style="background:#333" onclick="verEstatisticas()">📊 Ver Estatísticas</button>
     </div>
 
     <div id="view-quiz" style="display:none">
         <div id="sub-header" style="font-size: 0.7rem; color: var(--text-sec); text-align: center; margin-bottom: 5px;"></div>
-        <div id="titulo">Carregando...</div>
+        <div id="titulo"></div>
         <div id="conteudo"></div>
         <div id="feedback">
             <b id="res-status"></b>
@@ -148,22 +143,13 @@
 
     <div id="view-stats" style="display:none">
         <h3>Desempenho por Matéria</h3>
-        <div class="chart-container"><canvas id="chartMaterias"></canvas></div>
-        <button class="btn-action" onclick="irParaHome()">Voltar ao Início</button>
+        <canvas id="chartMaterias"></canvas>
+        <button class="btn-action" onclick="irParaHome()" style="margin-top:20px">Voltar ao Início</button>
     </div>
 </div>
 
 <script>
-// --- VARIÁVEIS E DADOS ---
-let materiaAtual = "";
-let capituloAtual = "";
-let questaoAtual = 0;
-let questoesFiltradas = [];
-let chartObj = null;
-
-let progressoCapitulos = JSON.parse(localStorage.getItem('progresso_regencia')) || {};
-let historico = JSON.parse(localStorage.getItem('hist_regencia')) || [];
-
+// --- BANCO DE DADOS ---
 const dados = {
     "Regência: uma arte complexa": {
         "Capítulo 1": [
@@ -1085,7 +1071,15 @@ const dados = {
     }
 };
 
-// --- FUNÇÕES DE NAVEGAÇÃO ---
+// --- LÓGICA DO SISTEMA ---
+let materiaAtual = "";
+let capituloAtual = "";
+let questaoAtual = 0;
+let questoesFiltradas = [];
+let chartObj = null;
+
+let progresso = JSON.parse(localStorage.getItem('progresso_regencia')) || {};
+let historico = JSON.parse(localStorage.getItem('hist_regencia')) || [];
 
 function irParaHome() {
     document.getElementById('view-home').style.display = 'block';
@@ -1099,7 +1093,6 @@ function carregarMaterias() {
     document.getElementById('view-home').style.display = 'none';
     document.getElementById('view-quiz').style.display = 'block';
     document.getElementById('btnVoltar').style.visibility = 'visible';
-    
     document.getElementById('titulo').innerText = "Escolha a Matéria:";
     let html = "";
     Object.keys(dados).forEach(m => {
@@ -1111,39 +1104,41 @@ function carregarMaterias() {
 function carregarCapitulos(m) {
     materiaAtual = m;
     document.getElementById('titulo').innerText = "Escolha o Conteúdo:";
-    let html = `<button class="option-btn" onclick="iniciarQuizTudo()" style="background: #eef7ff; border-color: var(--primary); font-weight: bold;">✨ Mistão Aleatório</button>`;
-    
+    let html = `<button class="option-btn" onclick="iniciarQuizTudo()" style="background: #eef7ff; font-weight: bold;">✨ Mistão Aleatório (Todas as Questões)</button>`;
     Object.keys(dados[m]).forEach(cap => {
-        let salvo = progressoCapitulos[cap] || 0;
-        let info = salvo > 0 ? ` <small style="color:var(--primary)">(Questão ${salvo + 1})</small>` : "";
-        html += `<button class="option-btn" onclick="iniciarQuiz('${cap}')">${cap}${info}</button>`;
+        let salvo = progresso[cap] || 0;
+        html += `<button class="option-btn" onclick="iniciarQuiz('${cap}')">${cap} <small>(${salvo} feitas)</small></button>`;
     });
     document.getElementById('conteudo').innerHTML = html;
 }
 
 function iniciarQuiz(cap) {
     capituloAtual = cap;
-    questaoAtual = progressoCapitulos[cap] || 0;
     questoesFiltradas = dados[materiaAtual][cap];
-    
-    if(questaoAtual >= questoesFiltradas.length) {
-        if(confirm("Capítulo concluído. Reiniciar?")) {
-            questaoAtual = 0;
-            progressoCapitulos[cap] = 0;
-            localStorage.setItem('progresso_regencia', JSON.stringify(progressoCapitulos));
-        } else return;
-    }
-    document.getElementById('feedback').style.display = 'none';
+    questaoAtual = progresso[cap] || 0;
+    if(questaoAtual >= questoesFiltradas.length) questaoAtual = 0;
+    mostrarQuestao();
+}
+
+function iniciarQuizTudo() {
+    questoesFiltradas = [];
+    Object.keys(dados[materiaAtual]).forEach(cap => {
+        questoesFiltradas = questoesFiltradas.concat(dados[materiaAtual][cap]);
+    });
+    questoesFiltradas.sort(() => Math.random() - 0.5); // Embaralha tudo
+    questaoAtual = 0;
+    capituloAtual = "Mistão Aleatório";
     mostrarQuestao();
 }
 
 function mostrarQuestao() {
     const q = questoesFiltradas[questaoAtual];
-    document.getElementById('sub-header').innerText = `${capituloAtual} - Questão ${questaoAtual + 1}/${questoesFiltradas.length}`;
+    document.getElementById('sub-header').innerText = `${capituloAtual} - ${questaoAtual + 1}/${questoesFiltradas.length}`;
     document.getElementById('titulo').innerText = q.q;
+    document.getElementById('feedback').style.display = 'none';
     let html = "";
     q.opcoes.forEach((o, i) => {
-        html += `<button class="option-btn" onclick="verificar(${i})"><span class="letter">${String.fromCharCode(65 + i)}</span>${o}</button>`;
+        html += `<button class="option-btn" onclick="verificar(${i})"><span class="letter">${String.fromCharCode(65+i)}</span>${o}</button>`;
     });
     document.getElementById('conteudo').innerHTML = html;
 }
@@ -1153,14 +1148,17 @@ function verificar(idx) {
     const btns = document.querySelectorAll('#conteudo .option-btn');
     btns.forEach(b => b.style.pointerEvents = 'none');
 
-    const acerto = idx === q.correta;
-    btns[idx].classList.add(acerto ? 'correta' : 'errada');
-    if(!acerto) btns[q.correta].classList.add('correta');
+    const correto = idx === q.correta;
+    btns[idx].classList.add(correto ? 'correta' : 'errada');
+    if(!correto) btns[q.correta].classList.add('correta');
 
-    historico.push({ materia: materiaAtual, assunto: capituloAtual, correta: acerto });
+    historico.push({ m: materiaAtual, c: capituloAtual, correta: correto });
     localStorage.setItem('hist_regencia', JSON.stringify(historico));
 
-    document.getElementById('res-status').innerText = acerto ? "✅ Correto!" : "❌ Incorreto";
+    // CORREÇÃO 1: Atualiza o contador imediatamente no topo
+    atualizarDashboard();
+
+    document.getElementById('res-status').innerText = correto ? "✅ ACERTOU!" : "❌ ERROU!";
     document.getElementById('fundamentacao').innerText = q.fund;
     document.getElementById('localizacao').innerText = `Fonte: ${q.loc}`;
     document.getElementById('feedback').style.display = 'block';
@@ -1168,72 +1166,54 @@ function verificar(idx) {
 
 function proximaQuestao() {
     questaoAtual++;
-    if (capituloAtual !== "Modo Aleatório") {
-        progressoCapitulos[capituloAtual] = questaoAtual;
-        localStorage.setItem('progresso_regencia', JSON.stringify(progressoCapitulos));
+    if(capituloAtual !== "Mistão Aleatório") {
+        progresso[capituloAtual] = questaoAtual;
+        localStorage.setItem('progresso_regencia', JSON.stringify(progresso));
     }
 
     if(questaoAtual < questoesFiltradas.length) {
-        document.getElementById('feedback').style.display = 'none';
         mostrarQuestao();
     } else {
-        document.getElementById('titulo').innerText = "🎉 Fim do Conteúdo!";
-        document.getElementById('conteudo').innerHTML = `<button class="btn-action" onclick="carregarCapitulos('${materiaAtual}')">Voltar</button>`;
-        document.getElementById('feedback').style.display = 'none';
+        alert("Parabéns! Você concluiu este bloco.");
+        irParaHome();
     }
-}
-
-function iniciarQuizTudo() {
-    questoesFiltradas = [];
-    Object.keys(dados[materiaAtual]).forEach(c => {
-        questoesFiltradas = questoesFiltradas.concat(dados[materiaAtual][c]);
-    });
-    questoesFiltradas.sort(() => Math.random() - 0.5);
-    questaoAtual = 0;
-    capituloAtual = "Modo Aleatório";
-    document.getElementById('feedback').style.display = 'none';
-    mostrarQuestao();
 }
 
 function atualizarDashboard() {
     const total = historico.length;
     const acertos = historico.filter(h => h.correta).length;
+    const erros = total - acertos;
+    
     document.getElementById('dash-total').innerText = total;
     document.getElementById('dash-perc').innerText = total > 0 ? Math.round((acertos/total)*100) + "%" : "0%";
     document.getElementById('top-acertos').innerText = acertos + " Acertos";
-    document.getElementById('top-erros').innerText = (total - acertos) + " Erros";
+    document.getElementById('top-erros').innerText = erros + " Erros";
 }
 
-function verEstatisticasDetalhadas() {
+function verEstatisticas() {
     document.getElementById('view-home').style.display = 'none';
     document.getElementById('view-stats').style.display = 'block';
     document.getElementById('btnVoltar').style.visibility = 'visible';
-    renderChart();
-}
-
-function renderChart() {
-    const mats = {};
-    historico.forEach(h => {
-        if(!mats[h.materia]) mats[h.materia] = { a:0, t:0 };
-        mats[h.materia].t++;
-        if(h.correta) mats[h.materia].a++;
+    
+    const ctx = document.getElementById('chartMaterias').getContext('2d');
+    if(chartObj) chartObj.destroy();
+    
+    // Agrupa por capítulo para o gráfico
+    const labels = [...new Set(historico.map(h => h.c))];
+    const data = labels.map(l => {
+        const histL = historico.filter(h => h.c === l);
+        return (histL.filter(h => h.correta).length / histL.length) * 100;
     });
 
-    const labels = Object.keys(mats);
-    const data = labels.map(l => (mats[l].a / mats[l].t) * 100);
-
-    if(chartObj) chartObj.destroy();
-    chartObj = new Chart(document.getElementById('chartMaterias'), {
+    chartObj = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: labels,
             datasets: [{ label: '% de Acerto', data: data, backgroundColor: '#007AFF' }]
-        },
-        options: { indexAxis: 'y', scales: { x: { beginAtZero: true, max: 100 } } }
+        }
     });
 }
 
-// Iniciar app
 atualizarDashboard();
 </script>
 </body>
