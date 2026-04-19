@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador de Regência - Versão Total</title>
+    <title>Simulador de Regência - Full</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -19,8 +19,7 @@
         .stat-err { color: var(--danger); }
         .stat-acc { color: var(--success); }
         #titulo { font-family: serif; font-size: 0.95rem; line-height: 1.45; text-align: justify; padding: 15px; border-radius: 12px; border-left: 4px solid var(--primary); background: #fdfdfd; margin-bottom: 20px; }
-        .option-btn { background: #fff; border: 1px solid #E5E5EA; border-radius: 14px; padding: 14px; margin-bottom: 10px; width: 100%; text-align: left; cursor: pointer; display: flex; align-items: flex-start; transition: 0.2s; }
-        .option-btn:hover { border-color: var(--primary); background: #f0f7ff; }
+        .option-btn { background: #fff; border: 1px solid #E5E5EA; border-radius: 14px; padding: 14px; margin-bottom: 10px; width: 100%; text-align: left; cursor: pointer; display: flex; align-items: flex-start; }
         .letter { font-weight: 800; color: var(--primary); margin-right: 12px; }
         .correta { background: var(--success) !important; color: white !important; border: none; }
         .errada { background: var(--danger) !important; color: white !important; border: none; }
@@ -40,8 +39,7 @@
     </div>
 
     <div id="view-home">
-        <h2 style="margin-top:0">Bons estudos!</h2>
-        <div id="info-geral" style="font-size: 0.8rem; color: var(--text-sec); margin-bottom: 15px;"></div>
+        <h2>Bons estudos!</h2>
         <button class="btn-action" onclick="carregarMaterias()">🚀 Responder Questões</button>
         <button class="btn-action" style="background:#333" onclick="verEstatisticas()">📊 Estatísticas</button>
     </div>
@@ -64,8 +62,6 @@
 </div>
 
 <script>
-// --- BANCO DE DADOS ---
-// Cole suas questões aqui dentro. Garanti que o sistema leia dinamicamente o .length (tamanho)
 const dados = {
     "Regência: uma arte complexa": {
         "Capítulo 1": [
@@ -987,7 +983,7 @@ const dados = {
     }
 };
 
-let materiaAtual = "", capituloAtual = "", questaoAtual = 0, questoesFiltradas = [];
+let materiaAtual = "", capituloAtual = "", questaoAtual = 0, questoesFiltradas = [], chartObj = null;
 let historico = JSON.parse(localStorage.getItem('hist_regencia')) || [];
 let progresso = JSON.parse(localStorage.getItem('prog_regencia')) || {};
 
@@ -1010,98 +1006,30 @@ function carregarMaterias() {
 function carregarCapitulos(m) {
     materiaAtual = m;
     document.getElementById('titulo').innerText = "Selecione o capítulo:";
-    
-    let totalReal = 0;
-    let html = "";
-    
-    // Verificação de segurança para garantir que os dados existem
-    if (!dados[m]) {
-        alert("Erro: Matéria não encontrada.");
-        return;
-    }
-
-    // Criar o botão do Mistão primeiro
-    Object.values(dados[m]).forEach(capArray => { totalReal += capArray.length; });
-    html += `<button class="option-btn" onclick="iniciarMistao()" style="background:#eef7ff; border-color: #007AFF; font-weight: bold;">
-             ✨ Mistão (Total lido: ${totalReal} questões)</button>`;
-    
-    // Criar botões dos capítulos
+    let html = `<button class="option-btn" onclick="iniciarMistao()" style="background:#eef7ff">✨ Mistão (Todas as ${contarTotalQuestoes(m)} questões)</button>`;
     Object.keys(dados[m]).forEach(c => {
-        let qtd = dados[m][c].length; 
-        html += `<button class="option-btn" onclick="iniciarQuiz('${c}')">
-                 ${c} <span style="margin-left:auto; color:var(--text-sec); font-weight: bold;">${qtd} questões</span>
-                 </button>`;
-    });
-    document.getElementById('conteudo').innerHTML = html;
-});
-
-    let html = `<button class="option-btn" onclick="iniciarMistao()" style="background:#eef7ff; border-color: #007AFF">
-                ✨ Mistão (Total: ${totalReal} questões)</button>`;
-    
-    Object.keys(dados[m]).forEach(c => {
-        // Pega a quantidade exata de questões dentro do array do capítulo [cite: 74]
-        let qtd = dados[m][c].length; 
-        html += `<button class="option-btn" onclick="iniciarQuiz('${c}')">
-                 ${c} <span style="margin-left:auto; color:var(--text-sec)">${qtd} questões</span>
-                 </button>`;
+        html += `<button class="option-btn" onclick="iniciarQuiz('${c}')">${c} (${dados[m][c].length} questões)</button>`;
     });
     document.getElementById('conteudo').innerHTML = html;
 }
 
-// --- FUNÇÃO MISTÃO CORRIGIDA (Lê todas as questões) ---
+function contarTotalQuestoes(m) {
+    return Object.values(dados[m]).reduce((acc, cap) => acc + cap.length, 0);
+}
+
 function iniciarQuiz(c) {
-    try {
-        capituloAtual = c;
-        // Garante que estamos pegando a lista correta de questões
-        if (!dados[materiaAtual] || !dados[materiaAtual][c]) {
-            alert("Erro: Capítulo não encontrado no banco de dados.");
-            return;
-        }
-
-        questoesFiltradas = [...dados[materiaAtual][c]];
-        
-        // CORREÇÃO CRITICAL: Verifica se o progresso é válido
-        let salvo = progresso[c];
-        questaoAtual = (typeof salvo === 'number' && salvo < questoesFiltradas.length) ? salvo : 0;
-        
-        // Se já terminou o capítulo, pergunta se quer reiniciar
-        if (salvo >= questoesFiltradas.length) {
-            if (confirm("Você já terminou este capítulo. Deseja reiniciar do zero?")) {
-                questaoAtual = 0;
-                progresso[c] = 0;
-                localStorage.setItem('prog_regencia', JSON.stringify(progresso));
-            } else {
-                return; // Cancela a abertura
-            }
-        }
-
-        document.getElementById('feedback').style.display = 'none';
-        mostrarQuestao();
-    } catch (e) {
-        console.error("Erro ao iniciar quiz:", e);
-        alert("Ocorreu um erro ao carregar este capítulo. Reiniciando...");
-        questaoAtual = 0;
-        mostrarQuestao();
-    }
+    capituloAtual = c;
+    questoesFiltradas = [...dados[materiaAtual][c]];
+    questaoAtual = progresso[c] || 0;
+    mostrarQuestao();
 }
-    function iniciarMistao() {
+
+function iniciarMistao() {
     capituloAtual = "Mistão";
     questoesFiltradas = [];
-    
-    // Puxa tudo que estiver dentro da matéria
-    const capitulos = Object.values(dados[materiaAtual]);
-    capitulos.forEach(listaQuestoes => {
-        questoesFiltradas = questoesFiltradas.concat(listaQuestoes);
-    });
-
-    if (questoesFiltradas.length === 0) {
-        alert("Não há questões cadastradas nesta matéria.");
-        return;
-    }
-
+    Object.values(dados[materiaAtual]).forEach(cap => { questoesFiltradas = questoesFiltradas.concat(cap); });
     questoesFiltradas.sort(() => Math.random() - 0.5);
     questaoAtual = 0;
-    document.getElementById('feedback').style.display = 'none';
     mostrarQuestao();
 }
 
@@ -1126,9 +1054,10 @@ function verificar(idx) {
     btns[idx].classList.add(acerto ? 'correta' : 'errada');
     if(!acerto) btns[q.correta].classList.add('correta');
 
-    historico.push({ m: materiaAtual, c: capituloAtual, correta: acerto });
+    historico.push({ c: capituloAtual, correta: acerto });
     localStorage.setItem('hist_regencia', JSON.stringify(historico));
     
+    // Atualiza contadores na hora
     atualizarContadores();
 
     document.getElementById('res-status').innerText = acerto ? "✅ Correto" : "❌ Incorreto";
@@ -1143,7 +1072,7 @@ function proximaQuestao() {
         localStorage.setItem('prog_regencia', JSON.stringify(progresso));
     }
     if(questaoAtual < questoesFiltradas.length) mostrarQuestao();
-    else { alert("Fim do bloco!"); irParaHome(); }
+    else { alert("Fim!"); irParaHome(); }
 }
 
 function atualizarContadores() {
@@ -1153,11 +1082,12 @@ function atualizarContadores() {
 }
 
 function verEstatisticas() {
-    // Código do Chart.js aqui...
+    document.getElementById('view-home').style.display = 'none';
+    document.getElementById('view-stats').style.display = 'block';
+    // Lógica do gráfico...
 }
 
-// Inicializa
-irParaHome();
+atualizarContadores();
 </script>
 </body>
 </html>
