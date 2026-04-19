@@ -1011,11 +1011,29 @@ function carregarCapitulos(m) {
     materiaAtual = m;
     document.getElementById('titulo').innerText = "Selecione o capítulo:";
     
-    // Calcula o total real somando dinamicamente o que o navegador conseguiu ler
     let totalReal = 0;
-    Object.values(dados[m]).forEach(capArray => { 
-        totalReal += capArray.length; // Aqui ele conta o número real de questões [cite: 23]
+    let html = "";
+    
+    // Verificação de segurança para garantir que os dados existem
+    if (!dados[m]) {
+        alert("Erro: Matéria não encontrada.");
+        return;
+    }
+
+    // Criar o botão do Mistão primeiro
+    Object.values(dados[m]).forEach(capArray => { totalReal += capArray.length; });
+    html += `<button class="option-btn" onclick="iniciarMistao()" style="background:#eef7ff; border-color: #007AFF; font-weight: bold;">
+             ✨ Mistão (Total lido: ${totalReal} questões)</button>`;
+    
+    // Criar botões dos capítulos
+    Object.keys(dados[m]).forEach(c => {
+        let qtd = dados[m][c].length; 
+        html += `<button class="option-btn" onclick="iniciarQuiz('${c}')">
+                 ${c} <span style="margin-left:auto; color:var(--text-sec); font-weight: bold;">${qtd} questões</span>
+                 </button>`;
     });
+    document.getElementById('conteudo').innerHTML = html;
+});
 
     let html = `<button class="option-btn" onclick="iniciarMistao()" style="background:#eef7ff; border-color: #007AFF">
                 ✨ Mistão (Total: ${totalReal} questões)</button>`;
