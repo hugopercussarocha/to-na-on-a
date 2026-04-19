@@ -1011,35 +1011,34 @@ function carregarCapitulos(m) {
     materiaAtual = m;
     document.getElementById('titulo').innerText = "Selecione o capítulo:";
     
-    // Calcula o total real somando todos os capítulos que o código conseguiu ler
+    // Calcula o total real somando dinamicamente o que o navegador conseguiu ler
     let totalReal = 0;
-    Object.values(dados[m]).forEach(capArray => { totalReal += capArray.length; });
+    Object.values(dados[m]).forEach(capArray => { 
+        totalReal += capArray.length; // Aqui ele conta o número real de questões [cite: 23]
+    });
 
-    let html = `<button class="option-btn" onclick="iniciarMistao()" style="background:#eef7ff; border-color: #007AFF">✨ Mistão (Total: ${totalReal} questões)</button>`;
+    let html = `<button class="option-btn" onclick="iniciarMistao()" style="background:#eef7ff; border-color: #007AFF">
+                ✨ Mistão (Total: ${totalReal} questões)</button>`;
     
     Object.keys(dados[m]).forEach(c => {
-        let qtd = dados[m][c].length;
-        html += `<button class="option-btn" onclick="iniciarQuiz('${c}')">${c} <span style="margin-left:auto; color:var(--text-sec)">${qtd} questões</span></button>`;
+        // Pega a quantidade exata de questões dentro do array do capítulo [cite: 74]
+        let qtd = dados[m][c].length; 
+        html += `<button class="option-btn" onclick="iniciarQuiz('${c}')">
+                 ${c} <span style="margin-left:auto; color:var(--text-sec)">${qtd} questões</span>
+                 </button>`;
     });
     document.getElementById('conteudo').innerHTML = html;
 }
 
-function iniciarQuiz(c) {
-    capituloAtual = c;
-    questoesFiltradas = [...dados[materiaAtual][c]];
-    questaoAtual = progresso[c] || 0;
-    if (questaoAtual >= questoesFiltradas.length) questaoAtual = 0;
-    mostrarQuestao();
-}
-
+// --- FUNÇÃO MISTÃO CORRIGIDA (Lê todas as questões) ---
 function iniciarMistao() {
     capituloAtual = "Mistão";
     questoesFiltradas = [];
-    // Pega absolutamente todas as questões da matéria selecionada
+    // Garante que percorre TODOS os capítulos da matéria [cite: 74, 115]
     Object.values(dados[materiaAtual]).forEach(capArray => {
         questoesFiltradas = questoesFiltradas.concat(capArray);
     });
-    questoesFiltradas.sort(() => Math.random() - 0.5);
+    questoesFiltradas.sort(() => Math.random() - 0.5); // Embaralha
     questaoAtual = 0;
     mostrarQuestao();
 }
