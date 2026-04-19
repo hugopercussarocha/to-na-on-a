@@ -51,7 +51,7 @@
         }
 
         .stat-box { padding: 4px 10px; border-radius: 8px; background: #f8f8f8; }
-        .stat-err { color: var(--danger); cursor: pointer; border: 1px solid #ff3b3033; }
+        .stat-err { color: var(--danger); }
         .stat-acc { color: var(--success); }
 
         #titulo { 
@@ -118,7 +118,7 @@
         <div class="voltar-link" id="btnVoltar" onclick="irParaHome()" style="visibility: hidden;">❮ Início</div>
         <div class="stats-summary">
             <div class="stat-box stat-acc" id="top-acertos">0 Acertos</div>
-            <div class="stat-box stat-err" id="top-erros" onclick="revisarErros()">0 Erros</div>
+            <div class="stat-box stat-err" id="top-erros">0 Erros</div>
         </div>
     </div>
 
@@ -149,23 +149,21 @@
     <div id="view-stats" style="display:none">
         <h3>Desempenho por Matéria</h3>
         <div class="chart-container"><canvas id="chartMaterias"></canvas></div>
-        <h3>Top 5 Pontos Fracos</h3>
-        <div id="lista-pontos-fracos" style="font-size: 0.85rem;"></div>
         <button class="btn-action" onclick="irParaHome()">Voltar ao Início</button>
     </div>
 </div>
 
 <script>
-// --- VARIÁVEIS DE ESTADO ---
+// --- ESTADO E DADOS ---
 let materiaAtual = "";
 let capituloAtual = "";
 let questaoAtual = 0;
 let questoesFiltradas = [];
+let chartObj = null;
 
-// Carrega o progresso de cada capítulo do LocalStorage
 let progressoCapitulos = JSON.parse(localStorage.getItem('progresso_regencia')) || {};
+let historico = JSON.parse(localStorage.getItem('hist_regencia')) || [];
 
-// --- BANCO DE DADOS DE QUESTÕES ---
 const dados = {
     "Regência: uma arte complexa": {
         "Capítulo 1": [
@@ -1093,23 +1091,22 @@ let materiaAtual, assuntoAtual, questaoIndex, listaAtual, tempoInicio;
 let chartObj = null;
 
 function irParaHome() {
-    document.getElementById('view-home').style.display = "block";
-    document.getElementById('view-quiz').style.display = "none";
-    document.getElementById('view-stats').style.display = "none";
-    document.getElementById('btnVoltar').style.visibility = "hidden";
+    document.getElementById('view-home').style.display = 'block';
+    document.getElementById('view-quiz').style.display = 'none';
+    document.getElementById('view-stats').style.display = 'none';
+    document.getElementById('btnVoltar').style.visibility = 'hidden';
     atualizarDashboard();
 }
 
 function carregarMaterias() {
-    document.getElementById('view-home').style.display = "none";
-    document.getElementById('view-quiz').style.display = "block";
-    document.getElementById('btnVoltar').style.visibility = "visible";
-    document.getElementById('sub-header').innerText = "";
-    document.getElementById('titulo').innerText = "Selecione uma matéria:";
-    document.getElementById('feedback').style.display = "none";
+    document.getElementById('view-home').style.display = 'none';
+    document.getElementById('view-quiz').style.display = 'block';
+    document.getElementById('btnVoltar').style.visibility = 'visible';
+    
+    document.getElementById('titulo').innerText = "Escolha a Matéria:";
     let html = "";
     Object.keys(dados).forEach(m => {
-        html += `<button class="option-btn" onclick="carregarCapitulos('${m}')" style="justify-content: center; font-weight: bold;">${m}</button>`;
+        html += `<button class="option-btn" onclick="carregarCapitulos('${m}')">${m}</button>`;
     });
     document.getElementById('conteudo').innerHTML = html;
 }
@@ -1117,184 +1114,128 @@ function carregarMaterias() {
 function carregarCapitulos(m) {
     materiaAtual = m;
     document.getElementById('titulo').innerText = "Escolha o Conteúdo:";
-    let html = `<button class="option-btn" onclick="iniciarQuizTudo()" style="background: #eef7ff; border-color: var(--primary); font-weight: bold;">✨ Todas as Questões (Aleatório)</button>`;
+    let html = `<button class="option-btn" onclick="iniciarQuizTudo()" style="background: #eef7ff; border-color: var(--primary); font-weight: bold;">✨ Mistão Aleatório</button>`;
+    
     Object.keys(dados[m]).forEach(cap => {
-        html += `<button class="option-btn" onclick="iniciarQuiz('${cap}')">${cap}</button>`;
+        let salvo = progressoCapitulos[cap] || 0;
+        let info = salvo > 0 ? ` <small style="color:var(--primary)">(Questão ${salvo + 1})</small>` : "";
+        html += `<button class="option-btn" onclick="iniciarQuiz('${cap}')">${cap}${info}</button>`;
     });
     document.getElementById('conteudo').innerHTML = html;
 }
 
 function iniciarQuiz(cap) {
-    assuntoAtual = cap;
-    revisandoErros = false;
-    questaoIndex = 0;
-    listaAtual = dados[materiaAtual][assuntoAtual].filter(q => !progresso.respondidas.includes(q.id));
-    if(listaAtual.length === 0) { alert("Capítulo concluído!"); return irParaHome(); }
-    mostrarQuestao();
-}
-
-function iniciarQuizTudo() {
-    assuntoAtual = "Tudo";
-    revisandoErros = false;
-    questaoIndex = 0;
+    capituloAtual = cap;
+    questaoAtual = progressoCapitulos[cap] || 0;
+    questoesFiltradas = dados[materiaAtual][cap];
     
-    // Junta todas as questões da matéria que ainda não foram respondidas
-    let todas = [];
-    Object.keys(dados[materiaAtual]).forEach(cap => {
-        todas = todas.concat(dados[materiaAtual][cap]);
-    });
-    
-    listaAtual = todas.filter(q => !progresso.respondidas.includes(q.id));
-    
-    // Embaralha a lista
-    listaAtual.sort(() => Math.random() - 0.5);
-
-    if(listaAtual.length === 0) { alert("Todas as questões desta matéria foram concluídas!"); return irParaHome(); }
+    if(questaoAtual >= questoesFiltradas.length) {
+        if(confirm("Capítulo concluído. Reiniciar?")) {
+            questaoAtual = 0;
+            progressoCapitulos[cap] = 0;
+            localStorage.setItem('progresso_regencia', JSON.stringify(progressoCapitulos));
+        } else return;
+    }
+    document.getElementById('feedback').style.display = 'none';
     mostrarQuestao();
 }
 
 function mostrarQuestao() {
-    const q = listaAtual[questaoIndex];
-    if (!q) { alert("Fim da sessão!"); return irParaHome(); }
-    tempoInicio = Date.now();
-    document.getElementById('feedback').style.display = "none";
-    document.getElementById('sub-header').innerText = revisandoErros ? "REVISANDO ERROS" : `${materiaAtual} • ${assuntoAtual}`;
+    const q = questoesFiltradas[questaoAtual];
+    document.getElementById('sub-header').innerText = `${capituloAtual} - Questão ${questaoAtual+1}/${questoesFiltradas.length}`;
     document.getElementById('titulo').innerText = q.q;
     let html = "";
-    const letras = ["A", "B", "C", "D", "E"];
-    q.opcoes.forEach((opt, i) => {
-        html += `<button class="option-btn" onclick="verificar(${i})"><span class="letter">${letras[i]}</span> <span>${opt}</span></button>`;
+    q.opcoes.forEach((o, i) => {
+        html += `<button class="option-btn" onclick="verificar(${i})"><span class="letter">${String.fromCharCode(65+i)}</span>${o}</button>`;
     });
     document.getElementById('conteudo').innerHTML = html;
 }
 
-function verificar(index) {
-    const q = listaAtual[questaoIndex];
-    const tempoGasto = Math.round((Date.now() - tempoInicio) / 1000);
-    const botoes = document.getElementById('conteudo').querySelectorAll('.option-btn');
-    botoes.forEach(b => b.onclick = null);
-    const correta = (index === q.correta);
+function verificar(idx) {
+    const q = questoesFiltradas[questaoAtual];
+    const btns = document.querySelectorAll('#conteudo .option-btn');
+    btns.forEach(b => b.style.pointerEvents = 'none');
 
-    if (correta) {
-        botoes[index].classList.add('correta');
-        document.getElementById('res-status').innerText = "✅ ACERTOU!";
-        document.getElementById('res-status').style.color = "var(--success)";
-        if (revisandoErros) {
-            progresso.listaErros = progresso.listaErros.filter(item => item.id !== q.id);
-        } else {
-            progresso.acertos++;
-            progresso.respondidas.push(q.id);
-        }
-    } else {
-        botoes[index].classList.add('errada');
-        botoes[q.correta].classList.add('correta');
-        document.getElementById('res-status').innerText = "❌ ERROU!";
-        document.getElementById('res-status').style.color = "var(--danger)";
-        if (!revisandoErros) {
-            progresso.erros++;
-            progresso.respondidas.push(q.id);
-            progresso.listaErros.push(q);
-        }
-    }
+    const acerto = idx === q.correta;
+    btns[idx].classList.add(acerto ? 'correta' : 'errada');
+    if(!acerto) btns[q.correta].classList.add('correta');
 
-    if (!revisandoErros) {
-        // Encontrar a qual capítulo pertence a questão para salvar no histórico corretamente
-        let capReal = assuntoAtual;
-        if(assuntoAtual === "Tudo") {
-            Object.keys(dados[materiaAtual]).forEach(cap => {
-                if(dados[materiaAtual][cap].some(quest => quest.id === q.id)) capReal = cap;
-            });
-        }
-        progresso.historico.push({
-            materia: materiaAtual,
-            assunto: capReal,
-            correta: correta,
-            tempo: tempoGasto,
-            data: new Date().toISOString()
-        });
-    }
+    historico.push({ materia: materiaAtual, assunto: capituloAtual, correta: acerto });
+    localStorage.setItem('hist_regencia', JSON.stringify(historico));
 
+    document.getElementById('res-status').innerText = acerto ? "✅ Correto!" : "❌ Incorreto";
     document.getElementById('fundamentacao').innerText = q.fund;
-    document.getElementById('localizacao').innerText = "Fonte: " + q.loc;
-    document.getElementById('feedback').style.display = "block";
-    salvarESincronizar();
+    document.getElementById('localizacao').innerText = `Fonte: ${q.loc}`;
+    document.getElementById('feedback').style.display = 'block';
 }
 
 function proximaQuestao() {
-    questaoIndex++;
-    mostrarQuestao();
-}
+    questaoAtual++;
+    progressoCapitulos[capituloAtual] = questaoAtual;
+    localStorage.setItem('progresso_regencia', JSON.stringify(progressoCapitulos));
 
-function revisarErros() {
-    if (progresso.listaErros.length === 0) return alert("Sem erros para revisar.");
-    revisandoErros = true;
-    listaAtual = [...progresso.listaErros];
-    questaoIndex = 0;
-    document.getElementById('view-home').style.display = "none";
-    document.getElementById('view-quiz').style.display = "block";
-    document.getElementById('btnVoltar').style.visibility = "visible";
-    mostrarQuestao();
+    if(questaoAtual < questoesFiltradas.length) {
+        document.getElementById('feedback').style.display = 'none';
+        mostrarQuestao();
+    } else {
+        document.getElementById('titulo').innerText = "🎉 Capítulo Finalizado!";
+        document.getElementById('conteudo').innerHTML = `<button class="btn-action" onclick="carregarCapitulos('${materiaAtual}')">Escolher outro conteúdo</button>`;
+        document.getElementById('feedback').style.display = 'none';
+    }
 }
 
 function atualizarDashboard() {
-    const hist = progresso.historico;
-    const total = hist.length;
-    const acertos = hist.filter(h => h.correta).length;
-    const perc = total > 0 ? Math.round((acertos / total) * 100) : 0;
-    const tMedio = total > 0 ? Math.round(hist.reduce((acc, curr) => acc + curr.tempo, 0) / total) : 0;
+    const total = historico.length;
+    const acertos = historico.filter(h => h.correta).length;
     document.getElementById('dash-total').innerText = total;
-    document.getElementById('dash-perc').innerText = perc + "%";
-    document.getElementById('dash-tempo').innerText = tMedio + "s";
-    document.getElementById('top-acertos').innerText = `${progresso.acertos} Acertos`;
-    document.getElementById('top-erros').innerText = `${progresso.listaErros.length} Erros`;
-    let msg = "Responda questões para ver seu diagnóstico.";
-    if(total > 5) {
-        if(perc >= 75) msg = "🚀 Excelente desempenho! Mantenha o ritmo.";
-        else if(perc >= 50) msg = "📈 Bom caminho, mas revise os pontos vermelhos.";
-        else msg = "⚠️ Atenção: Reforce a base teórica.";
-    }
-    document.getElementById('dash-insight').innerText = msg;
+    document.getElementById('dash-perc').innerText = total > 0 ? Math.round((acertos/total)*100) + "%" : "0%";
+    document.getElementById('top-acertos').innerText = acertos + " Acertos";
+    document.getElementById('top-erros').innerText = (total - acertos) + " Erros";
 }
 
 function verEstatisticasDetalhadas() {
-    document.getElementById('view-home').style.display = "none";
-    document.getElementById('view-stats').style.display = "block";
-    document.getElementById('btnVoltar').style.visibility = "visible";
-    const hist = progresso.historico;
-    const materiasData = {};
-    hist.forEach(h => {
-        if(!materiasData[h.materia]) materiasData[h.materia] = { acertos: 0, total: 0 };
-        materiasData[h.materia].total++;
-        if(h.correta) materiasData[h.materia].acertos++;
+    document.getElementById('view-home').style.display = 'none';
+    document.getElementById('view-stats').style.display = 'block';
+    document.getElementById('btnVoltar').style.visibility = 'visible';
+    renderChart();
+}
+
+function renderChart() {
+    const mats = {};
+    historico.forEach(h => {
+        if(!mats[h.materia]) mats[h.materia] = { a:0, t:0 };
+        mats[h.materia].t++;
+        if(h.correta) mats[h.materia].a++;
     });
-    const labels = Object.keys(materiasData);
-    const scores = labels.map(l => {
-        const p = (materiasData[l].acertos / materiasData[l].total) * 100;
-        return p * Math.log10(materiasData[l].total + 1);
-    });
+
+    const labels = Object.keys(mats);
+    const data = labels.map(l => (mats[l].a / mats[l].t) * 100);
+
     if(chartObj) chartObj.destroy();
-    const ctx = document.getElementById('chartMaterias').getContext('2d');
-    chartObj = new Chart(ctx, {
+    chartObj = new Chart(document.getElementById('chartMaterias'), {
         type: 'bar',
         data: {
             labels: labels,
-            datasets: [{ label: 'Score de Desempenho', data: scores, backgroundColor: '#007AFF', borderRadius: 8 }]
+            datasets: [{ label: '% de Acerto', data: data, backgroundColor: '#007AFF' }]
         },
-        options: { indexAxis: 'y', plugins: { legend: { display: false } } }
+        options: { indexAxis: 'y' }
     });
-    const assuntosErros = {};
-    hist.forEach(h => { if(!h.correta) assuntosErros[h.assunto] = (assuntosErros[h.assunto] || 0) + 1; });
-    const ranking = Object.entries(assuntosErros).sort((a,b) => b[1] - a[1]).slice(0, 5);
-    document.getElementById('lista-pontos-fracos').innerHTML = ranking.length > 0 ? 
-        ranking.map(r => `<div style="padding:8px; border-bottom:1px solid #eee">❌ ${r[0]} (${r[1]} erros)</div>`).join('') : "Nenhum erro registrado ainda.";
 }
 
-function salvarESincronizar() {
-    localStorage.setItem('titanium_quiz_v2', JSON.stringify(progresso));
-    atualizarDashboard();
+function iniciarQuizTudo() {
+    questoesFiltradas = [];
+    Object.keys(dados[materiaAtual]).forEach(c => {
+        questoesFiltradas = questoesFiltradas.concat(dados[materiaAtual][c]);
+    });
+    questoesFiltradas.sort(() => Math.random() - 0.5);
+    questaoAtual = 0;
+    capituloAtual = "Modo Aleatório";
+    document.getElementById('feedback').style.display = 'none';
+    mostrarQuestao();
 }
 
-irParaHome();
+// Inicia
+atualizarDashboard();
 </script>
 </body>
 </html>
