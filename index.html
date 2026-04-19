@@ -1031,15 +1031,59 @@ function carregarCapitulos(m) {
 }
 
 // --- FUNÇÃO MISTÃO CORRIGIDA (Lê todas as questões) ---
-function iniciarMistao() {
+function iniciarQuiz(c) {
+    try {
+        capituloAtual = c;
+        // Garante que estamos pegando a lista correta de questões
+        if (!dados[materiaAtual] || !dados[materiaAtual][c]) {
+            alert("Erro: Capítulo não encontrado no banco de dados.");
+            return;
+        }
+
+        questoesFiltradas = [...dados[materiaAtual][c]];
+        
+        // CORREÇÃO CRITICAL: Verifica se o progresso é válido
+        let salvo = progresso[c];
+        questaoAtual = (typeof salvo === 'number' && salvo < questoesFiltradas.length) ? salvo : 0;
+        
+        // Se já terminou o capítulo, pergunta se quer reiniciar
+        if (salvo >= questoesFiltradas.length) {
+            if (confirm("Você já terminou este capítulo. Deseja reiniciar do zero?")) {
+                questaoAtual = 0;
+                progresso[c] = 0;
+                localStorage.setItem('prog_regencia', JSON.stringify(progresso));
+            } else {
+                return; // Cancela a abertura
+            }
+        }
+
+        document.getElementById('feedback').style.display = 'none';
+        mostrarQuestao();
+    } catch (e) {
+        console.error("Erro ao iniciar quiz:", e);
+        alert("Ocorreu um erro ao carregar este capítulo. Reiniciando...");
+        questaoAtual = 0;
+        mostrarQuestao();
+    }
+}
+    function iniciarMistao() {
     capituloAtual = "Mistão";
     questoesFiltradas = [];
-    // Garante que percorre TODOS os capítulos da matéria [cite: 74, 115]
-    Object.values(dados[materiaAtual]).forEach(capArray => {
-        questoesFiltradas = questoesFiltradas.concat(capArray);
+    
+    // Puxa tudo que estiver dentro da matéria
+    const capitulos = Object.values(dados[materiaAtual]);
+    capitulos.forEach(listaQuestoes => {
+        questoesFiltradas = questoesFiltradas.concat(listaQuestoes);
     });
-    questoesFiltradas.sort(() => Math.random() - 0.5); // Embaralha
+
+    if (questoesFiltradas.length === 0) {
+        alert("Não há questões cadastradas nesta matéria.");
+        return;
+    }
+
+    questoesFiltradas.sort(() => Math.random() - 0.5);
     questaoAtual = 0;
+    document.getElementById('feedback').style.display = 'none';
     mostrarQuestao();
 }
 
