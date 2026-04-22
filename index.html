@@ -1644,46 +1644,67 @@ let materiaAtual = "";
 let questoesSessao = [];
 let indexAtual = 0;
 
+// Inicialização segura do LocalStorage (Progresso do usuário)
 let errosGlobal = JSON.parse(localStorage.getItem('erros_regencia')) || [];
 let respondidasGlobal = JSON.parse(localStorage.getItem('respondidas_regencia')) || [];
-let acertosContador = JSON.parse(localStorage.getItem('acertos_total')) || 0;
+let acertosContador = parseInt(localStorage.getItem('acertos_total')) || 0;
 
+// --- NAVEGAÇÃO ---
 function navegarPara(view, data = null) {
+    // Esconde todas as telas
     document.querySelectorAll('.container > div').forEach(d => d.classList.add('hide'));
-    document.getElementById(`view-${view}`).classList.remove('hide');
-    historyStack.push(view);
+    
+    // Mostra a tela de destino
+    const targetView = document.getElementById(`view-${view}`);
+    if (targetView) {
+        targetView.classList.remove('hide');
+        // Adiciona ao histórico apenas se for uma nova view
+        if (historyStack[historyStack.length - 1] !== view) {
+            historyStack.push(view);
+        }
+    }
+
+    // Aciona a renderização baseada na view
     if(view === 'materias') renderMaterias();
     if(view === 'capitulos') renderCapitulos(data);
 }
 
 function voltar() {
     if(historyStack.length > 1) {
-        historyStack.pop();
-        const anterior = historyStack.pop();
+        historyStack.pop(); // Remove a tela atual
+        const anterior = historyStack.pop(); // Recupera a anterior
         navegarPara(anterior);
     }
 }
 
+// --- RENDERIZADORES ---
 function renderMaterias() {
     const list = document.getElementById('materias-list');
     list.innerHTML = "";
     Object.keys(bancoDados).forEach(mat => {
-        list.innerHTML += `<div class="list-item" onclick="navegarPara('capitulos', '${mat}')"><span>${mat}</span><span>›</span></div>`;
+        const div = document.createElement('div');
+        div.className = 'list-item';
+        div.innerHTML = `<span>${mat}</span><span>›</span>`;
+        div.onclick = () => navegarPara('capitulos', mat);
+        list.appendChild(div);
     });
 }
 
 function renderCapitulos(mat) {
+    if (!mat) return;
     materiaAtual = mat;
     document.getElementById('cap-title-header').innerText = mat;
     const list = document.getElementById('capitulos-list');
     list.innerHTML = "";
     
-    // Mistão
-    let todas = [];
-    Object.values(bancoDados[mat]).forEach(c => todas = todas.concat(c));
-    list.appendChild(createCapCard("🔥 Mistão da Matéria", todas, true));
+    // 1. Botão do Mistão da Matéria (Todas as questões juntas)
+    let todasQuestoes = [];
+    Object.values(bancoDados[mat]).forEach(c => {
+        todasQuestoes = todasQuestoes.concat(c);
+    });
+    list.appendChild(createCapCard("🔥 Mistão da Matéria", todasQuestoes, true));
 
-    // Capítulos
+    // 2. Capítulos Individuais
     Object.keys(bancoDados[mat]).forEach(cap => {
         list.appendChild(createCapCard(cap, bancoDados[mat][cap]));
     });
@@ -1691,24 +1712,38 @@ function renderCapitulos(mat) {
 
 function createCapCard(label, lista, isMistao = false) {
     const feitas = lista.filter(q => respondidasGlobal.includes(q.id)).length;
-    const pct = (feitas / lista.length) * 100;
+    const total = lista.length;
+    const pct = total > 0 ? (feitas / total) * 100 : 0;
+    
     const div = document.createElement('div');
     div.className = 'list-item';
     div.style.flexDirection = 'column';
     div.style.alignItems = 'stretch';
-    div.onclick = () => isMistao ? iniciarMistao(materiaAtual) : iniciarQuiz(materiaAtual, label);
+    
+    div.onclick = () => {
+        if (isMistao) iniciarMistao(materiaAtual);
+        else iniciarQuiz(materiaAtual, label);
+    };
+
     div.innerHTML = `
-        <div style="display:flex; justify-content:space-between;">
-            <div><p style="font-size:14px; font-weight:600;">${label}</p><p style="font-size:11px; color:var(--text-sec);">${feitas}/${lista.length} questões</p></div>
-            <span>›</span>
+        <div style="display:flex; justify-content:space-between; align-items:center; width: 100%;">
+            <div>
+                <p style="font-size:14px; font-weight:600;">${label}</p>
+                <p style="font-size:11px; color:var(--text-sec); margin-top:4px;">${feitas}/${total} questões</p>
+            </div>
+            <span style="color:var(--text-sec)">›</span>
         </div>
-        <div class="progress-mini-bg"><div class="progress-mini-fill" style="width:${pct}%"></div></div>`;
+        <div class="progress-mini-bg"><div class="progress-mini-fill" style="width:${pct}%"></div></div>
+    `;
     return div;
 }
 
+// --- FUNÇÕES DO QUIZ ---
 function iniciarQuiz(mat, cap) {
-    const pendentes = bancoDados[mat][cap].filter(q => !respondidasGlobal.includes(q.id));
-    prepararSessao(pendentes.length > 0 ? pendentes : bancoDados[mat][cap], pendentes.length === 0);
+    const lista = bancoDados[mat][cap];
+    const pendentes = lista.filter(q => !respondidasGlobal.includes(q.id));
+    // Se não houver pendentes, reinicia o capítulo
+    prepararSessao(pendentes.length > 0 ? pendentes : lista, pendentes.length === 0);
 }
 
 function iniciarMistao(mat) {
@@ -1718,15 +1753,10 @@ function iniciarMistao(mat) {
     prepararSessao(pendentes.length > 0 ? pendentes : todas, pendentes.length === 0);
 }
 
-function iniciarRevisaoErros() {
-    if(errosGlobal.length === 0) return alert("Sem erros!");
-    prepararSessao(errosGlobal, false);
-}
-
-function prepararSessao(lista, reset) {
-    if(reset) {
-        const ids = lista.map(q => q.id);
-        respondidasGlobal = respondidasGlobal.filter(id => !ids.includes(id));
+function prepararSessao(lista, resetar) {
+    if(resetar) {
+        const idsParaResetar = lista.map(q => q.id);
+        respondidasGlobal = respondidasGlobal.filter(id => !idsParaResetar.includes(id));
         localStorage.setItem('respondidas_regencia', JSON.stringify(respondidasGlobal));
     }
     questoesSessao = [...lista].sort(() => Math.random() - 0.5);
@@ -1739,9 +1769,10 @@ function mostrarQuestao() {
     const q = questoesSessao[indexAtual];
     const container = document.getElementById('opcoes-container');
     document.getElementById('pergunta-texto').innerText = q.q;
-    document.getElementById('quiz-progress-text').innerText = `${indexAtual + 1}/${questoesSessao.length}`;
+    document.getElementById('quiz-progress-text').innerText = `${indexAtual + 1} de ${questoesSessao.length}`;
     document.getElementById('quiz-progress-bar').style.width = `${((indexAtual + 1) / questoesSessao.length) * 100}%`;
     document.getElementById('feedback-box').classList.add('hide');
+    
     container.innerHTML = "";
     q.opcoes.forEach((opt, i) => {
         const d = document.createElement('div');
@@ -1752,23 +1783,31 @@ function mostrarQuestao() {
     });
 }
 
-function validarResposta(idx, el) {
+function validarResposta(idx, elemento) {
     const q = questoesSessao[indexAtual];
     const correto = idx === q.correta;
-    document.querySelectorAll('.opcao').forEach(o => o.style.pointerEvents = 'none');
-    el.classList.add(correto ? 'correta' : 'errada');
-    document.querySelectorAll('.opcao')[q.correta].classList.add('correta');
-    
-    if(correto) { acertosContador++; errosGlobal = errosGlobal.filter(e => e.id !== q.id); }
-    else if(!errosGlobal.find(e => e.id === q.id)) { errosGlobal.push(q); }
+    const opcoes = document.querySelectorAll('.opcao');
+
+    opcoes.forEach(o => o.style.pointerEvents = 'none');
+    elemento.classList.add(correto ? 'correta' : 'errada');
+    opcoes[q.correta].classList.add('correta');
+
+    if(correto) {
+        acertosContador++;
+        errosGlobal = errosGlobal.filter(e => e.id !== q.id);
+    } else {
+        if(!errosGlobal.find(e => e.id === q.id)) errosGlobal.push(q);
+    }
 
     if(!respondidasGlobal.includes(q.id)) respondidasGlobal.push(q.id);
+    
     localStorage.setItem('erros_regencia', JSON.stringify(errosGlobal));
     localStorage.setItem('respondidas_regencia', JSON.stringify(respondidasGlobal));
-    localStorage.setItem('acertos_total', JSON.stringify(acertosContador));
+    localStorage.setItem('acertos_total', acertosContador.toString());
 
-    document.getElementById('feed-status').innerText = correto ? "✅ Correto!" : "❌ Incorreto";
-    document.getElementById('feed-fundamentacao').innerHTML = `${q.fund}<br><strong>${q.loc}</strong>`;
+    document.getElementById('feed-status').innerText = correto ? "✅ Excelente!" : "❌ Observe a técnica";
+    document.getElementById('feed-status').style.color = correto ? "var(--success)" : "var(--danger)";
+    document.getElementById('feed-fundamentacao').innerHTML = `${q.fund}<br><br><strong>${q.loc}</strong>`;
     document.getElementById('feedback-box').classList.remove('hide');
     atualizarStatsHome();
 }
@@ -1776,7 +1815,7 @@ function validarResposta(idx, el) {
 function proximaQuestao() {
     indexAtual++;
     if(indexAtual < questoesSessao.length) mostrarQuestao();
-    else { alert("Concluído!"); voltar(); }
+    else { alert("Sessão concluída!"); voltar(); }
 }
 
 function atualizarStatsHome() {
@@ -1784,13 +1823,21 @@ function atualizarStatsHome() {
     document.getElementById('home-erros').innerText = errosGlobal.length;
 }
 
-// SERVICE WORKER REGISTRATION
+function iniciarRevisaoErros() {
+    if(errosGlobal.length === 0) return alert("Nenhum erro para revisar!");
+    prepararSessao(errosGlobal, false);
+}
+
+// Registro do Service Worker (PWA)
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW fail:', err));
     });
 }
+
+// Inicialização
 atualizarStatsHome();
 </script>
+
 </body>
 </html>
