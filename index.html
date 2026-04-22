@@ -1644,35 +1644,38 @@ let materiaAtual = "";
 let questoesSessao = [];
 let indexAtual = 0;
 
-// Inicialização segura do LocalStorage (Progresso do usuário)
 let errosGlobal = JSON.parse(localStorage.getItem('erros_regencia')) || [];
 let respondidasGlobal = JSON.parse(localStorage.getItem('respondidas_regencia')) || [];
 let acertosContador = parseInt(localStorage.getItem('acertos_total')) || 0;
 
 // --- NAVEGAÇÃO ---
 function navegarPara(view, data = null) {
-    // Esconde todas as telas
-    document.querySelectorAll('.container > div').forEach(d => d.classList.add('hide'));
+    console.log("Tentando navegar para:", view); // LOG DE TESTE
     
-    // Mostra a tela de destino
+    const views = ['home', 'materias', 'capitulos', 'quiz'];
+    views.forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        if(el) el.classList.add('hide');
+    });
+    
     const targetView = document.getElementById(`view-${view}`);
     if (targetView) {
         targetView.classList.remove('hide');
-        // Adiciona ao histórico apenas se for uma nova view
         if (historyStack[historyStack.length - 1] !== view) {
             historyStack.push(view);
         }
+    } else {
+        console.error("Erro: A tela view-" + view + " não existe no HTML.");
     }
 
-    // Aciona a renderização baseada na view
     if(view === 'materias') renderMaterias();
     if(view === 'capitulos') renderCapitulos(data);
 }
 
 function voltar() {
     if(historyStack.length > 1) {
-        historyStack.pop(); // Remove a tela atual
-        const anterior = historyStack.pop(); // Recupera a anterior
+        historyStack.pop();
+        const anterior = historyStack.pop();
         navegarPara(anterior);
     }
 }
@@ -1680,31 +1683,40 @@ function voltar() {
 // --- RENDERIZADORES ---
 function renderMaterias() {
     const list = document.getElementById('materias-list');
+    if(!list) return console.error("Erro: Elemento materias-list não encontrado.");
+    
     list.innerHTML = "";
-    Object.keys(bancoDados).forEach(mat => {
+    const materias = Object.keys(bancoDados);
+    
+    materias.forEach(mat => {
         const div = document.createElement('div');
         div.className = 'list-item';
         div.innerHTML = `<span>${mat}</span><span>›</span>`;
-        div.onclick = () => navegarPara('capitulos', mat);
+        div.style.cursor = "pointer";
+        div.onclick = function() { navegarPara('capitulos', mat); };
         list.appendChild(div);
     });
 }
 
 function renderCapitulos(mat) {
-    if (!mat) return;
+    if (!mat || !bancoDados[mat]) return;
     materiaAtual = mat;
-    document.getElementById('cap-title-header').innerText = mat;
+    
+    const header = document.getElementById('cap-title-header');
+    if(header) header.innerText = mat;
+    
     const list = document.getElementById('capitulos-list');
+    if(!list) return;
+    
     list.innerHTML = "";
     
-    // 1. Botão do Mistão da Matéria (Todas as questões juntas)
     let todasQuestoes = [];
     Object.values(bancoDados[mat]).forEach(c => {
         todasQuestoes = todasQuestoes.concat(c);
     });
+    
     list.appendChild(createCapCard("🔥 Mistão da Matéria", todasQuestoes, true));
 
-    // 2. Capítulos Individuais
     Object.keys(bancoDados[mat]).forEach(cap => {
         list.appendChild(createCapCard(cap, bancoDados[mat][cap]));
     });
@@ -1719,8 +1731,9 @@ function createCapCard(label, lista, isMistao = false) {
     div.className = 'list-item';
     div.style.flexDirection = 'column';
     div.style.alignItems = 'stretch';
+    div.style.cursor = "pointer";
     
-    div.onclick = () => {
+    div.onclick = function() {
         if (isMistao) iniciarMistao(materiaAtual);
         else iniciarQuiz(materiaAtual, label);
     };
@@ -1738,11 +1751,9 @@ function createCapCard(label, lista, isMistao = false) {
     return div;
 }
 
-// --- FUNÇÕES DO QUIZ ---
 function iniciarQuiz(mat, cap) {
     const lista = bancoDados[mat][cap];
     const pendentes = lista.filter(q => !respondidasGlobal.includes(q.id));
-    // Se não houver pendentes, reinicia o capítulo
     prepararSessao(pendentes.length > 0 ? pendentes : lista, pendentes.length === 0);
 }
 
@@ -1768,17 +1779,22 @@ function prepararSessao(lista, resetar) {
 function mostrarQuestao() {
     const q = questoesSessao[indexAtual];
     const container = document.getElementById('opcoes-container');
-    document.getElementById('pergunta-texto').innerText = q.q;
-    document.getElementById('quiz-progress-text').innerText = `${indexAtual + 1} de ${questoesSessao.length}`;
-    document.getElementById('quiz-progress-bar').style.width = `${((indexAtual + 1) / questoesSessao.length) * 100}%`;
-    document.getElementById('feedback-box').classList.add('hide');
+    const txt = document.getElementById('pergunta-texto');
+    const progTxt = document.getElementById('quiz-progress-text');
+    const progBar = document.getElementById('quiz-progress-bar');
     
+    if(txt) txt.innerText = q.q;
+    if(progTxt) progTxt.innerText = (indexAtual + 1) + " de " + questoesSessao.length;
+    if(progBar) progBar.style.width = ((indexAtual + 1) / questoesSessao.length * 100) + "%";
+    
+    document.getElementById('feedback-box').classList.add('hide');
     container.innerHTML = "";
+    
     q.opcoes.forEach((opt, i) => {
         const d = document.createElement('div');
         d.className = 'opcao';
         d.innerHTML = `<div class="letra-circulo">${"ABCDE"[i]}</div><span>${opt}</span>`;
-        d.onclick = () => validarResposta(i, d);
+        d.onclick = function() { validarResposta(i, d); };
         container.appendChild(d);
     });
 }
@@ -1806,8 +1822,7 @@ function validarResposta(idx, elemento) {
     localStorage.setItem('acertos_total', acertosContador.toString());
 
     document.getElementById('feed-status').innerText = correto ? "✅ Excelente!" : "❌ Observe a técnica";
-    document.getElementById('feed-status').style.color = correto ? "var(--success)" : "var(--danger)";
-    document.getElementById('feed-fundamentacao').innerHTML = `${q.fund}<br><br><strong>${q.loc}</strong>`;
+    document.getElementById('feed-fundamentacao').innerHTML = q.fund + "<br><br><strong>" + q.loc + "</strong>";
     document.getElementById('feedback-box').classList.remove('hide');
     atualizarStatsHome();
 }
@@ -1815,12 +1830,14 @@ function validarResposta(idx, elemento) {
 function proximaQuestao() {
     indexAtual++;
     if(indexAtual < questoesSessao.length) mostrarQuestao();
-    else { alert("Sessão concluída!"); voltar(); }
+    else { alert("Sessão concluída!"); navegarPara('home'); }
 }
 
 function atualizarStatsHome() {
-    document.getElementById('home-acertos').innerText = acertosContador;
-    document.getElementById('home-erros').innerText = errosGlobal.length;
+    const ac = document.getElementById('home-acertos');
+    const er = document.getElementById('home-erros');
+    if(ac) ac.innerText = acertosContador;
+    if(er) er.innerText = errosGlobal.length;
 }
 
 function iniciarRevisaoErros() {
@@ -1828,14 +1845,12 @@ function iniciarRevisaoErros() {
     prepararSessao(errosGlobal, false);
 }
 
-// Registro do Service Worker (PWA)
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW fail:', err));
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('./sw.js').catch(function(err) { console.log(err); });
     });
 }
 
-// Inicialização
 atualizarStatsHome();
 </script>
 
