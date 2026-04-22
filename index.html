@@ -50,14 +50,11 @@
 
     <div id="view-materias">
         <h1>Simulador de Regência</h1>
-        <p class="subtitle">Selecione a obra ou matéria para estudar:</p>
+        <p class="subtitle">Selecione a obra ou matéria:</p>
         <div class="menu-grid">
             <div class="cap-card" onclick="selecionarMateria('Ricardo Rocha')">
                 <div><strong>Ricardo Rocha</strong><br><small>Regência: Uma Arte Complexa</small></div>
                 <span>❯</span>
-            </div>
-            <div class="cap-card" style="opacity: 0.6; cursor: not-allowed;">
-                <div><strong>Em breve...</strong><br><small>Outros autores e conteúdos</small></div>
             </div>
         </div>
     </div>
@@ -66,8 +63,7 @@
         <h1 id="titulo-materia">Matéria</h1>
         <p class="subtitle">Escolha o capítulo:</p>
         <div id="lista-capitulos" class="menu-grid"></div>
-        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #EEE;">
-        <div class="menu-grid">
+        <div class="menu-grid" style="margin-top:20px; border-top:1px solid #EEE; padding-top:20px;">
             <div class="cap-card" onclick="iniciarMistao()" style="background: #E8F2FF;">
                 <div><strong>🌪️ O Mistão</strong><br><small>Tudo misturado</small></div>
                 <span>❯</span>
@@ -97,15 +93,15 @@
 </div>
 
 <script>
+// VARIÁVEIS GLOBAIS
 let materiaAtual = "";
 let capituloAtual = "";
 let questoesFiltradas = [];
 let questaoAtual = 0;
-
 let historico = JSON.parse(localStorage.getItem('hist_regencia')) || [];
 let progresso = JSON.parse(localStorage.getItem('prog_regencia')) || {};
 
-// NAVEGAÇÃO PRINCIPAL
+// FUNÇÃO PARA VOLTAR AO INÍCIO REAL
 function irParaHome() {
     document.getElementById('view-materias').classList.remove('hidden');
     document.getElementById('view-capitulos').classList.add('hidden');
@@ -115,18 +111,26 @@ function irParaHome() {
     atualizarContadores();
 }
 
+// ESTA FUNÇÃO FAZ O CLIQUE NO "RICARDO ROCHA" FUNCIONAR
 function selecionarMateria(m) {
+    if (typeof dados === 'undefined') {
+        alert("Erro: O banco de questões não foi carregado corretamente.");
+        return;
+    }
+    
     materiaAtual = m;
     document.getElementById('titulo-materia').innerText = m;
     
     const lista = document.getElementById('lista-capitulos');
     lista.innerHTML = '';
     
-    // Gera os botões de capítulos dinamicamente com base na matéria selecionada
-    Object.keys(dados[m]).forEach(cap => {
+    // Pega os capítulos dentro de dados["Ricardo Rocha"]
+    const capitulos = Object.keys(dados[m]);
+    
+    capitulos.forEach(cap => {
         const item = document.createElement('div');
         item.className = 'cap-card';
-        item.onclick = () => iniciarQuiz(cap);
+        item.onclick = function() { iniciarQuiz(cap); };
         item.innerHTML = `<div><strong>${cap}</strong></div><span>❯</span>`;
         lista.appendChild(item);
     });
@@ -139,13 +143,11 @@ function selecionarMateria(m) {
 function iniciarQuiz(c) {
     capituloAtual = c;
     questoesFiltradas = [...dados[materiaAtual][c]];
-    
     questaoAtual = progresso[c] || 0;
     if(questaoAtual >= questoesFiltradas.length) questaoAtual = 0;
 
     document.getElementById('view-capitulos').classList.add('hidden');
     document.getElementById('view-quiz').classList.remove('hidden');
-    document.getElementById('feedback').style.display = 'none';
     mostrarQuestao();
 }
 
@@ -153,7 +155,6 @@ function mostrarQuestao() {
     const q = questoesFiltradas[questaoAtual];
     document.getElementById('pergunta').innerText = q.q;
     document.getElementById('feedback').style.display = 'none';
-    
     const container = document.getElementById('opcoes-container');
     container.innerHTML = '';
     
@@ -184,30 +185,9 @@ function verificar(idx) {
     
     localStorage.setItem('hist_regencia', JSON.stringify(historico));
     atualizarContadores();
-
     document.getElementById('res-status').innerText = acerto ? "✅ Correto" : "❌ Incorreto";
     document.getElementById('fundamentacao').innerHTML = `${q.fund} <br><br><small><strong>Fonte: ${q.loc}</strong></small>`;
     document.getElementById('feedback').style.display = 'block';
-}
-
-function iniciarQuizErros() {
-    const listaErros = historico.filter(h => !h.correta);
-    if (listaErros.length === 0) { alert("Nenhum erro!"); return; }
-
-    const mapaUnico = new Map();
-    listaErros.forEach(item => {
-        if(item.dadosCompletos) mapaUnico.set(item.perguntaTexto, item.dadosCompletos);
-    });
-
-    questoesFiltradas = Array.from(mapaUnico.values());
-    capituloAtual = "Revisão de Erros";
-    questaoAtual = 0;
-    
-    document.getElementById('view-materias').classList.add('hidden');
-    document.getElementById('view-capitulos').classList.add('hidden');
-    document.getElementById('view-quiz').classList.remove('hidden');
-    document.getElementById('btnVoltar').style.visibility = 'visible';
-    mostrarQuestao();
 }
 
 function proximaQuestao() {
@@ -216,13 +196,8 @@ function proximaQuestao() {
         progresso[capituloAtual] = questaoAtual;
         localStorage.setItem('prog_regencia', JSON.stringify(progresso));
     }
-    
-    if(questaoAtual < questoesFiltradas.length) {
-        mostrarQuestao();
-    } else {
-        alert("Fim do bloco!");
-        irParaHome();
-    }
+    if(questaoAtual < questoesFiltradas.length) mostrarQuestao();
+    else { alert("Fim do capítulo!"); irParaHome(); }
 }
 
 function iniciarMistao() {
@@ -235,6 +210,20 @@ function iniciarMistao() {
     questaoAtual = 0;
     document.getElementById('view-capitulos').classList.add('hidden');
     document.getElementById('view-quiz').classList.remove('hidden');
+    mostrarQuestao();
+}
+
+function iniciarQuizErros() {
+    const listaErros = historico.filter(h => !h.correta);
+    if (listaErros.length === 0) { alert("Nenhum erro!"); return; }
+    const mapaUnico = new Map();
+    listaErros.forEach(item => { if(item.dadosCompletos) mapaUnico.set(item.perguntaTexto, item.dadosCompletos); });
+    questoesFiltradas = Array.from(mapaUnico.values());
+    capituloAtual = "Revisão de Erros"; questaoAtual = 0;
+    document.getElementById('view-materias').classList.add('hidden');
+    document.getElementById('view-capitulos').classList.add('hidden');
+    document.getElementById('view-quiz').classList.remove('hidden');
+    document.getElementById('btnVoltar').style.visibility = 'visible';
     mostrarQuestao();
 }
 
