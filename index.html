@@ -1606,17 +1606,47 @@ function contarTotalQuestoes(m) {
 
 function iniciarQuiz(c) {
     capituloAtual = c;
+    // Carrega as questões da matéria e capítulo selecionados
     questoesFiltradas = [...dados[materiaAtual][c]];
+    
+    // Recupera o progresso salvo ou inicia do zero
     questaoAtual = progresso[c] || 0;
+    if(questaoAtual >= questoesFiltradas.length) questaoAtual = 0;
+
+    // Transição de telas
+    document.getElementById('view-home').style.display = 'none';
+    document.getElementById('view-quiz').style.display = 'block';
+    document.getElementById('feedback').style.display = 'none';
+    
+    // Garante que o botão de voltar apareça
+    const btnVoltar = document.getElementById('btnVoltar');
+    if(btnVoltar) btnVoltar.style.visibility = 'visible';
+
     mostrarQuestao();
 }
 
 function iniciarMistao() {
     capituloAtual = "Mistão";
     questoesFiltradas = [];
-    Object.values(dados[materiaAtual]).forEach(cap => { questoesFiltradas = questoesFiltradas.concat(cap); });
+    
+    // Junta todas as questões da matéria atual
+    Object.values(dados[materiaAtual]).forEach(cap => { 
+        questoesFiltradas = questoesFiltradas.concat(cap); 
+    });
+    
+    // Embaralha as questões
     questoesFiltradas.sort(() => Math.random() - 0.5);
     questaoAtual = 0;
+
+    // Transição de telas
+    document.getElementById('view-home').style.display = 'none';
+    document.getElementById('view-quiz').style.display = 'block';
+    document.getElementById('feedback').style.display = 'none';
+    
+    // Garante que o botão de voltar apareça
+    const btnVoltar = document.getElementById('btnVoltar');
+    if(btnVoltar) btnVoltar.style.visibility = 'visible';
+
     mostrarQuestao();
 }
 
