@@ -1663,10 +1663,8 @@ let capituloSelecionado = "";
 let questoesQuiz = [];
 let indexAtual = 0;
 
-// Recuperação de dados do LocalStorage
 let errosGlobal = JSON.parse(localStorage.getItem('erros_regencia')) || [];
 let historicoAcertos = JSON.parse(localStorage.getItem('acertos_total')) || 0;
-// Lista de IDs de questões já respondidas para não repetir
 let respondidasGlobal = JSON.parse(localStorage.getItem('respondidas_regencia')) || [];
 
 window.onload = atualizarStatsHome;
@@ -1688,8 +1686,6 @@ function voltar() {
     }
 }
 
-// --- 3. RENDERIZAÇÃO DE INTERFACE ---
-
 function renderMaterias() {
     const list = document.getElementById('materias-list');
     list.innerHTML = "";
@@ -1709,8 +1705,14 @@ function renderCapitulos(mat) {
     list.innerHTML = "";
     
     if(bancoDados[mat]) {
+        list.innerHTML += `
+            <div class="list-item" onclick="iniciarMistãoDaMateria('${mat}')" 
+                 style="background: var(--primary-gradient); border:none; margin-bottom:25px;">
+                <span style="font-weight:700; color:#fff;">🔥 MISTÃO: ${mat}</span>
+                <span style="color:#fff;">Simular ›</span>
+            </div>`;
+
         Object.keys(bancoDados[mat]).forEach(cap => {
-            // Lógica de progresso visual nos capítulos
             const questoesDoCap = bancoDados[mat][cap];
             const total = questoesDoCap.length;
             const feitas = questoesDoCap.filter(q => respondidasGlobal.includes(q.id)).length;
@@ -1728,20 +1730,14 @@ function renderCapitulos(mat) {
     }
 }
 
-// --- 4. LÓGICA DO SIMULADO (COM MEMÓRIA) ---
-
 function iniciarQuiz(mat, cap) {
     materiaSelecionada = mat;
     capituloSelecionado = cap;
-
-    // Filtra para mostrar apenas o que NÃO foi respondido ainda
     let pendentes = bancoDados[mat][cap].filter(q => !respondidasGlobal.includes(q.id));
 
-    // Se todas já foram feitas, reinicia o capítulo
     if (pendentes.length === 0) {
-        alert("Você já concluiu todas as questões deste capítulo. Vamos reiniciar para revisão!");
+        alert("Capítulo concluído! Reiniciando rodada...");
         const idsDoCapitulo = bancoDados[mat][cap].map(q => q.id);
-        // Remove os IDs deste capítulo da lista global de respondidas
         respondidasGlobal = respondidasGlobal.filter(id => !idsDoCapitulo.includes(id));
         localStorage.setItem('respondidas_regencia', JSON.stringify(respondidasGlobal));
         pendentes = [...bancoDados[mat][cap]];
@@ -1753,16 +1749,34 @@ function iniciarQuiz(mat, cap) {
     mostrarQuestao();
 }
 
+function iniciarMistãoDaMateria(mat) {
+    materiaSelecionada = mat;
+    let tudoDessaMateria = [];
+    Object.values(bancoDados[mat]).forEach(capitulo => {
+        tudoDessaMateria = tudoDessaMateria.concat(capitulo);
+    });
+    let pendentes = tudoDessaMateria.filter(q => !respondidasGlobal.includes(q.id));
+    if(pendentes.length === 0) {
+        alert("Matéria concluída! Reiniciando...");
+        const idsMateria = tudoDessaMateria.map(q => q.id);
+        respondidasGlobal = respondidasGlobal.filter(id => !idsMateria.includes(id));
+        localStorage.setItem('respondidas_regencia', JSON.stringify(respondidasGlobal));
+        pendentes = tudoDessaMateria;
+    }
+    questoesQuiz = pendentes.sort(() => Math.random() - 0.5);
+    indexAtual = 0;
+    navegarPara('quiz');
+    mostrarQuestao();
+}
+
 function mostrarQuestao() {
     const q = questoesQuiz[indexAtual];
     const container = document.getElementById('opcoes-container');
     const letras = ['A', 'B', 'C', 'D', 'E'];
-    
     document.getElementById('pergunta-texto').innerText = q.q;
-    document.getElementById('quiz-status').innerText = `Questão ${indexAtual + 1} de ${questoesQuiz.length}`;
+    document.getElementById('quiz-status').innerText = `Questão ${indexAtual + 1}`;
     document.getElementById('fill').style.width = `${(indexAtual / questoesQuiz.length) * 100}%`;
     document.getElementById('feedback').classList.add('hide');
-    
     container.innerHTML = "";
     q.opcoes.forEach((opt, i) => {
         container.innerHTML += `
@@ -1777,28 +1791,22 @@ function verificarResposta(idx) {
     const q = questoesQuiz[indexAtual];
     const opcoes = document.querySelectorAll('.opcao');
     const eCorreto = idx === q.correta;
-
     opcoes.forEach(o => o.style.pointerEvents = 'none');
     opcoes[idx].classList.add(eCorreto ? 'correta' : 'errada');
     opcoes[q.correta].classList.add('correta');
-
-    // Salva que a questão foi respondida para não aparecer mais nesta rodada
     if (!respondidasGlobal.includes(q.id)) {
         respondidasGlobal.push(q.id);
         localStorage.setItem('respondidas_regencia', JSON.stringify(respondidasGlobal));
     }
-
     if(eCorreto) {
         historicoAcertos++;
         errosGlobal = errosGlobal.filter(item => item.id !== q.id);
     } else {
         if(!errosGlobal.find(item => item.id === q.id)) errosGlobal.push(q);
     }
-
     localStorage.setItem('erros_regencia', JSON.stringify(errosGlobal));
     localStorage.setItem('acertos_total', JSON.stringify(historicoAcertos));
-    
-    document.getElementById('res-status').innerText = eCorreto ? "✅ EXCELENTE" : "❌ OBSERVE A TÉCNICA";
+    document.getElementById('res-status').innerText = eCorreto ? "✅ ACERTOU" : "❌ ERROU";
     document.getElementById('res-status').style.color = eCorreto ? "var(--success)" : "var(--danger)";
     document.getElementById('fundamentacao').innerHTML = `${q.fund}<br><br><strong>Fonte: ${q.loc}</strong>`;
     document.getElementById('feedback').classList.remove('hide');
@@ -1807,41 +1815,13 @@ function verificarResposta(idx) {
 
 function proximaQuestao() {
     indexAtual++;
-    if(indexAtual < questoesQuiz.length) {
-        mostrarQuestao();
-    } else {
-        alert("Sessão finalizada! Seu progresso foi salvo.");
-        voltar();
-    }
+    if(indexAtual < questoesQuiz.length) mostrarQuestao();
+    else { alert("Sessão finalizada!"); voltar(); }
 }
-
-// --- 5. MODOS ESPECIAIS ---
 
 function iniciarRevisaoErros() {
     if(errosGlobal.length === 0) return alert("Nenhum erro pendente!");
     questoesQuiz = [...errosGlobal].sort(() => Math.random() - 0.5);
-    indexAtual = 0;
-    navegarPara('quiz');
-    mostrarQuestao();
-}
-
-function iniciarMistão() {
-    let tudo = [];
-    Object.values(bancoDados).forEach(mat => {
-        Object.values(mat).forEach(cap => tudo = tudo.concat(cap));
-    });
-    
-    // Mistão foca no que ainda falta fazer no geral
-    let pendentes = tudo.filter(q => !respondidasGlobal.includes(q.id));
-    
-    if(pendentes.length === 0) {
-        alert("Você já respondeu todas as questões do banco! Reiniciando progresso geral.");
-        respondidasGlobal = [];
-        localStorage.setItem('respondidas_regencia', JSON.stringify(respondidasGlobal));
-        pendentes = tudo;
-    }
-
-    questoesQuiz = pendentes.sort(() => Math.random() - 0.5);
     indexAtual = 0;
     navegarPara('quiz');
     mostrarQuestao();
