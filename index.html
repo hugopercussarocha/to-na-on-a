@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
@@ -14,17 +14,27 @@
         body { font-family: -apple-system, sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; }
         .container { width: 100%; max-width: 600px; background: var(--card-bg); padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
         .header-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .stats-summary { display: flex; gap: 12px; font-size: 0.75rem; font-weight: 700; }
-        .stat-box { padding: 4px 10px; border-radius: 8px; background: #f8f8f8; }
-        .stat-err { color: var(--danger); }
-        .stat-acc { color: var(--success); }
-        #titulo { font-family: serif; font-size: 0.95rem; line-height: 1.45; text-align: justify; padding: 15px; border-radius: 12px; border-left: 4px solid var(--primary); background: #fdfdfd; margin-bottom: 20px; }
-        .option-btn { background: #fff; border: 1px solid #E5E5EA; border-radius: 14px; padding: 14px; margin-bottom: 10px; width: 100%; text-align: left; cursor: pointer; display: flex; align-items: flex-start; }
-        .letter { font-weight: 800; color: var(--primary); margin-right: 12px; }
-        .correta { background: var(--success) !important; color: white !important; border: none; }
-        .errada { background: var(--danger) !important; color: white !important; border: none; }
-        .btn-action { background: var(--primary); color: white; border: none; border-radius: 12px; padding: 15px; font-weight: 600; width: 100%; cursor: pointer; margin-top: 10px; }
-        #feedback { display: none; margin-top: 15px; padding: 15px; background: #F2F2F7; border-radius: 12px; font-size: 0.85rem; }
+        .stats-summary { display: flex; gap: 12px; font-size: 0.75rem; font-weight: bold; }
+        .stat-box { padding: 6px 12px; border-radius: 12px; }
+        .stat-acc { background: #E8F9EE; color: var(--success); }
+        .stat-err { background: #FFEBEA; color: var(--danger); cursor: pointer; }
+        
+        h1 { font-size: 1.5rem; margin-bottom: 5px; }
+        .subtitle { color: var(--text-sec); font-size: 0.9rem; margin-bottom: 25px; }
+        
+        .menu-grid { display: grid; gap: 15px; }
+        .cap-card { background: #F9F9FB; padding: 18px; border-radius: 18px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; border: 1px solid #EEE; }
+        .cap-card:hover { transform: translateY(-2px); background: #FFF; border-color: var(--primary); }
+        
+        .option-btn { background: #F2F2F7; padding: 15px; border-radius: 14px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; border: 2px solid transparent; }
+        .option-btn:hover { background: #E5E5EA; }
+        .correta { background: #E8F9EE !important; border-color: var(--success) !important; color: #1E7E34; font-weight: bold; }
+        .errada { background: #FFEBEA !important; border-color: var(--danger) !important; color: #B02A27; font-weight: bold; }
+        
+        #feedback { margin-top: 20px; padding: 20px; border-radius: 16px; background: #F8F9FF; display: none; border-left: 5px solid var(--primary); }
+        .btn-next { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 14px; font-weight: bold; margin-top: 15px; cursor: pointer; }
+        
+        canvas { max-width: 100% !important; height: auto !important; }
     </style>
 </head>
 <body>
@@ -34,35 +44,209 @@
         <div onclick="irParaHome()" style="cursor:pointer; color:var(--text-sec); font-size:0.8rem; visibility: hidden;" id="btnVoltar">❮ Início</div>
         <div class="stats-summary">
             <div class="stat-box stat-acc" id="top-acertos">0 Acertos</div>
-            
-            <div class="stat-box stat-err" id="top-erros" onclick="iniciarQuizErros()" style="cursor:pointer" title="Clique para refazer os erros">0 Erros</div>
+            <div class="stat-box stat-err" id="top-erros" onclick="iniciarQuizErros()" title="Clique para revisar erros" style="cursor:pointer">0 Erros</div>
         </div>
     </div>
 
     <div id="view-home">
-        <h2>Bons estudos!</h2>
-        <button class="btn-action" onclick="carregarMaterias()">🚀 Responder Questões</button>
-        <button class="btn-action" style="background:#333" onclick="verEstatisticas()">📊 Estatísticas</button>
-    </div>
-
-    <div id="view-quiz" style="display:none">
-        <div id="sub-header" style="text-align:center; font-size:0.7rem; color:var(--text-sec); margin-bottom:5px;"></div>
-        <div id="titulo"></div>
-        <div id="conteudo"></div>
-        <div id="feedback">
-            <b id="res-status"></b>
-            <p id="fundamentacao"></p>
-            <button class="btn-action" onclick="proximaQuestao()">Próxima Questão</button>
+        <h1>Ricardo Rocha</h1>
+        <p class="subtitle">Regência: Uma Arte Complexa</p>
+        
+        <div class="menu-grid">
+            <div class="cap-card" onclick="iniciarQuiz('Capítulo 1')">
+                <div><strong>Capítulo 1</strong><br><small>Fundamentos</small></div>
+                <span>❯</span>
+            </div>
+            <div class="cap-card" onclick="iniciarQuiz('Capítulo 2')">
+                <div><strong>Capítulo 2</strong><br><small>Técnica e Gesto</small></div>
+                <span>❯</span>
+            </div>
+            <div class="cap-card" onclick="iniciarQuiz('Capítulo 3')">
+                <div><strong>Capítulo 3</strong><br><small>A Gênese do Gesto</small></div>
+                <span>❯</span>
+            </div>
+            <div class="cap-card" onclick="iniciarMistao()" style="background: #E8F2FF; border-color: #B2D7FF;">
+                <div><strong>🌪️ O Mistão</strong><br><small>Todos os capítulos misturados</small></div>
+                <span>❯</span>
+            </div>
+            <div class="cap-card" onclick="verEstatisticas()">
+                <div><strong>📊 Estatísticas</strong><br><small>Ver seu desempenho</small></div>
+                <span>❯</span>
+            </div>
         </div>
     </div>
 
-    <div id="view-stats" style="display:none">
-        <canvas id="chartMaterias"></canvas>
-        <button class="btn-action" onclick="irParaHome()">Voltar</button>
+    <div id="view-quiz" style="display:none;">
+        <h3 id="pergunta" style="margin-bottom:20px;">Carregando...</h3>
+        <div id="opcoes-container"></div>
+        
+        <div id="feedback">
+            <h4 id="res-status" style="margin:0 0 10px 0;"></h4>
+            <p id="fundamentacao" style="font-size:0.9rem; line-height:1.4; color:#444;"></p>
+            <button class="btn-next" onclick="proximaQuestao()">Próxima Pergunta</button>
+        </div>
+    </div>
+
+    <div id="view-stats" style="display:none;">
+        <h3>Seu Desempenho</h3>
+        <canvas id="graficoErros"></canvas>
+        <button class="btn-next" onclick="irParaHome()" style="background:#8E8E93;">Voltar ao Início</button>
     </div>
 </div>
 
 <script>
+// CONFIGURAÇÕES GERAIS
+let materiaAtual = "Ricardo Rocha"; 
+let capituloAtual = "";
+let questoesFiltradas = [];
+let questaoAtual = 0;
+
+let historico = JSON.parse(localStorage.getItem('hist_regencia')) || [];
+let progresso = JSON.parse(localStorage.getItem('prog_regencia')) || {};
+
+function irParaHome() {
+    document.getElementById('view-home').style.display = 'block';
+    document.getElementById('view-quiz').style.display = 'none';
+    document.getElementById('view-stats').style.display = 'none';
+    document.getElementById('btnVoltar').style.visibility = 'hidden';
+    atualizarContadores();
+}
+
+function iniciarQuiz(c) {
+    materiaAtual = "Ricardo Rocha";
+    capituloAtual = c;
+    
+    // Verifica se os dados existem antes de tentar acessar
+    if (!dados[materiaAtual] || !dados[materiaAtual][c]) {
+        alert("Capítulo não encontrado!");
+        return;
+    }
+
+    questoesFiltradas = [...dados[materiaAtual][c]];
+    questaoAtual = progresso[c] || 0;
+    if(questaoAtual >= questoesFiltradas.length) questaoAtual = 0;
+
+    document.getElementById('view-home').style.display = 'none';
+    document.getElementById('view-quiz').style.display = 'block';
+    document.getElementById('feedback').style.display = 'none';
+    document.getElementById('btnVoltar').style.visibility = 'visible';
+
+    mostrarQuestao();
+}
+
+function iniciarMistao() {
+    materiaAtual = "Ricardo Rocha";
+    capituloAtual = "Mistão";
+    questoesFiltradas = [];
+    
+    Object.values(dados[materiaAtual]).forEach(cap => { 
+        questoesFiltradas = questoesFiltradas.concat(cap); 
+    });
+    
+    questoesFiltradas.sort(() => Math.random() - 0.5);
+    questaoAtual = 0;
+
+    document.getElementById('view-home').style.display = 'none';
+    document.getElementById('view-quiz').style.display = 'block';
+    document.getElementById('feedback').style.display = 'none';
+    document.getElementById('btnVoltar').style.visibility = 'visible';
+
+    mostrarQuestao();
+}
+
+function mostrarQuestao() {
+    const q = questoesFiltradas[questaoAtual];
+    document.getElementById('pergunta').innerText = q.q;
+    document.getElementById('feedback').style.display = 'none';
+    
+    const container = document.getElementById('opcoes-container');
+    container.innerHTML = '';
+    
+    q.opcoes.forEach((opt, i) => {
+        const btn = document.createElement('div');
+        btn.className = 'option-btn';
+        btn.innerText = opt;
+        btn.onclick = () => verificar(i);
+        container.appendChild(btn);
+    });
+}
+
+function verificar(idx) {
+    const q = questoesFiltradas[questaoAtual];
+    const acerto = (idx === q.correta);
+    const btns = document.querySelectorAll('.option-btn');
+    
+    btns.forEach(b => b.style.pointerEvents = 'none');
+    btns[idx].classList.add(acerto ? 'correta' : 'errada');
+    if(!acerto) btns[q.correta].classList.add('correta');
+
+    // SALVA A QUESTÃO INTEIRA NO HISTÓRICO PARA O FILTRO DE ERROS
+    historico.push({ 
+        c: capituloAtual, 
+        correta: acerto, 
+        perguntaTexto: q.q, 
+        dadosCompletos: q 
+    });
+    
+    localStorage.setItem('hist_regencia', JSON.stringify(historico));
+    atualizarContadores();
+
+    document.getElementById('res-status').innerText = acerto ? "✅ Correto" : "❌ Incorreto";
+    document.getElementById('fundamentacao').innerHTML = `${q.fund} <br><br><small><strong>Fonte: ${q.loc}</strong></small>`;
+    document.getElementById('feedback').style.display = 'block';
+}
+
+function iniciarQuizErros() {
+    const listaErros = historico.filter(h => !h.correta);
+    if (listaErros.length === 0) {
+        alert("Nenhum erro registrado!");
+        return;
+    }
+
+    const mapaUnico = new Map();
+    listaErros.forEach(item => {
+        if(item.dadosCompletos) mapaUnico.set(item.perguntaTexto, item.dadosCompletos);
+    });
+
+    if (mapaUnico.size === 0) {
+        alert("Histórico antigo detectado. Erre novas questões para ativar esta função!");
+        return;
+    }
+
+    questoesFiltradas = Array.from(mapaUnico.values());
+    capituloAtual = "Revisão de Erros";
+    questaoAtual = 0;
+    
+    document.getElementById('view-home').style.display = 'none';
+    document.getElementById('view-quiz').style.display = 'block';
+    document.getElementById('feedback').style.display = 'none';
+    document.getElementById('btnVoltar').style.visibility = 'visible';
+    
+    mostrarQuestao();
+}
+
+function proximaQuestao() {
+    questaoAtual++;
+    if(capituloAtual !== "Mistão" && capituloAtual !== "Revisão de Erros") {
+        progresso[capituloAtual] = questaoAtual;
+        localStorage.setItem('prog_regencia', JSON.stringify(progresso));
+    }
+    
+    if(questaoAtual < questoesFiltradas.length) {
+        mostrarQuestao();
+    } else {
+        alert("Fim deste capítulo!");
+        irParaHome();
+    }
+}
+
+function atualizarContadores() {
+    const acertos = historico.filter(h => h.correta).length;
+    const erros = historico.length - acertos;
+    document.getElementById('top-acertos').innerText = `${acertos} Acertos`;
+    document.getElementById('top-erros').innerText = `${erros} Erros`;
+}
+
 const dados = {
     "Regência: uma arte complexa": {
         "Capítulo 1": [
