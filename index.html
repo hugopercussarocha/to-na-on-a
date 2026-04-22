@@ -1601,26 +1601,55 @@ function carregarCapitulos(m) {
 }
 
 function contarTotalQuestoes(m) {
+    // Verifica se a matéria existe antes de contar
+    if (!dados[m]) return 0;
     return Object.values(dados[m]).reduce((acc, cap) => acc + cap.length, 0);
 }
 
 function iniciarQuiz(c) {
+    // Definimos a matéria como "Ricardo Rocha" (que é a chave principal no seu objeto 'dados')
+    const m = "Ricardo Rocha"; 
+    materiaAtual = m; 
     capituloAtual = c;
-    // Carrega as questões da matéria e capítulo selecionados
-    questoesFiltradas = [...dados[materiaAtual][c]];
-    
-    // Recupera o progresso salvo ou inicia do zero
-    questaoAtual = progresso[c] || 0;
-    if(questaoAtual >= questoesFiltradas.length) {
-        questaoAtual = 0;
-    }
 
-    // --- ESTAS LINHAS FAZEM A TELA APARECER ---
+    // Carrega as questões
+    questoesFiltradas = [...dados[m][c]];
+    
+    // Recupera progresso
+    questaoAtual = progresso[c] || 0;
+    if(questaoAtual >= questoesFiltradas.length) questaoAtual = 0;
+
+    // COMANDOS DE VISUALIZAÇÃO (O que faz a tela mudar)
     document.getElementById('view-home').style.display = 'none';
     document.getElementById('view-quiz').style.display = 'block';
     document.getElementById('feedback').style.display = 'none';
     
-    // Garante que o botão de voltar apareça no topo
+    const btnVoltar = document.getElementById('btnVoltar');
+    if(btnVoltar) btnVoltar.style.visibility = 'visible';
+
+    mostrarQuestao();
+}
+
+function iniciarMistao() {
+    const m = "Ricardo Rocha";
+    materiaAtual = m;
+    capituloAtual = "Mistão";
+    questoesFiltradas = [];
+    
+    // Junta todos os capítulos da obra
+    Object.values(dados[m]).forEach(cap => { 
+        questoesFiltradas = questoesFiltradas.concat(cap); 
+    });
+    
+    // Embaralha
+    questoesFiltradas.sort(() => Math.random() - 0.5);
+    questaoAtual = 0;
+
+    // COMANDOS DE VISUALIZAÇÃO
+    document.getElementById('view-home').style.display = 'none';
+    document.getElementById('view-quiz').style.display = 'block';
+    document.getElementById('feedback').style.display = 'none';
+    
     const btnVoltar = document.getElementById('btnVoltar');
     if(btnVoltar) btnVoltar.style.visibility = 'visible';
 
