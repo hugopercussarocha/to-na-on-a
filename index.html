@@ -1,9 +1,9 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador de Regência - Full</title>
+    <title>Simulador de Regência - Profissional</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -11,22 +11,22 @@
             --text-main: #1C1C1E; --text-sec: #8E8E93;
             --success: #34C759; --danger: #FF3B30;
         }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; }
-        .container { width: 100%; max-width: 600px; background: var(--card-bg); padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .header-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; margin: 0; }
+        .container { width: 100%; max-width: 600px; background: var(--card-bg); padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); min-height: 90vh; }
+        .header-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; height: 30px; }
         .stats-summary { display: flex; gap: 12px; font-size: 0.75rem; font-weight: bold; }
         .stat-box { padding: 6px 12px; border-radius: 12px; }
         .stat-acc { background: #E8F9EE; color: var(--success); }
         .stat-err { background: #FFEBEA; color: var(--danger); cursor: pointer; }
         
         h1 { font-size: 1.5rem; margin-bottom: 5px; }
-        .subtitle { color: var(--text-sec); font-size: 0.9rem; margin-bottom: 25px; }
+        .subtitle { color: var(--text-sec); font-size: 0.9rem; margin-bottom: 25px; display: block; }
         
-        .menu-grid { display: grid; gap: 15px; }
-        .cap-card { background: #F9F9FB; padding: 18px; border-radius: 18px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; border: 1px solid #EEE; }
-        .cap-card:hover { transform: translateY(-2px); background: #FFF; border-color: var(--primary); }
+        .menu-grid { display: grid; gap: 12px; }
+        .cap-card { background: #F9F9FB; padding: 16px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; border: 1px solid #EEE; }
+        .cap-card:hover { transform: translateY(-2px); border-color: var(--primary); background: #FFF; }
         
-        .option-btn { background: #F2F2F7; padding: 15px; border-radius: 14px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; border: 2px solid transparent; }
+        .option-btn { background: #F2F2F7; padding: 15px; border-radius: 14px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; border: 2px solid transparent; font-size: 0.95rem; }
         .option-btn:hover { background: #E5E5EA; }
         .correta { background: #E8F9EE !important; border-color: var(--success) !important; color: #1E7E34; font-weight: bold; }
         .errada { background: #FFEBEA !important; border-color: var(--danger) !important; color: #B02A27; font-weight: bold; }
@@ -34,52 +34,54 @@
         #feedback { margin-top: 20px; padding: 20px; border-radius: 16px; background: #F8F9FF; display: none; border-left: 5px solid var(--primary); }
         .btn-next { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 14px; font-weight: bold; margin-top: 15px; cursor: pointer; }
         
-        canvas { max-width: 100% !important; height: auto !important; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header-nav">
-        <div onclick="irParaHome()" style="cursor:pointer; color:var(--text-sec); font-size:0.8rem; visibility: hidden;" id="btnVoltar">❮ Início</div>
+        <div onclick="irParaHome()" style="cursor:pointer; color:var(--text-sec); font-size:0.8rem; visibility: hidden;" id="btnVoltar">❮ Voltar</div>
         <div class="stats-summary">
             <div class="stat-box stat-acc" id="top-acertos">0 Acertos</div>
-            <div class="stat-box stat-err" id="top-erros" onclick="iniciarQuizErros()" title="Clique para revisar erros" style="cursor:pointer">0 Erros</div>
+            <div class="stat-box stat-err" id="top-erros" onclick="iniciarQuizErros()" title="Revisar erros">0 Erros</div>
         </div>
     </div>
 
-    <div id="view-home">
-        <h1>Ricardo Rocha</h1>
-        <p class="subtitle">Regência: Uma Arte Complexa</p>
-        
+    <div id="view-materias">
+        <h1>Simulador de Regência</h1>
+        <p class="subtitle">Selecione a obra ou matéria para estudar:</p>
         <div class="menu-grid">
-            <div class="cap-card" onclick="iniciarQuiz('Capítulo 1')">
-                <div><strong>Capítulo 1</strong><br><small>Fundamentos</small></div>
+            <div class="cap-card" onclick="selecionarMateria('Ricardo Rocha')">
+                <div><strong>Ricardo Rocha</strong><br><small>Regência: Uma Arte Complexa</small></div>
                 <span>❯</span>
             </div>
-            <div class="cap-card" onclick="iniciarQuiz('Capítulo 2')">
-                <div><strong>Capítulo 2</strong><br><small>Técnica e Gesto</small></div>
-                <span>❯</span>
+            <div class="cap-card" style="opacity: 0.6; cursor: not-allowed;">
+                <div><strong>Em breve...</strong><br><small>Outros autores e conteúdos</small></div>
             </div>
-            <div class="cap-card" onclick="iniciarQuiz('Capítulo 3')">
-                <div><strong>Capítulo 3</strong><br><small>A Gênese do Gesto</small></div>
-                <span>❯</span>
-            </div>
-            <div class="cap-card" onclick="iniciarMistao()" style="background: #E8F2FF; border-color: #B2D7FF;">
-                <div><strong>🌪️ O Mistão</strong><br><small>Todos os capítulos misturados</small></div>
+        </div>
+    </div>
+
+    <div id="view-capitulos" class="hidden">
+        <h1 id="titulo-materia">Matéria</h1>
+        <p class="subtitle">Escolha o capítulo:</p>
+        <div id="lista-capitulos" class="menu-grid"></div>
+        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #EEE;">
+        <div class="menu-grid">
+            <div class="cap-card" onclick="iniciarMistao()" style="background: #E8F2FF;">
+                <div><strong>🌪️ O Mistão</strong><br><small>Tudo misturado</small></div>
                 <span>❯</span>
             </div>
             <div class="cap-card" onclick="verEstatisticas()">
-                <div><strong>📊 Estatísticas</strong><br><small>Ver seu desempenho</small></div>
+                <div><strong>📊 Estatísticas</strong><br><small>Ver desempenho</small></div>
                 <span>❯</span>
             </div>
         </div>
     </div>
 
-    <div id="view-quiz" style="display:none;">
-        <h3 id="pergunta" style="margin-bottom:20px;">Carregando...</h3>
+    <div id="view-quiz" class="hidden">
+        <h3 id="pergunta" style="margin-bottom:20px;"></h3>
         <div id="opcoes-container"></div>
-        
         <div id="feedback">
             <h4 id="res-status" style="margin:0 0 10px 0;"></h4>
             <p id="fundamentacao" style="font-size:0.9rem; line-height:1.4; color:#444;"></p>
@@ -87,16 +89,15 @@
         </div>
     </div>
 
-    <div id="view-stats" style="display:none;">
+    <div id="view-stats" class="hidden">
         <h3>Seu Desempenho</h3>
         <canvas id="graficoErros"></canvas>
-        <button class="btn-next" onclick="irParaHome()" style="background:#8E8E93;">Voltar ao Início</button>
+        <button class="btn-next" onclick="irParaHome()" style="background:#8E8E93;">Voltar</button>
     </div>
 </div>
 
 <script>
-// CONFIGURAÇÕES GERAIS
-let materiaAtual = "Ricardo Rocha"; 
+let materiaAtual = "";
 let capituloAtual = "";
 let questoesFiltradas = [];
 let questaoAtual = 0;
@@ -104,53 +105,47 @@ let questaoAtual = 0;
 let historico = JSON.parse(localStorage.getItem('hist_regencia')) || [];
 let progresso = JSON.parse(localStorage.getItem('prog_regencia')) || {};
 
+// NAVEGAÇÃO PRINCIPAL
 function irParaHome() {
-    document.getElementById('view-home').style.display = 'block';
-    document.getElementById('view-quiz').style.display = 'none';
-    document.getElementById('view-stats').style.display = 'none';
+    document.getElementById('view-materias').classList.remove('hidden');
+    document.getElementById('view-capitulos').classList.add('hidden');
+    document.getElementById('view-quiz').classList.add('hidden');
+    document.getElementById('view-stats').classList.add('hidden');
     document.getElementById('btnVoltar').style.visibility = 'hidden';
     atualizarContadores();
 }
 
-function iniciarQuiz(c) {
-    materiaAtual = "Ricardo Rocha";
-    capituloAtual = c;
+function selecionarMateria(m) {
+    materiaAtual = m;
+    document.getElementById('titulo-materia').innerText = m;
     
-    // Verifica se os dados existem antes de tentar acessar
-    if (!dados[materiaAtual] || !dados[materiaAtual][c]) {
-        alert("Capítulo não encontrado!");
-        return;
-    }
+    const lista = document.getElementById('lista-capitulos');
+    lista.innerHTML = '';
+    
+    // Gera os botões de capítulos dinamicamente com base na matéria selecionada
+    Object.keys(dados[m]).forEach(cap => {
+        const item = document.createElement('div');
+        item.className = 'cap-card';
+        item.onclick = () => iniciarQuiz(cap);
+        item.innerHTML = `<div><strong>${cap}</strong></div><span>❯</span>`;
+        lista.appendChild(item);
+    });
 
+    document.getElementById('view-materias').classList.add('hidden');
+    document.getElementById('view-capitulos').classList.remove('hidden');
+    document.getElementById('btnVoltar').style.visibility = 'visible';
+}
+
+function iniciarQuiz(c) {
+    capituloAtual = c;
     questoesFiltradas = [...dados[materiaAtual][c]];
+    
     questaoAtual = progresso[c] || 0;
     if(questaoAtual >= questoesFiltradas.length) questaoAtual = 0;
 
-    document.getElementById('view-home').style.display = 'none';
-    document.getElementById('view-quiz').style.display = 'block';
+    document.getElementById('view-capitulos').classList.add('hidden');
+    document.getElementById('view-quiz').classList.remove('hidden');
     document.getElementById('feedback').style.display = 'none';
-    document.getElementById('btnVoltar').style.visibility = 'visible';
-
-    mostrarQuestao();
-}
-
-function iniciarMistao() {
-    materiaAtual = "Ricardo Rocha";
-    capituloAtual = "Mistão";
-    questoesFiltradas = [];
-    
-    Object.values(dados[materiaAtual]).forEach(cap => { 
-        questoesFiltradas = questoesFiltradas.concat(cap); 
-    });
-    
-    questoesFiltradas.sort(() => Math.random() - 0.5);
-    questaoAtual = 0;
-
-    document.getElementById('view-home').style.display = 'none';
-    document.getElementById('view-quiz').style.display = 'block';
-    document.getElementById('feedback').style.display = 'none';
-    document.getElementById('btnVoltar').style.visibility = 'visible';
-
     mostrarQuestao();
 }
 
@@ -180,7 +175,6 @@ function verificar(idx) {
     btns[idx].classList.add(acerto ? 'correta' : 'errada');
     if(!acerto) btns[q.correta].classList.add('correta');
 
-    // SALVA A QUESTÃO INTEIRA NO HISTÓRICO PARA O FILTRO DE ERROS
     historico.push({ 
         c: capituloAtual, 
         correta: acerto, 
@@ -198,30 +192,21 @@ function verificar(idx) {
 
 function iniciarQuizErros() {
     const listaErros = historico.filter(h => !h.correta);
-    if (listaErros.length === 0) {
-        alert("Nenhum erro registrado!");
-        return;
-    }
+    if (listaErros.length === 0) { alert("Nenhum erro!"); return; }
 
     const mapaUnico = new Map();
     listaErros.forEach(item => {
         if(item.dadosCompletos) mapaUnico.set(item.perguntaTexto, item.dadosCompletos);
     });
 
-    if (mapaUnico.size === 0) {
-        alert("Histórico antigo detectado. Erre novas questões para ativar esta função!");
-        return;
-    }
-
     questoesFiltradas = Array.from(mapaUnico.values());
     capituloAtual = "Revisão de Erros";
     questaoAtual = 0;
     
-    document.getElementById('view-home').style.display = 'none';
-    document.getElementById('view-quiz').style.display = 'block';
-    document.getElementById('feedback').style.display = 'none';
+    document.getElementById('view-materias').classList.add('hidden');
+    document.getElementById('view-capitulos').classList.add('hidden');
+    document.getElementById('view-quiz').classList.remove('hidden');
     document.getElementById('btnVoltar').style.visibility = 'visible';
-    
     mostrarQuestao();
 }
 
@@ -235,16 +220,28 @@ function proximaQuestao() {
     if(questaoAtual < questoesFiltradas.length) {
         mostrarQuestao();
     } else {
-        alert("Fim deste capítulo!");
+        alert("Fim do bloco!");
         irParaHome();
     }
 }
 
+function iniciarMistao() {
+    capituloAtual = "Mistão";
+    questoesFiltradas = [];
+    Object.values(dados[materiaAtual]).forEach(cap => { 
+        questoesFiltradas = questoesFiltradas.concat(cap); 
+    });
+    questoesFiltradas.sort(() => Math.random() - 0.5);
+    questaoAtual = 0;
+    document.getElementById('view-capitulos').classList.add('hidden');
+    document.getElementById('view-quiz').classList.remove('hidden');
+    mostrarQuestao();
+}
+
 function atualizarContadores() {
     const acertos = historico.filter(h => h.correta).length;
-    const erros = historico.length - acertos;
     document.getElementById('top-acertos').innerText = `${acertos} Acertos`;
-    document.getElementById('top-erros').innerText = `${erros} Erros`;
+    document.getElementById('top-erros').innerText = `${historico.length - acertos} Erros`;
 }
 
 const dados = {
@@ -1771,9 +1768,8 @@ function verEstatisticas() {
         options: { indexAxis: 'y', responsive: true }
     });
 
-    document.getElementById('view-home').style.display = 'none';
-    document.getElementById('view-stats').style.display = 'block';
-    document.getElementById('btnVoltar').style.visibility = 'visible';
+    document.getElementById('view-capitulos').classList.add('hidden');
+    document.getElementById('view-stats').classList.remove('hidden');
 }
 
 atualizarContadores();
