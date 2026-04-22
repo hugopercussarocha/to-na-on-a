@@ -3,26 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Regência Pro - Simulação</title>
+    <title>Regência Pro - Estúdio Técnico</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --primary: #4facfe;
-            --secondary: #00f2fe;
-            --bg: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
+            --primary-gradient: linear-gradient(135deg, #22d3ee, #818cf8);
+            --bg-radial: radial-gradient(circle at center, #1a202c 0%, #0d1117 100%);
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
             --text-main: #f8fafc;
             --text-sec: #94a3b8;
-            --success: #10b981;
-            --danger: #ef4444;
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --success: #4ade80;
+            --danger: #f87171;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: radial-gradient(circle at top left, #1e293b, #0f172a);
+            font-family: 'Inter', sans-serif;
+            font-weight: 300;
+            background: var(--bg-radial);
             background-attachment: fixed;
             color: var(--text-main);
             display: flex;
@@ -33,99 +34,117 @@
 
         .container {
             width: 100%;
-            max-width: 500px;
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            max-width: 480px;
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
             border: 1px solid var(--glass-border);
-            border-radius: 35px;
-            padding: 30px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border-radius: 32px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
             height: fit-content;
         }
 
-        /* Header & Stats */
-        .header { text-align: center; margin-bottom: 25px; }
-        .header h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; }
-        
-        .stats-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 15px; 
-            margin-bottom: 30px; 
+        /* Animação de Entrada */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-in-up.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        .stat-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--glass-border);
-            padding: 15px;
-            border-radius: 20px;
-            text-align: center;
-        }
+        .header { text-align: center; }
 
-        .stat-card span { display: block; font-size: 0.7rem; color: var(--text-sec); text-transform: uppercase; margin-bottom: 5px; }
-        .stat-card b { font-size: 1.2rem; color: var(--primary); }
-
-        /* Buttons & Menu */
-        .menu-grid { display: grid; gap: 12px; }
-        
-        .btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--glass-border);
-            padding: 18px;
-            border-radius: 18px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            text-align: left;
+        /* Bloco Unificado de Status */
+        .stats-container {
             display: flex;
-            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 20px 0;
+            margin-bottom: 35px;
             align-items: center;
         }
 
-        .btn:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-2px); }
-        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); border: none; text-align: center; justify-content: center; }
+        .stat-item { flex: 1; text-align: center; }
+        .stat-divider { width: 1px; height: 40px; background: rgba(255, 255, 255, 0.1); }
+        .stat-value { display: block; font-size: 42px; font-weight: 700; line-height: 1; margin-bottom: 8px; }
+        .stat-label { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; color: var(--text-sec); text-transform: uppercase; }
 
-        /* Quiz Area */
-        .question-box h2 { font-size: 1.1rem; line-height: 1.5; margin-bottom: 25px; font-weight: 500; }
-        
-        .opcoes-list { display: grid; gap: 10px; }
-        
+        /* Botões */
+        .menu-grid { display: grid; gap: 14px; }
+
+        .btn-main {
+            height: 58px;
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 16px;
+            color: #fff;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 15px rgba(34, 211, 238, 0.3);
+        }
+        .btn-main:active { transform: scale(0.98); }
+
+        .btn-secondary {
+            height: 52px;
+            background: none;
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            border-radius: 16px;
+            color: var(--danger);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        /* Itens de Capítulo */
+        .cap-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .cap-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateX(6px);
+        }
+        .chevron { color: var(--text-sec); font-size: 18px; }
+
+        /* Layout do Quiz */
+        .question-box h2 { font-size: 1.15rem; font-weight: 400; line-height: 1.6; margin-bottom: 30px; }
         .opcao {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--glass-border);
-            padding: 16px;
-            border-radius: 15px;
+            padding: 18px;
+            border-radius: 16px;
             cursor: pointer;
-            font-size: 0.95rem;
+            margin-bottom: 12px;
             transition: 0.2s;
         }
-
         .opcao:hover { background: rgba(255, 255, 255, 0.08); }
-        .opcao.correta { background: var(--success) !important; border-color: transparent; }
-        .opcao.errada { background: var(--danger) !important; border-color: transparent; }
+        .correta { background: var(--success) !important; color: #000; font-weight: 600; }
+        .errada { background: var(--danger) !important; color: #fff; }
 
-        /* Feedback Overlay */
         #feedback {
             margin-top: 25px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.02);
             border-radius: 20px;
             border: 1px dashed var(--glass-border);
         }
 
-        #fundamentacao { font-size: 0.85rem; color: var(--text-sec); margin: 10px 0; line-height: 1.4; }
-
-        .progress-bar {
-            height: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-        #fill { height: 100%; background: var(--primary); transition: 0.4s; width: 0%; }
-
+        .progress-bar { height: 4px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; margin-bottom: 30px; }
+        #fill { height: 100%; background: var(--primary-gradient); transition: 0.5s; width: 0%; }
         .hide { display: none; }
     </style>
 </head>
@@ -133,54 +152,64 @@
 
 <div class="container">
     <div id="view-home">
-        <div class="header">
-            <h1>Regência Pro</h1>
-            <p style="color: var(--text-sec); font-size: 0.8rem;">Simulador Técnico v3.0</p>
+        <div class="header fade-in-up">
+            <h1 style="font-weight: 700; font-size: 28px; margin-bottom: 5px;">Regência Pro</h1>
+            <p style="color: var(--text-sec); font-size: 11px; letter-spacing: 2px; margin-bottom: 35px;">ESTÚDIO TÉCNICO DE MAESTRIA</p>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <span>Acertos</span>
-                <b id="top-acertos">0</b>
+        <div class="stats-container fade-in-up">
+            <div class="stat-item">
+                <span class="stat-value" id="top-acertos" style="color: var(--success);">0</span>
+                <span class="stat-label">Acertos</span>
             </div>
-            <div class="stat-card">
-                <span>Erros</span>
-                <b id="top-erros" style="color: var(--danger)">0</b>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-value" id="top-erros" style="color: var(--danger);">0</span>
+                <span class="stat-label">Erros</span>
             </div>
         </div>
 
         <div class="menu-grid">
-            <button class="btn btn-primary" onclick="iniciarMistão()">Modo Mistão 🔥</button>
-            <button class="btn" onclick="iniciarRevisaoErros()">Revisão de Erros ⚠️</button>
-            <div style="margin: 15px 0 5px 5px; font-size: 0.7rem; color: var(--text-sec); text-transform: uppercase;">Capítulos Ricardo Rocha</div>
-            <button class="btn" onclick="iniciarCapitulo('Capítulo 1')">1. Mecânica Gestual <span>→</span></button>
-            <button class="btn" onclick="iniciarCapitulo('Capítulo 2')">2. Dinâmicas e Cortes <span>→</span></button>
-            <button class="btn" onclick="iniciarCapitulo('Capítulo 3')">3. Trajetórias e Fermatas <span>→</span></button>
+            <button class="btn-main fade-in-up" onclick="iniciarMistão()">Modo Mistão 🔥</button>
+            <button class="btn-secondary fade-in-up" onclick="iniciarRevisaoErros()">Revisão de Erros</button>
+            
+            <p class="fade-in-up" style="margin: 25px 0 10px 5px; font-size: 10px; font-weight: 600; color: var(--text-sec); letter-spacing: 1.5px;">BIBLIOGRAFIA DE REFERÊNCIA</p>
+            
+            <div class="cap-item fade-in-up" onclick="iniciarCapitulo('Capítulo 1')">
+                <span>1. Mecânica Gestual</span><span class="chevron">›</span>
+            </div>
+            <div class="cap-item fade-in-up" onclick="iniciarCapitulo('Capítulo 2')">
+                <span>2. Dinâmicas e Cortes</span><span class="chevron">›</span>
+            </div>
+            <div class="cap-item fade-in-up" onclick="iniciarCapitulo('Capítulo 3')">
+                <span>3. Trajetórias e Fermatas</span><span class="chevron">›</span>
+            </div>
         </div>
     </div>
 
     <div id="view-quiz" class="hide">
-        <div class="header-nav" style="display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center;">
-            <button onclick="irParaHome()" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 0.8rem;">← Voltar</button>
-            <span id="title-cap" style="font-size: 0.8rem; color: var(--text-sec);">Capítulo</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <button onclick="irParaHome()" style="background:none; border:none; color:var(--text-sec); cursor:pointer; font-size:14px;">✕ Fechar</button>
+            <span id="title-cap" style="font-size:11px; font-weight:600; color:var(--text-sec); text-transform:uppercase;">Capítulo</span>
         </div>
 
         <div class="progress-bar"><div id="fill"></div></div>
 
         <div class="question-box">
-            <h2 id="pergunta-texto">Carregando questão...</h2>
-            <div id="opcoes-container" class="opcoes-list"></div>
+            <h2 id="pergunta-texto">...</h2>
+            <div id="opcoes-container"></div>
         </div>
 
         <div id="feedback" class="hide">
-            <div id="res-status" style="font-weight: 700; margin-bottom: 5px;"></div>
-            <div id="fundamentacao"></div>
-            <button class="btn btn-primary" style="width: 100%; margin-top: 15px;" onclick="proximaQuestao()">Próxima Questão</button>
+            <div id="res-status" style="font-weight:700; margin-bottom:10px;"></div>
+            <div id="fundamentacao" style="font-size:14px; line-height:1.5; color:var(--text-sec);"></div>
+            <button class="btn-main" style="width:100%; margin-top:20px; height:50px;" onclick="proximaQuestao()">Continuar</button>
         </div>
     </div>
 </div>
 
 <script>
+// --- BANCO DE DADOS ---
 const dados = {
     "Ricardo Rocha": {
         "Capítulo 1": [
@@ -1654,8 +1683,34 @@ let questoesFiltradas = [];
 let questaoAtual = 0;
 let historico = JSON.parse(localStorage.getItem('hist_reg_v3')) || [];
 
-// Inicializa os contadores ao carregar a página
-window.onload = atualizarContadores;
+function animarNumero(id, valorFinal) {
+    const elemento = document.getElementById(id);
+    let valorAtual = 0;
+    const incremento = valorFinal / 60;
+    const timer = setInterval(() => {
+        valorAtual += incremento;
+        if (valorAtual >= valorFinal) {
+            elemento.innerText = Math.floor(valorFinal);
+            clearInterval(timer);
+        } else {
+            elemento.innerText = Math.floor(valorAtual);
+        }
+    }, 16);
+}
+
+function atualizarContadores() {
+    const acertos = historico.filter(h => h.acerto).length;
+    const erros = historico.length - acertos;
+    
+    document.querySelectorAll('.fade-in-up').forEach((el, i) => {
+        setTimeout(() => el.classList.add('visible'), i * 80);
+    });
+
+    setTimeout(() => {
+        animarNumero('top-acertos', acertos);
+        animarNumero('top-erros', erros);
+    }, 400);
+}
 
 function irParaHome() {
     document.getElementById('view-home').classList.remove('hide');
@@ -1663,60 +1718,26 @@ function irParaHome() {
     atualizarContadores();
 }
 
-function atualizarContadores() {
-    const acertos = historico.filter(h => h.acerto).length;
-    const erros = historico.length - acertos;
-    document.getElementById('top-acertos').innerText = acertos;
-    document.getElementById('top-erros').innerText = erros;
-}
-
 function iniciarCapitulo(cap) {
     capituloAtual = cap;
-    // Acessa as questões dentro de "Ricardo Rocha" -> "Capítulo X"
-    questoesFiltradas = dados["Ricardo Rocha"][cap];
-    
-    if(!questoesFiltradas || questoesFiltradas.length === 0) { 
-        alert("Este capítulo ainda não possui questões cadastradas."); 
-        return; 
-    }
-    
-    questaoAtual = 0;
-    prepararQuiz();
+    questoesFiltradas = dados["Ricardo Rocha"][cap] || [];
+    if(questoesFiltradas.length === 0) return alert("Em breve!");
+    questaoAtual = 0; prepararQuiz();
 }
 
 function iniciarMistão() {
     capituloAtual = "Mistão 🔥";
-    const c1 = dados["Ricardo Rocha"]["Capítulo 1"] || [];
-    const c2 = dados["Ricardo Rocha"]["Capítulo 2"] || [];
-    const c3 = dados["Ricardo Rocha"]["Capítulo 3"] || [];
-    
-    // Une todos os capítulos e embaralha a ordem
-    questoesFiltradas = [...c1, ...c2, ...c3].sort(() => Math.random() - 0.5);
-    
-    if(questoesFiltradas.length === 0) { 
-        alert("Nenhuma questão encontrada para o Mistão."); 
-        return; 
-    }
-    
-    questaoAtual = 0;
-    prepararQuiz();
+    const r = dados["Ricardo Rocha"];
+    questoesFiltradas = [...r["Capítulo 1"], ...r["Capítulo 2"], ...r["Capítulo 3"]].sort(() => Math.random() - 0.5);
+    questaoAtual = 0; prepararQuiz();
 }
 
 function iniciarRevisaoErros() {
-    // Filtra no histórico global apenas o que o usuário errou
-    const errosNoHistorico = historico.filter(h => !h.acerto).map(h => h.quest);
-    
-    if(errosNoHistorico.length === 0) { 
-        alert("Você ainda não tem erros registrados para revisar!"); 
-        return; 
-    }
-    
-    capituloAtual = "Revisão de Erros ⚠️";
-    // Remove duplicatas caso o usuário tenha errado a mesma questão várias vezes
-    questoesFiltradas = [...new Map(errosNoHistorico.map(q => [q.q, q])).values()];
-    
-    questaoAtual = 0;
-    prepararQuiz();
+    const erros = historico.filter(h => !h.acerto).map(h => h.quest);
+    if(erros.length === 0) return alert("Sem erros!");
+    capituloAtual = "Revisão";
+    questoesFiltradas = [...new Map(erros.map(q => [q.q, q])).values()];
+    questaoAtual = 0; prepararQuiz();
 }
 
 function prepararQuiz() {
@@ -1728,17 +1749,12 @@ function prepararQuiz() {
 
 function mostrarQuestao() {
     const q = questoesFiltradas[questaoAtual];
-    const container = document.getElementById('opcoes-container');
-    
     document.getElementById('pergunta-texto').innerText = q.q;
     document.getElementById('feedback').classList.add('hide');
+    document.getElementById('fill').style.width = `${(questaoAtual / questoesFiltradas.length) * 100}%`;
     
-    // Atualiza a barra de progresso visual
-    const porcentagem = (questaoAtual / questoesFiltradas.length) * 100;
-    document.getElementById('fill').style.width = porcentagem + "%";
-    
+    const container = document.getElementById('opcoes-container');
     container.innerHTML = "";
-    
     q.opcoes.forEach((opt, i) => {
         const div = document.createElement('div');
         div.className = 'opcao';
@@ -1752,36 +1768,26 @@ function verificarResposta(idx) {
     const q = questoesFiltradas[questaoAtual];
     const acerto = idx === q.correta;
     const opcoes = document.querySelectorAll('.opcao');
-    
-    // Desabilita cliques múltiplos
     opcoes.forEach(o => o.style.pointerEvents = 'none');
-    
-    // Aplica as cores de acerto ou erro
     opcoes[idx].classList.add(acerto ? 'correta' : 'errada');
     opcoes[q.correta].classList.add('correta');
 
-    // Salva o resultado no histórico para estatísticas e revisão
     historico.push({ quest: q, acerto: acerto });
     localStorage.setItem('hist_reg_v3', JSON.stringify(historico));
 
-    // Exibe o feedback técnico e a fundamentação
-    const statusTxt = document.getElementById('res-status');
-    statusTxt.innerText = acerto ? "✅ Excelente!" : "❌ Observe a técnica:";
-    statusTxt.style.color = acerto ? "var(--success)" : "var(--danger)";
-    
-    document.getElementById('fundamentacao').innerHTML = `${q.fund} <br><br><b>${q.loc}</b>`;
+    document.getElementById('res-status').innerText = acerto ? "✓ EXCELENTE" : "✕ ATENÇÃO";
+    document.getElementById('res-status').style.color = acerto ? "var(--success)" : "var(--danger)";
+    document.getElementById('fundamentacao').innerHTML = `${q.fund}<br><br><strong>${q.loc}</strong>`;
     document.getElementById('feedback').classList.remove('hide');
 }
 
 function proximaQuestao() {
     questaoAtual++;
-    if(questaoAtual < questoesFiltradas.length) {
-        mostrarQuestao();
-    } else {
-        alert("Módulo concluído com sucesso!");
-        irParaHome();
-    }
+    if(questaoAtual < questoesFiltradas.length) mostrarQuestao();
+    else { alert("Módulo concluído!"); irParaHome(); }
 }
+
+window.onload = atualizarContadores;
 </script>
 </body>
 </html>
