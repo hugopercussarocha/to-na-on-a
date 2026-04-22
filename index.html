@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Regência Pro - Estúdio Técnico</title>
+    <title>Regência Pro - Maestria Acadêmica</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary-gradient: linear-gradient(135deg, #22d3ee, #818cf8);
@@ -40,178 +39,157 @@
             -webkit-backdrop-filter: blur(25px);
             border: 1px solid var(--glass-border);
             border-radius: 32px;
-            padding: 40px 30px;
+            padding: 35px 25px;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
             height: fit-content;
         }
 
-        /* Animação de Entrada */
-        .fade-in-up {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-        }
-        .fade-in-up.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        .hide { display: none !important; }
 
-        .header { text-align: center; }
+        /* Animações */
+        .fade-in { animation: fadeIn 0.4s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Bloco Unificado de Status */
-        .stats-container {
+        /* Stats Resumido */
+        .mini-stats {
             display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Botão Materias (Premium Card) */
+        .card-materias {
+            background: var(--primary-gradient);
+            padding: 40px 25px;
+            border-radius: 24px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+            box-shadow: 0 10px 25px rgba(34, 211, 238, 0.2);
+        }
+        .card-materias:active { transform: scale(0.97); }
+        .card-materias i { font-size: 30px; display: block; margin-bottom: 10px; }
+
+        /* Listas de Seleção */
+        .list-item {
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 20px 0;
-            margin-bottom: 35px;
-            align-items: center;
-        }
-
-        .stat-item { flex: 1; text-align: center; }
-        .stat-divider { width: 1px; height: 40px; background: rgba(255, 255, 255, 0.1); }
-        .stat-value { display: block; font-size: 42px; font-weight: 700; line-height: 1; margin-bottom: 8px; }
-        .stat-label { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; color: var(--text-sec); text-transform: uppercase; }
-
-        /* Botões */
-        .menu-grid { display: grid; gap: 14px; }
-
-        .btn-main {
-            height: 58px;
-            background: var(--primary-gradient);
-            border: none;
-            border-radius: 16px;
-            color: #fff;
-            font-weight: 700;
-            font-size: 16px;
+            padding: 20px;
+            border-radius: 18px;
+            margin-bottom: 12px;
             cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            box-shadow: 0 4px 15px rgba(34, 211, 238, 0.3);
-        }
-        .btn-main:active { transform: scale(0.98); }
-
-        .btn-secondary {
-            height: 52px;
-            background: none;
-            border: 1px solid rgba(248, 113, 113, 0.3);
-            border-radius: 16px;
-            color: var(--danger);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        /* Itens de Capítulo */
-        .cap-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--glass-border);
-            border-radius: 18px;
-            cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .cap-item:hover {
-            background: rgba(255, 255, 255, 0.06);
-            transform: translateX(6px);
-        }
-        .chevron { color: var(--text-sec); font-size: 18px; }
-
-        /* Layout do Quiz */
-        .question-box h2 { font-size: 1.15rem; font-weight: 400; line-height: 1.6; margin-bottom: 30px; }
-        .opcao {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--glass-border);
-            padding: 18px;
-            border-radius: 16px;
-            cursor: pointer;
-            margin-bottom: 12px;
             transition: 0.2s;
         }
-        .opcao:hover { background: rgba(255, 255, 255, 0.08); }
-        .correta { background: var(--success) !important; color: #000; font-weight: 600; }
-        .errada { background: var(--danger) !important; color: #fff; }
+        .list-item:hover { background: rgba(255, 255, 255, 0.06); transform: translateX(5px); }
 
-        #feedback {
-            margin-top: 25px;
-            padding: 25px;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 20px;
-            border: 1px dashed var(--glass-border);
+        /* Alternativas do Simulado */
+        .opcao {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            padding: 15px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: 0.2s;
         }
+        .letra-circulo {
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--glass-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 12px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .opcao.correta { background: var(--success) !important; color: #000; }
+        .opcao.correta .letra-circulo { border-color: rgba(0,0,0,0.2); background: rgba(0,0,0,0.1); }
+        .opcao.errada { background: var(--danger) !important; color: #fff; }
 
-        .progress-bar { height: 4px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; margin-bottom: 30px; }
+        /* Botões Gerais */
+        .btn-action {
+            width: 100%;
+            padding: 18px;
+            border-radius: 16px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .btn-revisao { background: none; border: 1px solid var(--danger); color: var(--danger); }
+        .btn-nav { background: none; border: none; color: var(--text-sec); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+
+        .progress-bar { height: 4px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; margin: 20px 0; }
         #fill { height: 100%; background: var(--primary-gradient); transition: 0.5s; width: 0%; }
-        .hide { display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="view-home">
-        <div class="header fade-in-up">
-            <h1 style="font-weight: 700; font-size: 28px; margin-bottom: 5px;">Regência Pro</h1>
-            <p style="color: var(--text-sec); font-size: 11px; letter-spacing: 2px; margin-bottom: 35px;">ESTÚDIO TÉCNICO DE MAESTRIA</p>
+    
+    <div id="view-home" class="fade-in">
+        <div class="mini-stats">
+            <span style="color: var(--success)">Acertos: <span id="count-acertos">0</span></span>
+            <span style="color: var(--danger)">Erros: <span id="count-erros">0</span></span>
+        </div>
+        
+        <div class="card-materias" onclick="navegarPara('materias')">
+            <span style="font-size: 11px; letter-spacing: 2px; font-weight: 700; opacity: 0.8;">BIBLIOTECA</span>
+            <h2 style="font-size: 24px; margin-top: 5px;">MATÉRIAS</h2>
         </div>
 
-        <div class="stats-container fade-in-up">
-            <div class="stat-item">
-                <span class="stat-value" id="top-acertos" style="color: var(--success);">0</span>
-                <span class="stat-label">Acertos</span>
-            </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item">
-                <span class="stat-value" id="top-erros" style="color: var(--danger);">0</span>
-                <span class="stat-label">Erros</span>
-            </div>
-        </div>
-
-        <div class="menu-grid">
-            <button class="btn-main fade-in-up" onclick="iniciarMistão()">Modo Mistão 🔥</button>
-            <button class="btn-secondary fade-in-up" onclick="iniciarRevisaoErros()">Revisão de Erros</button>
-            
-            <p class="fade-in-up" style="margin: 25px 0 10px 5px; font-size: 10px; font-weight: 600; color: var(--text-sec); letter-spacing: 1.5px;">BIBLIOGRAFIA DE REFERÊNCIA</p>
-            
-            <div class="cap-item fade-in-up" onclick="iniciarCapitulo('Capítulo 1')">
-                <span>1. Mecânica Gestual</span><span class="chevron">›</span>
-            </div>
-            <div class="cap-item fade-in-up" onclick="iniciarCapitulo('Capítulo 2')">
-                <span>2. Dinâmicas e Cortes</span><span class="chevron">›</span>
-            </div>
-            <div class="cap-item fade-in-up" onclick="iniciarCapitulo('Capítulo 3')">
-                <span>3. Trajetórias e Fermatas</span><span class="chevron">›</span>
-            </div>
-        </div>
+        <button class="btn-action btn-revisao" onclick="iniciarRevisaoErros()">Revisão de Erros ⚠️</button>
+        <button class="btn-action btn-revisao" style="border-color: var(--text-sec); color: var(--text-sec);" onclick="iniciarMistão()">Modo Mistão 🔥</button>
     </div>
 
-    <div id="view-quiz" class="hide">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-            <button onclick="irParaHome()" style="background:none; border:none; color:var(--text-sec); cursor:pointer; font-size:14px;">✕ Fechar</button>
-            <span id="title-cap" style="font-size:11px; font-weight:600; color:var(--text-sec); text-transform:uppercase;">Capítulo</span>
+    <div id="view-materias" class="hide fade-in">
+        <button class="btn-nav" onclick="voltar()">‹ Voltar para Home</button>
+        <h2 style="margin: 25px 0; font-size: 1.2rem;">Selecione a Matéria</h2>
+        <div id="materias-list"></div>
+    </div>
+
+    <div id="view-capitulos" class="hide fade-in">
+        <button class="btn-nav" onclick="voltar()">‹ Voltar para Matérias</button>
+        <h2 id="current-materia-name" style="margin: 25px 0; font-size: 1.2rem;">Capítulos</h2>
+        <div id="capitulos-list"></div>
+    </div>
+
+    <div id="view-quiz" class="hide fade-in">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <button class="btn-nav" onclick="voltar()">✕ Sair</button>
+            <span id="quiz-status" style="font-size: 10px; font-weight: 700; color: var(--text-sec);"></span>
         </div>
-
         <div class="progress-bar"><div id="fill"></div></div>
-
         <div class="question-box">
-            <h2 id="pergunta-texto">...</h2>
+            <h2 id="pergunta-texto" style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 25px;"></h2>
             <div id="opcoes-container"></div>
         </div>
-
         <div id="feedback" class="hide">
-            <div id="res-status" style="font-weight:700; margin-bottom:10px;"></div>
-            <div id="fundamentacao" style="font-size:14px; line-height:1.5; color:var(--text-sec);"></div>
-            <button class="btn-main" style="width:100%; margin-top:20px; height:50px;" onclick="proximaQuestao()">Continuar</button>
+            <div id="res-status" style="font-weight: 700; margin-bottom: 10px;"></div>
+            <div id="fundamentacao" style="font-size: 13px; color: var(--text-sec); line-height: 1.5;"></div>
+            <button class="btn-action btn-revisao" style="background: var(--primary-gradient); color: #fff; border:none; margin-top: 20px;" onclick="proximaQuestao()">Continuar</button>
         </div>
     </div>
 </div>
 
 <script>
-// --- BANCO DE DADOS ---
-const dados = {
-    "Ricardo Rocha": {
+// 2. ORGANIZAÇÃO DE DADOS (Hieraquia Matéria > Capítulo)
+const bancoDados = {
+    "Regência - Uma arte Complexa- Ricardo Rocha": {
         "Capítulo 1": [
             {
                 id: "Q01",
@@ -1678,116 +1656,177 @@ const dados = {
     }
 };
 
-let capituloAtual = "";
-let questoesFiltradas = [];
-let questaoAtual = 0;
-let historico = JSON.parse(localStorage.getItem('hist_reg_v3')) || [];
+let currentView = 'home';
+let historyStack = ['home'];
+let materiaSelecionada = "";
+let capituloSelecionado = "";
+let questoesQuiz = [];
+let indexAtual = 0;
 
-function animarNumero(id, valorFinal) {
-    const elemento = document.getElementById(id);
-    let valorAtual = 0;
-    const incremento = valorFinal / 60;
-    const timer = setInterval(() => {
-        valorAtual += incremento;
-        if (valorAtual >= valorFinal) {
-            elemento.innerText = Math.floor(valorFinal);
-            clearInterval(timer);
-        } else {
-            elemento.innerText = Math.floor(valorAtual);
-        }
-    }, 16);
+// Persistência: Recupera erros e acertos do LocalStorage
+let errosGlobal = JSON.parse(localStorage.getItem('erros_regencia')) || [];
+let historicoAcertos = JSON.parse(localStorage.getItem('acertos_total')) || 0;
+
+// Inicialização
+window.onload = atualizarStatsHome;
+
+// Função de Navegação em Camadas (Botão Voltar Inteligente)
+function navegarPara(view, data = null) {
+    document.querySelectorAll('.container > div').forEach(div => div.classList.add('hide'));
+    document.getElementById(`view-${view}`).classList.remove('hide');
+    currentView = view;
+    historyStack.push(view);
+
+    if(view === 'materias') renderMaterias();
+    if(view === 'capitulos') renderCapitulos(data);
 }
 
-function atualizarContadores() {
-    const acertos = historico.filter(h => h.acerto).length;
-    const erros = historico.length - acertos;
-    
-    document.querySelectorAll('.fade-in-up').forEach((el, i) => {
-        setTimeout(() => el.classList.add('visible'), i * 80);
+function voltar() {
+    if(historyStack.length > 1) {
+        historyStack.pop(); // Remove a tela atual da pilha
+        const anterior = historyStack.pop(); // Resgata a anterior
+        navegarPara(anterior);
+    }
+}
+
+// Renderiza a lista de matérias baseada nas chaves do bancoDados
+function renderMaterias() {
+    const list = document.getElementById('materias-list');
+    list.innerHTML = "";
+    Object.keys(bancoDados).forEach(mat => {
+        list.innerHTML += `
+            <div class="list-item" onclick="navegarPara('capitulos', '${mat}')">
+                <span>${mat}</span>
+                <span>›</span>
+            </div>`;
     });
-
-    setTimeout(() => {
-        animarNumero('top-acertos', acertos);
-        animarNumero('top-erros', erros);
-    }, 400);
 }
 
-function irParaHome() {
-    document.getElementById('view-home').classList.remove('hide');
-    document.getElementById('view-quiz').classList.add('hide');
-    atualizarContadores();
+// Renderiza os capítulos da matéria selecionada
+function renderCapitulos(mat) {
+    materiaSelecionada = mat;
+    document.getElementById('current-materia-name').innerText = mat;
+    const list = document.getElementById('capitulos-list');
+    list.innerHTML = "";
+    
+    if(bancoDados[mat]) {
+        Object.keys(bancoDados[mat]).forEach(cap => {
+            list.innerHTML += `
+                <div class="list-item" onclick="iniciarQuiz('${mat}', '${cap}')">
+                    <span>${cap}</span>
+                    <span style="color: var(--primary-gradient); font-weight: 600;">Simular ›</span>
+                </div>`;
+        });
+    }
 }
 
-function iniciarCapitulo(cap) {
-    capituloAtual = cap;
-    questoesFiltradas = dados["Ricardo Rocha"][cap] || [];
-    if(questoesFiltradas.length === 0) return alert("Em breve!");
-    questaoAtual = 0; prepararQuiz();
-}
-
-function iniciarMistão() {
-    capituloAtual = "Mistão 🔥";
-    const r = dados["Ricardo Rocha"];
-    questoesFiltradas = [...r["Capítulo 1"], ...r["Capítulo 2"], ...r["Capítulo 3"]].sort(() => Math.random() - 0.5);
-    questaoAtual = 0; prepararQuiz();
-}
-
-function iniciarRevisaoErros() {
-    const erros = historico.filter(h => !h.acerto).map(h => h.quest);
-    if(erros.length === 0) return alert("Sem erros!");
-    capituloAtual = "Revisão";
-    questoesFiltradas = [...new Map(erros.map(q => [q.q, q])).values()];
-    questaoAtual = 0; prepararQuiz();
-}
-
-function prepararQuiz() {
-    document.getElementById('view-home').classList.add('hide');
-    document.getElementById('view-quiz').classList.remove('hide');
-    document.getElementById('title-cap').innerText = capituloAtual;
+// Configura o Simulado
+function iniciarQuiz(mat, cap) {
+    materiaSelecionada = mat;
+    capituloSelecionado = cap;
+    // Carrega e embaralha as questões
+    questoesQuiz = [...bancoDados[mat][cap]].sort(() => Math.random() - 0.5);
+    indexAtual = 0;
+    navegarPara('quiz');
     mostrarQuestao();
 }
 
 function mostrarQuestao() {
-    const q = questoesFiltradas[questaoAtual];
-    document.getElementById('pergunta-texto').innerText = q.q;
-    document.getElementById('feedback').classList.add('hide');
-    document.getElementById('fill').style.width = `${(questaoAtual / questoesFiltradas.length) * 100}%`;
-    
+    const q = questoesQuiz[indexAtual];
     const container = document.getElementById('opcoes-container');
+    const letras = ['A', 'B', 'C', 'D', 'E'];
+    
+    document.getElementById('pergunta-texto').innerText = q.q;
+    document.getElementById('quiz-status').innerText = `${indexAtual + 1} / ${questoesQuiz.length}`;
+    document.getElementById('fill').style.width = `${(indexAtual / questoesQuiz.length) * 100}%`;
+    document.getElementById('feedback').classList.add('hide');
+    
     container.innerHTML = "";
     q.opcoes.forEach((opt, i) => {
-        const div = document.createElement('div');
-        div.className = 'opcao';
-        div.innerText = opt;
-        div.onclick = () => verificarResposta(i);
-        container.appendChild(div);
+        container.innerHTML += `
+            <div class="opcao" onclick="verificarResposta(${i})">
+                <div class="letra-circulo">${letras[i]}</div>
+                <span>${opt}</span>
+            </div>`;
     });
 }
 
 function verificarResposta(idx) {
-    const q = questoesFiltradas[questaoAtual];
-    const acerto = idx === q.correta;
+    const q = questoesQuiz[indexAtual];
     const opcoes = document.querySelectorAll('.opcao');
+    const eCorreto = idx === q.correta;
+
+    // Trava cliques
     opcoes.forEach(o => o.style.pointerEvents = 'none');
-    opcoes[idx].classList.add(acerto ? 'correta' : 'errada');
+    
+    // Feedback Visual nas Letras
+    opcoes[idx].classList.add(eCorreto ? 'correta' : 'errada');
     opcoes[q.correta].classList.add('correta');
 
-    historico.push({ quest: q, acerto: acerto });
-    localStorage.setItem('hist_reg_v3', JSON.stringify(historico));
+    if(eCorreto) {
+        historicoAcertos++;
+        // REMOÇÃO DINÂMICA DE ERROS: Se acertou, remove do banco de erros
+        errosGlobal = errosGlobal.filter(item => item.id !== q.id);
+    } else {
+        // Se errou e ainda não estava na lista de erros, adiciona
+        if(!errosGlobal.find(item => item.id === q.id)) {
+            errosGlobal.push(q);
+        }
+    }
 
-    document.getElementById('res-status').innerText = acerto ? "✓ EXCELENTE" : "✕ ATENÇÃO";
-    document.getElementById('res-status').style.color = acerto ? "var(--success)" : "var(--danger)";
-    document.getElementById('fundamentacao').innerHTML = `${q.fund}<br><br><strong>${q.loc}</strong>`;
+    // Salva no LocalStorage
+    localStorage.setItem('erros_regencia', JSON.stringify(errosGlobal));
+    localStorage.setItem('acertos_total', JSON.stringify(historicoAcertos));
+    
+    // Exibe Feedback
+    document.getElementById('res-status').innerText = eCorreto ? "✅ EXCELENTE" : "❌ OBSERVE A TÉCNICA";
+    document.getElementById('res-status').style.color = eCorreto ? "var(--success)" : "var(--danger)";
+    document.getElementById('fundamentacao').innerHTML = `${q.fund}<br><br><strong>Fonte: ${q.loc}</strong>`;
     document.getElementById('feedback').classList.remove('hide');
+    atualizarStatsHome();
 }
 
 function proximaQuestao() {
-    questaoAtual++;
-    if(questaoAtual < questoesFiltradas.length) mostrarQuestao();
-    else { alert("Módulo concluído!"); irParaHome(); }
+    indexAtual++;
+    if(indexAtual < questoesQuiz.length) {
+        mostrarQuestao();
+    } else {
+        alert("Módulo concluído com sucesso!");
+        voltar();
+    }
 }
 
-window.onload = atualizarContadores;
+// MODO REVISÃO DE ERROS
+function iniciarRevisaoErros() {
+    if(errosGlobal.length === 0) {
+        alert("Você não possui erros pendentes de revisão!");
+        return;
+    }
+    questoesQuiz = [...errosGlobal].sort(() => Math.random() - 0.5);
+    indexAtual = 0;
+    navegarPara('quiz');
+    mostrarQuestao();
+}
+
+// MODO MISTÃO (Pega tudo de todas as matérias)
+function iniciarMistão() {
+    let todasAsQuestoes = [];
+    Object.values(bancoDados).forEach(materia => {
+        Object.values(materia).forEach(capitulo => {
+            todasAsQuestoes = todasAsQuestoes.concat(capitulo);
+        });
+    });
+
+    if(todasAsQuestoes.length === 0) return alert("Nenhuma questão disponível.");
+    
+    questoesQuiz = todasAsQuestoes.sort(() => Math.random() - 0.5);
+    indexAtual = 0;
+    navegarPara('quiz');
+    mostrarQuestao();
+}
+
+function atualizarStatsHome() {
+    document.getElementById('count-acertos').innerText = historicoAcertos;
+    document.getElementById('count-erros').innerText = errosGlobal.length;
+}
 </script>
-</body>
-</html>
