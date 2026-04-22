@@ -1650,8 +1650,6 @@ let acertosContador = parseInt(localStorage.getItem('acertos_total')) || 0;
 
 // --- NAVEGAÇÃO ---
 function navegarPara(view, data = null) {
-    console.log("Tentando navegar para:", view); // LOG DE TESTE
-    
     const views = ['home', 'materias', 'capitulos', 'quiz'];
     views.forEach(v => {
         const el = document.getElementById(`view-${v}`);
@@ -1664,8 +1662,6 @@ function navegarPara(view, data = null) {
         if (historyStack[historyStack.length - 1] !== view) {
             historyStack.push(view);
         }
-    } else {
-        console.error("Erro: A tela view-" + view + " não existe no HTML.");
     }
 
     if(view === 'materias') renderMaterias();
@@ -1683,7 +1679,7 @@ function voltar() {
 // --- RENDERIZADORES ---
 function renderMaterias() {
     const list = document.getElementById('materias-list');
-    if(!list) return console.error("Erro: Elemento materias-list não encontrado.");
+    if(!list) return;
     
     list.innerHTML = "";
     const materias = Object.keys(bancoDados);
@@ -1692,8 +1688,7 @@ function renderMaterias() {
         const div = document.createElement('div');
         div.className = 'list-item';
         div.innerHTML = `<span>${mat}</span><span>›</span>`;
-        div.style.cursor = "pointer";
-        div.onclick = function() { navegarPara('capitulos', mat); };
+        div.onclick = () => navegarPara('capitulos', mat);
         list.appendChild(div);
     });
 }
@@ -1701,13 +1696,9 @@ function renderMaterias() {
 function renderCapitulos(mat) {
     if (!mat || !bancoDados[mat]) return;
     materiaAtual = mat;
-    
-    const header = document.getElementById('cap-title-header');
-    if(header) header.innerText = mat;
+    document.getElementById('cap-title-header').innerText = mat;
     
     const list = document.getElementById('capitulos-list');
-    if(!list) return;
-    
     list.innerHTML = "";
     
     let todasQuestoes = [];
@@ -1731,12 +1722,7 @@ function createCapCard(label, lista, isMistao = false) {
     div.className = 'list-item';
     div.style.flexDirection = 'column';
     div.style.alignItems = 'stretch';
-    div.style.cursor = "pointer";
-    
-    div.onclick = function() {
-        if (isMistao) iniciarMistao(materiaAtual);
-        else iniciarQuiz(materiaAtual, label);
-    };
+    div.onclick = () => isMistao ? iniciarMistao(materiaAtual) : iniciarQuiz(materiaAtual, label);
 
     div.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; width: 100%;">
@@ -1778,23 +1764,19 @@ function prepararSessao(lista, resetar) {
 
 function mostrarQuestao() {
     const q = questoesSessao[indexAtual];
-    const container = document.getElementById('opcoes-container');
-    const txt = document.getElementById('pergunta-texto');
-    const progTxt = document.getElementById('quiz-progress-text');
-    const progBar = document.getElementById('quiz-progress-bar');
-    
-    if(txt) txt.innerText = q.q;
-    if(progTxt) progTxt.innerText = (indexAtual + 1) + " de " + questoesSessao.length;
-    if(progBar) progBar.style.width = ((indexAtual + 1) / questoesSessao.length * 100) + "%";
+    document.getElementById('pergunta-texto').innerText = q.q;
+    document.getElementById('quiz-progress-text').innerText = `${indexAtual + 1} de ${questoesSessao.length}`;
+    document.getElementById('quiz-progress-bar').style.width = `${((indexAtual + 1) / questoesSessao.length) * 100}%`;
     
     document.getElementById('feedback-box').classList.add('hide');
+    const container = document.getElementById('opcoes-container');
     container.innerHTML = "";
     
     q.opcoes.forEach((opt, i) => {
         const d = document.createElement('div');
         d.className = 'opcao';
         d.innerHTML = `<div class="letra-circulo">${"ABCDE"[i]}</div><span>${opt}</span>`;
-        d.onclick = function() { validarResposta(i, d); };
+        d.onclick = () => validarResposta(i, d);
         container.appendChild(d);
     });
 }
@@ -1811,8 +1793,8 @@ function validarResposta(idx, elemento) {
     if(correto) {
         acertosContador++;
         errosGlobal = errosGlobal.filter(e => e.id !== q.id);
-    } else {
-        if(!errosGlobal.find(e => e.id === q.id)) errosGlobal.push(q);
+    } else if(!errosGlobal.find(e => e.id === q.id)) {
+        errosGlobal.push(q);
     }
 
     if(!respondidasGlobal.includes(q.id)) respondidasGlobal.push(q.id);
@@ -1822,7 +1804,7 @@ function validarResposta(idx, elemento) {
     localStorage.setItem('acertos_total', acertosContador.toString());
 
     document.getElementById('feed-status').innerText = correto ? "✅ Excelente!" : "❌ Observe a técnica";
-    document.getElementById('feed-fundamentacao').innerHTML = q.fund + "<br><br><strong>" + q.loc + "</strong>";
+    document.getElementById('feed-fundamentacao').innerHTML = `${q.fund}<br><br><strong>${q.loc}</strong>`;
     document.getElementById('feedback-box').classList.remove('hide');
     atualizarStatsHome();
 }
@@ -1834,10 +1816,10 @@ function proximaQuestao() {
 }
 
 function atualizarStatsHome() {
-    const ac = document.getElementById('home-acertos');
-    const er = document.getElementById('home-erros');
-    if(ac) ac.innerText = acertosContador;
-    if(er) er.innerText = errosGlobal.length;
+    const elAcertos = document.getElementById('home-acertos');
+    const elErros = document.getElementById('home-erros');
+    if(elAcertos) elAcertos.innerText = acertosContador;
+    if(elErros) elErros.innerText = errosGlobal.length;
 }
 
 function iniciarRevisaoErros() {
@@ -1845,9 +1827,10 @@ function iniciarRevisaoErros() {
     prepararSessao(errosGlobal, false);
 }
 
+// Registro do Service Worker (PWA)
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-        navigator.serviceWorker.register('./sw.js').catch(function(err) { console.log(err); });
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW fail:', err));
     });
 }
 
