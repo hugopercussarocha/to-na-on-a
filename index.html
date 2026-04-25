@@ -215,414 +215,706 @@ let acertosContador = parseInt(localStorage.getItem('acertos_total')) || 0;
 // --- BANCO DE DADOS (Certifique-se de que ele está ANTES das funções que o usam) ---
 const bancoDados = {
     "Regência - Uma arte Complexa- Ricardo Rocha": {
-        "Capítulo 1": [
+        "CAPÍTULO 1": [
             {
-                id: "Q01",
-                q: "Ricardo Rocha inicia o capítulo estabelecendo que a regência é uma 'vocação específica'. Qual é o critério ontológico que ele utiliza para desqualificar a mera experiência orquestral como habilitação automática para a regência?",
-        opcoes: [
-            "A distinção entre o acúmulo de anos como instrumentista e a posse do fundamento da liderança.",
-            "A falta de domínio das matérias teóricas de nível superior, como Análise e Contraponto.",
-            "A ausência de uma formação física voltada para a estabilização do manguito rotador.",
-            "A carência de conhecimentos administrativos necessários para o gerenciamento de negócios orquestrais.",
-            "A incapacidade de realizar co-repetição ao piano para a redução de partituras."
-        ],
-        correta: 0,
-        fund: "O autor afirma que a regência é uma arte que exige uma vocação específica fundada na liderança, algo que não é garantido pelo virtuosismo instrumental ou anos de experiência.",
-        loc: "Página 19."
-    },
-    {
-        id: "Q02",
-        q: "Sobre a dicotomia patrimonial da formação do regente, como o autor define a natureza do Patrimônio Próprio?",
-        opcoes: [
-            "Como um bem acumulado e cultivado ao longo da vida profissional.",
-            "Como conhecimentos intelectuais de Estética, História e Línguas.",
-            "Como a autoridade institucional outorgada pelo cargo que o maestro ocupa.",
-            "Como atributos inalienáveis que, quando não possuídos inerentemente, não podem ser obtidos.",
-            "Como o domínio técnico dos rudimentos teóricos da música através do piano."
-        ],
-        correta: 3,
-        fund: "Rocha define o Patrimônio Próprio como 'bem inalienável, intransferível... Quando não se tem, não se pode obter'. São talentos e inclinações inatos.",
-        loc: "Página 19."
-    },
-    {
-        id: "Q03",
-        q: "No que tange à Liderança dentro do Patrimônio Próprio, Rocha afirma que ela deve ser obrigatoriamente 'lastreada' por qual elemento para que a autoridade do regente emane de forma legítima?",
-        opcoes: [
-            "Pela autoridade institucional do cargo.",
-            "Por um talento musical que reflita o domínio da matéria.",
-            "Pelo carisma e poder de animação.",
-            "Pela capacidade de argumentação em situações de conflito.",
-            "Por uma sólida formação cultural em Filosofia e Ética."
-        ],
-        correta: 1,
-        fund: "Embora a liderança se expresse no carisma, o autor afirma que ela 'tem de ser lastreada por um talento musical', de onde emana a autoridade real.",
-        loc: "Página 20."
-    },
-    {
-        id: "Q04",
-        q: "Ao descrever a Aptidão Física como Patrimônio Próprio, o autor associa o regente a um 'veículo visual'. Qual a implicação intelectual dessa função corporal segundo o texto?",
-        opcoes: [
-            "Exige apenas vigor físico para suportar o dispêndio de energia nos ensaios.",
-            "Requer a manutenção de uma dieta própria para evitar a flacidez abdominal.",
-            "Necessita de treinamento isométrico para garantir a mobilidade dos ombros.",
-            "Serve como mero suporte para que a inteligência foque exclusivamente na análise funcional.",
-            "Demanda alto poder de concentração e grande sofisticação da inteligência para expressar o pathos da obra."
-        ],
-        correta: 4,
-        fund: "O corpo do regente deve traduzir visualmente conceitos complexos, demandando alta concentração e sofisticação intelectual para expressar o pathos da obra.",
-        loc: "Página 20."
-    },
-    {
-        id: "Q05",
-        q: "Sobre a diferença entre Percepção e Análise no Patrimônio Adquirido, qual a visão do autor?",
-        opcoes: [
-            "A Percepção é um exercício de condicionamento que se perde rapidamente sem prática, enquanto a Análise é a matéria de maior importância por dar as bases estruturais.",
-            "A Percepção é a matéria de maior importância por treinar o ouvido absoluto.",
-            "A Análise é um exercício de condicionamento bruto, enquanto a Percepção fundamenta as bases estruturais.",
-            "Ambas são inclinações genéticas do Patrimônio Próprio que não podem ser cultivadas.",
-            "O domínio da Análise é 'evidentemente necessário', enquanto a Percepção é opcional para quem já toca piano."
-        ],
-        correta: 0,
-        fund: "Rocha define a Percepção como exercício bruto de condicionamento e a Análise como a matéria de 'maior importância na regência'.",
-        loc: "Página 21."
-    },
-    {
-        id: "Q06",
-        q: "Qual a finalidade principal do estudo do Piano na formação do regente, segundo o texto?",
-        opcoes: [
-            "Para servir de ferramenta no domínio dos rudimentos teóricos e na prática de co-repetição.",
-            "Para que o regente possa substituir músicos faltosos em ensaios de naipe.",
-            "Porque o piano é o único instrumento que permite o fortalecimento do manguito rotador.",
-            "Para garantir que o regente tenha uma autoridade institucional frente aos pianistas da orquestra.",
-            "Para permitir que o maestro componha seus próprios arranjos de forma autodidata."
-        ],
-        correta: 0,
-        fund: "O piano é um aliado no domínio dos rudimentos teóricos e essencial para a evolução em transposições e reduções de partitura (co-repetição).",
-        loc: "Páginas 21 e 22."
-    },
-    {
-        id: "Q07",
-        q: "A formação cultural (Estética e História) é fundamental porque a função do 'Mestre' implica:",
-        opcoes: [
-            "Comandar músicos que não possuem formação cultural sólida.",
-            "Responder a demandas exclusivamente administrativas e financeiras da instituição.",
-            "Atuar como um ditador temperamental nos moldes do século XIX.",
-            "Focar apenas no conhecimento genético da Estética e da História.",
-            "Liderar pessoas maduras e cultas, exigindo substrato ético, filosófico e cultural."
-        ],
-        correta: 4,
-        fund: "Liderar músicos maduros exige que o regente tenha sólida formação cultural para responder a demandas psicológicas e filosóficas do grupo.",
-        loc: "Página 22."
-    },
-    {
-        id: "Q08",
-        q: "Por que matérias como Antropologia, Psicologia, Filosofia e Religião são citadas como necessárias ao regente?",
-        opcoes: [
-            "A música é uma ciência exata que depende de códigos jurídicos para ser interpretada.",
-            "A oficina do regente depende diretamente de pessoas, e a arte está inserida em sociedades com valores e códigos morais.",
-            "O regente precisa desses conhecimentos para negociar contratos sindicais com maior autoridade.",
-            "Essas matérias são componentes do Patrimônio Próprio e determinam o talento musical.",
-            "O conhecimento religioso é necessário apenas para a regência de obras sacras do período barroco."
-        ],
-        correta: 1,
-        fund: "Como a oficina do regente depende de pessoas e a arte está em sociedade, o regente deve ser um 'antropólogo' para compreender o universo humano.",
-        loc: "Página 23."
-    },
-    {
-        id: "Q09",
-        q: "Sobre a Comunicação não-verbal, qual o percentual de impacto da Expressão Corporal citado no texto?",
-        opcoes: ["7%", "38%", "55%", "90%", "100%"],
-        correta: 2,
-        fund: "O texto divide a comunicação em: palavra falada (7%), tom de voz (38%) e expressão corporal (55%).",
-        loc: "Página 37."
-    },
-    {
-        id: "Q10",
-        q: "Qual o impacto de uma musculatura abdominal fraca para o regente?",
-        opcoes: [
-            "Nenhum, pois a regência é uma atividade puramente mental e gestual.",
-            "Prejudica apenas a estética visual do maestro frente ao público.",
-            "Compromete o desempenho expressivo e musical, pois o abdômen é o centro emanador da energia corporal.",
-            "Dificulta a respiração, impedindo o regente de dar entradas vocais ao coro.",
-            "Impede o regente de manter os joelhos encaixados no pódio."
-        ],
-        correta: 2,
-        fund: "O abdômen é o centro do corpo; uma musculatura fraca compromete o desempenho expressivo e a sustentação da coluna.",
-        loc: "Página 24."
-    },
-    {
-        id: "Q11",
-        q: "Ao analisar o Relacionamento com o Grupo, qual fator se refere ao 'investimento nas virtudes'?",
-        opcoes: [
-            "Fator 1 - Postura e comportamento do líder.",
-            "Fator 2 - A forma de condução do grupo na implementação dos planos.",
-            "Fator 3 - A administração de conflitos.",
-            "Fator 4 - O domínio da batuta como símbolo de poder.",
-            "Todos os fatores dependem exclusivamente do carisma inato."
-        ],
-        correta: 1,
-        fund: "O Fator 2 trata da implementação dos planos e inclui a filosofia de investir nas virtudes em vez de lutar contra fraquezas.",
-        loc: "Páginas 24, 28 e 30."
-    },
-    {
-        id: "Q12",
-        q: "Qual a principal característica da Autoridade Pessoal do regente em oposição à autoridade institucional?",
-        opcoes: [
-            "Ela é outorgada pelo cargo e deve ser mantida através do rigor e da sisudez.",
-            "Ela depende da capacidade do regente de falar diferentes línguas e conhecer a estética.",
-            "Ela nasce e se manifesta de forma espontânea e natural, independente do cargo ocupado.",
-            "Ela é conquistada através de atitudes de prepotência e arrogância quando necessário.",
-            "Ela é um componente do Patrimônio Adquirido que pode ser comprado com prestígio."
-        ],
-        correta: 2,
-        fund: "A autoridade pessoal deve nascer de forma espontânea, baseada no reconhecimento da competência e do caráter, independentemente do cargo.",
-        loc: "Página 25."
-    },
-    {
-        id: "Q13",
-        q: "Como o autor define o Autodomínio e qual sua importância para o líder?",
-        opcoes: [
-            "É o poder sobre si próprio (paixões e emoções), garantindo decisões pautadas pela isenção.",
-            "É a capacidade de decorar a partitura para não depender da leitura visual.",
-            "É o controle sobre os músicos através de comportamentos típicos do século XIX.",
-            "É a habilidade técnica de reger compassos complexos com independência de braços.",
-            "É o domínio dos negócios e do gerenciamento de conflitos pessoais."
-        ],
-        correta: 0,
-        fund: "Autodomínio é o poder sobre as próprias paixões e emoções, permitindo decisões isentas e não passionais.",
-        loc: "Página 25."
-    },
-    {
-        id: "Q14",
-        q: "Qual a distinção técnica entre Estratégia e Tática adotada pelo autor?",
-        opcoes: [
-            "Estratégia é o plano de ação; Tática é o objetivo final.",
-            "Estratégia refere-se ao Patrimônio Próprio; Tática ao Patrimônio Adquirido.",
-            "Não há distinção, ambos referem-se ao planejamento de ensaios.",
-            "Estratégia é identificar as coisas certas a serem feitas; Tática é o plano específico para fazê-las da maneira certa.",
-            "Estratégia é a meta; Tática é a maneira de alcançá-la."
-        ],
-        correta: 3,
-        fund: "Estratégia define as coisas certas a fazer (maneira), enquanto Tática é o plano de ação específico (fazer certo).",
-        loc: "Página 26."
-    },
-    {
-        id: "Q15",
-        q: "O processo empático deve produzir a Mobilização Construtiva baseada em três elementos: Confiança, Respeito e:",
-        opcoes: ["Medo.", "Amizade pessoal profunda.", "Dependência técnica.", "Rigidez.", "Autoridade."],
-        correta: 4,
-        fund: "Os três pilares para mobilização são: confiança (sinceridade), respeito (trato) e autoridade (reputação).",
-        loc: "Página 26."
-    },
-    {
-        id: "Q16",
-        q: "Qual fenômeno prova que a Sonoridade é fruto da indução carismática?",
-        opcoes: [
-            "A mudança de dinâmica através da envergadura dos braços.",
-            "A precisão dos ataques em anacruzes.",
-            "O fato de uma mesma orquestra produzir sonoridades distintas conforme o regente, mesmo sem instruções orais.",
-            "A utilização de batutas claras para favorecer a visibilidade.",
-            "O nivelamento das individualidades através do reconhecimento de egos."
-        ],
-        correta: 2,
-        fund: "O autor cita que orquestras mudam de sonoridade conforme o regente induz sensibilidades, provando o poder do carisma.",
-        loc: "Página 27."
-    },
-    {
-        id: "Q17",
-        q: "Qual o requisito para que o regente convença o grupo sem precisar ser autoritário?",
-        opcoes: [
-            "Estar convicto do que diz e dizê-lo com igual convicção.",
-            "Ter um cargo institucional vitalício.",
-            "Falar de forma prolixa e técnica para demonstrar erudição.",
-            "Ceder às ideias contrárias dos músicos para manter a empatia.",
-            "Usar o 'grito' como ferramenta de persuasão final."
-        ],
-        correta: 0,
-        fund: "Para convencer e tornar o projeto comum, o regente deve estar convicto e transmitir essa convicção com firmeza.",
-        loc: "Página 27."
-    },
-    {
-        id: "Q18",
-        q: "Sobre o Sentido de Reconhecimento na regência, o autor defende que:",
-        opcoes: [
-            "O regente deve tratar todos com indiferença para não gerar ciúmes.",
-            "O regente deve focar apenas nos erros para que o grupo não se acomode.",
-            "O reconhecimento deve ser apenas financeiro.",
-            "O regente deve reconhecer e prestigiar quem se destaca, pois o ser humano é movido por afeições.",
-            "O reconhecimento estimula a competição destrutiva e deve ser evitado."
-        ],
-        correta: 3,
-        fund: "O ser humano é movido por afeições; o prestígio aos que se destacam evita o desânimo e mantém a qualidade.",
-        loc: "Página 28."
-    },
-    {
-        id: "Q19",
-        q: "Qual metáfora Rocha utiliza para justificar a necessidade de metas claras (Fator 2)?",
-        opcoes: [
-            "'O corpo é o instrumento de comunicação'.",
-            "'Para quem não tem direção, todos os ventos são contrários'.",
-            "'O regente-antropólogo precisa conhecer a ética'.",
-            "'O mestre deve estabilizar o manguito rotador'.",
-            "'A autoridade pessoal é independente da institucional'."
-        ],
-        correta: 1,
-        fund: "O ditado enfatiza que o líder deve estabelecer planos para dar vazão às inclinações produtivas do grupo.",
-        loc: "Página 29."
-    },
-    {
-        id: "Q20",
-        q: "A fórmula 'Comunicação + Responsabilidade = Entusiasmo' implica em:",
-        opcoes: [
-            "Centralização total do poder nas mãos do maestro.",
-            "Rigor técnico e punição dos relapsos.",
-            "Aumento do número de ensaios de naipe.",
-            "Foco exclusivo no adestramento das inabilidades.",
-            "Descentralização e circulação de informações."
-        ],
-        correta: 4,
-        fund: "A circulação de informações libera recursos e integra o grupo através da descentralização operacional.",
-        loc: "Página 29."
-    },
-    {
-        id: "Q21",
-        q: "Quais são os eixos da Fórmula Ternária para reuniões de balanço?",
-        opcoes: [
-            "Arsis, Tesis e Ictus.",
-            "Planejamento, Execução e Crítica.",
-            "Cordas, Madeiras e Metais.",
-            "De onde viemos, onde estamos e para onde vamos.",
-            "Ética, Estética e Técnica."
-        ],
-        correta: 3,
-        fund: "A fórmula ternária segue: balanço (passado), situação atual (presente) e metas (futuro).",
-        loc: "Página 30."
-    },
-    {
-        id: "Q22",
-        q: "Qual a crítica central ao ato de 'investir na habilitação dos pontos fracos'?",
-        opcoes: [
-            "Leva à mediocridade e faz perder o tempo que seria usado para atingir a excelência nos pontos fortes.",
-            "É um processo que exige muito dinheiro da instituição.",
-            "Fortalece o ego do músico e gera conflitos internos.",
-            "É uma tarefa impossível, pois as inabilidades são sempre genéticas.",
-            "Diminui a autoridade pessoal do regente frente aos músicos talentosos."
-        ],
-        correta: 0,
-        fund: "Investir em pontos fracos gera mediocridade; o foco deve ser a excelência através dos pontos fortes.",
-        loc: "Páginas 30 e 31."
-    },
-    {
-        id: "Q23",
-        q: "Qual a função do líder no exercício do foco nas competências específicas?",
-        opcoes: [
-            "Adestrar as inabilidades naturais de cada integrante.",
-            "Corrigir cada nota errada com rigor e disciplina militar.",
-            "Perceber e localizar as aptidões de cada um, canalizando-as em harmonia com o grupo.",
-            "Garantir que ninguém se destaque individualmente no trabalho.",
-            "Centralizar a avaliação das etapas vencidas para evitar discussões."
-        ],
-        correta: 2,
-        fund: "Cabe ao líder localizar as habilidades e sonhos de cada integrante para harmonizá-los com o trabalho coletivo.",
-        loc: "Página 31."
-    },
-    {
-        id: "Q24",
-        q: "O que caracteriza o Segundo Momento da Administração de Conflitos (Fator 3)?",
-        opcoes: [
-            "O reconhecimento do conflito e localização de suas fontes.",
-            "A reflexão, a definição e a utilização das soluções e antídotos.",
-            "O empreendimento de uma ação preventiva sistemática.",
-            "A demissão imediata dos músicos arrogantes.",
-            "A circulação de fofocas e boatos para testar a lealdade do grupo."
-        ],
-        correta: 1,
-        fund: "O segundo momento foca na reflexão e aplicação dos antídotos indicados para a crise identificada.",
-        loc: "Página 32."
-    },
-    {
-        id: "Q25",
-        q: "Quais são as três fontes usuais de crises citadas pelo autor?",
-        opcoes: [
-            "Falta de verbas, instrumentos velhos e má acústica.",
-            "Inchamento de egos, diferenças de produção e boatos/fofocas.",
-            "Incompetência técnica, atrasos e falta de batuta.",
-            "Rigidez, sisudez e autoritarismo institucional.",
-            "Falta de análise, percepção ruim e desequilíbrio físico."
-        ],
-        correta: 1,
-        fund: "Crises comuns surgem do ego inflamado, diferenças na qualidade de produção e boatos.",
-        loc: "Página 32."
-    },
-    {
-        id: "Q26",
-        q: "Qual o antídoto contra o conflito gerado por diferenças de produção entre músicos?",
-        opcoes: [
-            "Exigir proporcionalmente: cobrar muito do talentoso e valorizar o esforço do medíocre.",
-            "Nivelar a exigência pelo músico medíocre para evitar estresse.",
-            "Premiar financeiramente o talentoso para que ele produza mais.",
-            "Criticar o medíocre publicamente para que ele atinja o nível do talentoso.",
-            "Ignorar a diferença de produção para não ferir suscetibilidades."
-        ],
-        correta: 0,
-        fund: "A solução é exigir conforme a potência de cada um: cobrar o talentoso e valorizar o esforço do menos apto.",
-        loc: "Página 32."
-    },
-    {
-        id: "Q27",
-        q: "Por que a velocidade é decisiva contra boatos e fofocas?",
-        opcoes: [
-            "Para impedir que o regente se envolva emocionalmente na crise.",
-            "Para punir o fofoqueiro antes que ele se esconda no anonimato.",
-            "Para garantir que o cronograma de ensaios não sofra atrasos.",
-            "A velocidade não é importante; o silêncio é o melhor remédio.",
-            "Para dissolver dúvidas antes que se espalhem."
-        ],
-        correta: 4,
-        fund: "A transparência rápida dissolve a incerteza que possui alta carga tóxica para o grupo.",
-        loc: "Página 33."
-    },
-    {
-        id: "Q28",
-        q: "O que a identificação de 'antenas receptoras' exige do líder no momento preventivo?",
-        opcoes: [
-            "A instalação de sistemas de monitoramento eletrônico.",
-            "Uma leitura de sinais e informações de modo instintivo e empírico.",
-            "Que o líder peça formalmente para os músicos espionarem uns aos outros.",
-            "O uso de perguntas apócrifas em pesquisas bimestrais obrigatórias.",
-            "Que o maestro ignore sentimentos ruins para não 'poluir' o gesto."
-        ],
-        correta: 1,
-        fund: "O líder deve ler sinais instintivamente para montar o mosaico da realidade do grupo.",
-        loc: "Página 33."
-    },
-    {
-        id: "Q29",
-        q: "Qual a finalidade de permitir respostas 'apócrifas' na Pesquisa Interna?",
-        opcoes: [
-            "Identificar quem são os músicos desleais para demiti-los.",
-            "Garantir que ninguém assuma responsabilidade pelo que diz.",
-            "Abrir espaço para críticas e propostas que a hierarquia poderia inibir.",
-            "Facilitar o trabalho administrativo de tabulação de dados estatísticos.",
-            "Substituir a necessidade de reuniões presenciais."
-        ],
-        correta: 2,
-        fund: "O anonimato libera críticas e sugestões importantes que seriam inibidas pela hierarquia.",
-        loc: "Página 34."
-    },
-    {
-        id: "Q30",
-        q: "Qual a conclusão de Rocha sobre a autoridade do regente ao fim do capítulo?",
-        opcoes: [
-            "Ela deve ser sempre baseada no autoritarismo e no rigor do século XIX.",
-            "Ela emana da capacidade de o regente punir os erros técnicos com rigidez.",
-            "Ela deve transparecer e emanar de si mesmo, exigindo exercício e amadurecimento.",
-            "Ela é um dom genético que não requer formação cultural.",
-            "Ela depende exclusivamente do sucesso financeiro e do mercado."
-        ],
-        correta: 2,
-        fund: "A autoridade legítima emana do próprio regente e exige um amadurecimento constante e exercício pessoal.",
-        loc: "Página 158."
+                id: "cap1_1",
+                q: "Sobre a formação do regente como um 'bem patrimonial', assinale a alternativa CORRETA:",
+                opcoes: [
+                    "O patrimônio próprio é cumulativo e depende exclusivamente do tempo de estudo acadêmico.",
+                    "O talento musical, por ser inato, dispensa o cultivo de disciplinas como a Análise e a Percepção.",
+                    "A liderança é uma autoridade meramente institucional que se recebe ao assumir um cargo.",
+                    "A regência é uma arte que exige uma vocação específica fundada na liderança, além de formação diversificada.",
+                    "A aptidão física é um requisito meramente estético, sem relação com o dispêndio de energia no pódio."
+                ],
+                correta: 3,
+                fund: "O autor define a regência como uma arte de vocação específica e complexa, que requer mais do que apenas ser um bom instrumentista.",
+                loc: "Fonte: Página 19"
+            },
+            {
+                id: "cap1_2",
+                q: "Assinale a alternativa INCORRETA sobre o 'Patrimônio Adquirido':",
+                opcoes: [
+                    "O nível de percepção real do regente é uma constante biológica que independe do conhecimento sobre a obra.",
+                    "A Análise, tanto estrutural quanto funcional, é considerada a matéria de maior importância na formação superior.",
+                    "A co-repetição ao piano é fundamental para a prática de transposição e redução de partituras.",
+                    "Harmonia e Contraponto são bases indispensáveis para que o regente entenda a sintaxe musical.",
+                    "A musicalização na infância impacta diretamente a qualidade da música que o regente produzirá no futuro."
+                ],
+                correta: 0,
+                fund: "A audição do regente é seletiva; quanto mais ele conhece a obra, mais ele está apto a ouvir. A percepção cai se o treinamento parar.",
+                loc: "Fonte: Páginas 21 e 22"
+            },
+            {
+                id: "cap1_3",
+                q: "Sobre a 'Formação Física' do regente, é CORRETO afirmar que:",
+                opcoes: [
+                    "Após os 40 anos, a prática de musculação é desaconselhada para evitar o enrijecimento dos braços.",
+                    "O fortalecimento abdominal serve apenas para suportar o peso da batuta em andamentos lentos.",
+                    "O regente deve praticar exercícios isométricos para fortalecer o manguito rotador e prevenir lesões.",
+                    "A dieta do regente deve ser universal, não havendo necessidade de personalização individual.",
+                    "A regência é uma atividade física leve que dispensa o preparo atlético do corpo como um todo."
+                ],
+                correta: 2,
+                fund: "O manguito rotador estabiliza a cabeça umeral, essencial para a movimentação dos ombros e braços sob carga de estresse físico.",
+                loc: "Fonte: Páginas 23 e 24"
+            },
+            {
+                id: "cap1_4",
+                q: "Assinale a alternativa INCORRETA sobre a 'Autoridade Pessoal':",
+                opcoes: [
+                    "Ela emana do reconhecimento tácito da competência profissional, do caráter e das boas maneiras.",
+                    "Deve nascer e se manifestar de forma espontânea e natural frente ao conjunto liderado.",
+                    "Um regente culto deve saber se fazer entender em diferentes línguas e contextos socioculturais.",
+                    "A autoridade pessoal deve ser independente da autoridade institucional outorgada pelo cargo.",
+                    "O mestre moderno deve manter o comportamento ditatorial do século XIX para assegurar o respeito."
+                ],
+                correta: 4,
+                fund: "O autor afirma que a era do mestre temperamental e ditador foi extinta; o regente moderno deve evitar prepotência e arrogância.",
+                loc: "Fonte: Página 25"
+            },
+            {
+                id: "cap1_5",
+                q: "A respeito da qualidade do 'Autodomínio', é CORRETO afirmar que:",
+                opcoes: [
+                    "Refere-se à capacidade do regente de dominar os músicos através do medo e da punição.",
+                    "Consiste no poder sobre as próprias paixões e emoções, permitindo decisões pautadas pela isenção.",
+                    "O regente deve reagir por impulsos passionais para demonstrar intensidade artística no pódio.",
+                    "É uma característica física ligada à resistência do manguito rotador em obras de grande envergadura.",
+                    "O autodomínio exclui a necessidade de boas maneiras no trato administrativo com a orquestra."
+                ],
+                correta: 1,
+                fund: "O autodomínio é o poder sobre si próprio; o líder deve ser um referencial estável e decidir sem ser movido por paixões momentâneas.",
+                loc: "Fonte: Página 25"
+            },
+            {
+                id: "cap1_6",
+                q: "Assinale a alternativa INCORRETA quanto à 'Clareza de objetivos e expressão do pensamento':",
+                opcoes: [
+                    "O regente precisa saber o que quer e como quer antes mesmo de chegar ao primeiro ensaio.",
+                    "A fala do mestre deve ter concisão e assertividade, portadora de sentimentos e pensamentos verdadeiros.",
+                    "Para impor respeito intelectual, o regente deve ser prolixo e utilizar linguagem excessivamente técnica.",
+                    "A mensagem transmitida deve ser clara, sintética e, acima de tudo, verdadeira para sensibilizar o grupo.",
+                    "O líder que não sabe aonde quer chegar não conseguirá mobilizar o grupo de forma construtiva."
+                ],
+                correta: 2,
+                fund: "O autor prescreve que a fala 'jamais prolixa, deve ter concisão e assertividade' para uma comunicação eficaz.",
+                loc: "Fonte: Página 26"
+            },
+            {
+                id: "cap1_7",
+                q: "No planejamento de um projeto comum, assinale a alternativa INCORRETA sobre Estratégia e Tática:",
+                opcoes: [
+                    "Estratégia é a maneira como se alcança uma meta, identificando as coisas certas a serem feitas.",
+                    "Tática é o plano específico de ação dentro da estratégia para fazer as coisas da maneira certa.",
+                    "A argumentação eficiente exige que o regente esteja convicto do que diz para convencer sem impor.",
+                    "O regente precisa saber demover ideias contrárias sem necessariamente contrariar o interlocutor.",
+                    "Estratégia e Tática são sinônimos de Patrimônio Próprio e Adquirido, respectivamente."
+                ],
+                correta: 4,
+                fund: "Estratégia e Tática são ferramentas de planejamento administrativo, distintas dos conceitos de patrimônio vocacional ou adquirido.",
+                loc: "Fonte: Página 26"
+            },
+            {
+                id: "cap1_8",
+                q: "Sobre a 'Empatia e capacidade de mobilização', é CORRETO afirmar:",
+                opcoes: [
+                    "O regente, através do carisma e da empatia, 'tira o som do grupo', mobilizando as sensibilidades individuais.",
+                    "A sonoridade de uma orquestra é fixa e não se altera com a mudança do regente no pódio.",
+                    "Confiança e respeito são obtidos exclusivamente através da hierarquia institucional e do salário.",
+                    "O 'fruto sagrado' do regente é o silêncio que precede o início de cada movimento sinfônico.",
+                    "Mobilização construtiva significa forçar os músicos a tocarem apenas o que está escrito na partitura."
+                ],
+                correta: 0,
+                fund: "O carisma e o tom de voz permitem ao líder abrir o 'santuário do espírito' de cada um para gerar a sonoridade coletiva.",
+                loc: "Fonte: Páginas 26 e 27"
+            },
+            {
+                id: "cap1_9",
+                q: "Sobre o 'Sentido de Reconhecimento', assinale a alternativa CORRETA:",
+                opcoes: [
+                    "O ser humano é movido por interesses materiais, dispensando elogios ou afetos no ambiente de trabalho.",
+                    "O regente deve ignorar o desempenho individual para não gerar competitividade tóxica no grupo.",
+                    "O reconhecimento de contribuições reais deve ser feito apenas de forma anônima e administrativa.",
+                    "Urge que o regente reconheça e prestigie os que se destacam por empenho, qualidade ou lealdade.",
+                    "A percepção de uma situação de não-reconhecimento estimula os músicos a trabalharem com mais afinco."
+                ],
+                correta: 3,
+                fund: "O ser humano é um mamífero de grande inteligência emocional movido por afeições; o não-reconhecimento provoca desânimo.",
+                loc: "Fonte: Página 28"
+            },
+            {
+                id: "cap1_10",
+                q: "Assinale a alternativa INCORRETA sobre o 'Investimento nas Virtudes':",
+                opcoes: [
+                    "O exercício da liderança deve ser calcado na valorização dos pontos fortes de cada liderado.",
+                    "O líder deve focar permanentemente no adestramento das inabilidades naturais de seus músicos.",
+                    "Passar a vida tentando consertar pontos fracos resulta, no máximo, em mediocridade do esforço.",
+                    "A função do líder é localizar sonhos e projetos de cada um para canalizá-los em harmonia com o grupo.",
+                    "Devemos procurar crescer naquilo em que somos bons para atingir a excelência nas potências que possuímos."
+                ],
+                correta: 1,
+                fund: "O autor afirma que o foco deve ser nas competências específicas e não no adestramento das inabilidades.",
+                loc: "Fonte: Página 31"
+            },
+            {
+                id: "cap1_11",
+                q: "No 'Fator 2' da condução do grupo, a 'Fórmula do Entusiasmo' é composta por:",
+                opcoes: [
+                    "Técnica de Batuta + Carisma.",
+                    "Liderança + Talento Musical.",
+                    "Estratégia + Tática.",
+                    "Percepção + Análise.",
+                    "Comunicação + Responsabilidade."
+                ],
+                correta: 4,
+                fund: "Sem informações não se assume responsabilidade; com comunicação completa, gera-se entusiasmo e responsabilidade no grupo.",
+                loc: "Fonte: Página 29"
+            },
+            {
+                id: "cap1_12",
+                q: "Assinale a alternativa INCORRETA sobre a 'Administração de Conflitos' (Fator 3):",
+                opcoes: [
+                    "Crises são naturais em agrupamentos humanos e podem representar tanto perigo quanto oportunidade.",
+                    "Conflitos devem ser ignorados pelo mestre para que o grupo os resolva autonomamente sem interferência.",
+                    "O primeiro momento da superação é o reconhecimento do conflito e a localização de suas fontes.",
+                    "Boatos e fofocas possuem alta carga tóxica e devem ser combatidos com circulação imediata de informações.",
+                    "A ação preventiva é o terceiro momento da administração, baseada na leitura de sinais e pesquisa de satisfação."
+                ],
+                correta: 1,
+                fund: "O regente deve estar sempre preparado para crises; ignorá-las permite que elas evoluam para estados incontroláveis.",
+                loc: "Fonte: Páginas 31 e 32"
+            },
+            {
+                id: "cap1_13",
+                q: "Sobre a natureza do 'Patrimônio Próprio', Rocha estabelece que:",
+                opcoes: [
+                    "É um bem acumulado ao longo da vida através do estudo exaustivo de tratados de regência.",
+                    "Refere-se especificamente ao domínio das línguas estrangeiras e da administração de negócios.",
+                    "Pode ser transferido de mestre para aluno através de aulas particulares de técnica gestual.",
+                    "É constituído de talentos que já devem existir na pessoa: liderança, talento musical e aptidão física.",
+                    "É facultativo ao regente profissional, desde que ele possua um patrimônio adquirido robusto."
+                ],
+                correta: 3,
+                fund: "O patrimônio próprio é inalienável e intransferível: 'quando se tem, não se pode perder. Quando não se tem, não se pode obter'.",
+                loc: "Fonte: Páginas 19 e 20"
+            },
+            {
+                id: "cap1_14",
+                q: "Assinale a alternativa INCORRETA sobre o 'Regente-Antropólogo':",
+                opcoes: [
+                    "Sua função restringe-se ao estudo técnico da partitura, ignorando o substrato ético da sociedade.",
+                    "Ele precisa conhecer Direito, Ética, Filosofia e Religião para lidar com sua 'oficina de pessoas'.",
+                    "A regência é uma atividade que depende diretamente de pessoas e seus valores estabelecidos.",
+                    "O mestre deve estar preparado para gerenciar conflitos pessoais e coletivos com base no conhecimento humano.",
+                    "A arte musical vive inserida em sociedades com códigos morais que o regente deve compreender."
+                ],
+                correta: 0,
+                fund: "O regente-antropólogo é aquele que entende que a música é feita por pessoas inseridas em um contexto social e ético complexo.",
+                loc: "Fonte: Página 23"
+            },
+            {
+                id: "cap1_15",
+                q: "No planejamento de balanço de um projeto, a fórmula ternária recomendada consiste em:",
+                opcoes: [
+                    "Melodia, Harmonia e Ritmo.",
+                    "Tônica, Mediante e Dominante.",
+                    "De onde viemos, onde estamos e para onde vamos.",
+                    "Reconhecimento, Antídoto e Ação Preventiva.",
+                    "Comunicação, Responsabilidade e Entusiasmo."
+                ],
+                correta: 2,
+                fund: "Essa fórmula serve para análise e balanço do já realizado, localização da situação atual e identificação do que se quer para o futuro.",
+                loc: "Fonte: Página 30"
+            },
+            {
+                id: "cap1_16",
+                q: "Sobre o 'Patrimônio Adquirido - Formação Intelectual', é CORRETO afirmar:",
+                opcoes: [
+                    "O espectro de conhecimento não se reduz à música, abrangendo Estética, História e línguas.",
+                    "O regente deve ser um especialista isolado na técnica de batuta para não poluir sua visão artística.",
+                    "Conhecimentos de Administração são irrelevantes para o regente titular de uma instituição.",
+                    "O diploma de curso superior substitui a necessidade de autoridade pessoal e liderança inata.",
+                    "A Psicologia deve ser aplicada apenas aos músicos amadores, pois profissionais não geram conflitos."
+                ],
+                correta: 0,
+                fund: "O Maestro é um Mestre, alguém na posição de liderança de homens e mulheres maduros e cultos, exigindo sólida formação cultural.",
+                loc: "Fonte: Página 22"
+            },
+            {
+                id: "cap1_17",
+                q: "O 'Ponto Central' na regência física é definido tecnicamente como:",
+                opcoes: [
+                    "O centro do pódio de onde o regente emite os comandos verbais.",
+                    "A ponta da batuta, onde se localiza o ictus métrico do compasso.",
+                    "O nível dos olhos do regente para garantir o contato visual com os músicos.",
+                    "Uma área em frente ao centro da região abdominal, de onde nasce o gesto rítmico.",
+                    "A partitura, que centraliza toda a atenção intelectual e física do maestro."
+                ],
+                correta: 3,
+                fund: "Localizado à frente do abdômen, é o ponto de origem e retorno do gesto, mantendo os cotovelos a 90 graus.",
+                loc: "Fonte: Página 24"
+            },
+            {
+                id: "cap1_18",
+                q: "Assinale a alternativa INCORRETA sobre o 'Corpo do Regente':",
+                opcoes: [
+                    "O abdômen é o centro de todo o corpo e dele emana a energia que o mestre possui.",
+                    "Braços convergentes (para dentro) ou do tipo 'manequim' são exemplos de posições positivas.",
+                    "A cabeça deve acompanhar o movimento geral do corpo para transmitir unidade gestual.",
+                    "Uma barriga flácida pode comprometer o desempenho expressivo e musical do condutor.",
+                    "O mestre deve evitar vícios como batimentos de tempo no chão com os pés."
+                ],
+                correta: 1,
+                fund: "Braços convergentes ou do tipo manequim são listados como posições negativas que sugerem timidez ou insegurança.",
+                loc: "Fonte: Página 41"
+            },
+            {
+                id: "cap1_19",
+                q: "A 'Fórmula do Entusiasmo' (Fator 2) defende que:",
+                opcoes: [
+                    "O músico produz mais quando é punido por erros técnicos no ensaio geral.",
+                    "A responsabilidade é um dom inato que independe da circulação de informações.",
+                    "A centralização total das decisões no mestre é o que gera motivação no grupo.",
+                    "O entusiasmo nasce apenas quando o repertório é de agrado pessoal dos músicos.",
+                    "A integração efetua-se pela descentralização e pela confiança do líder em cada um."
+                ],
+                correta: 4,
+                fund: "A circulação de informações gera motivação porque, com elas, o liderado não pode deixar de assumir sua responsabilidade.",
+                loc: "Fonte: Página 29"
+            },
+            {
+                id: "cap1_20",
+                q: "No âmbito da administração de crises, o autor sugere como antídoto contra o 'inchamento de egos':",
+                opcoes: [
+                    "Ignorar o músico arrogante até que ele se sinta isolado pelo grupo.",
+                    "Aumentar o salário apenas dos músicos que não apresentam conflitos.",
+                    "Tentar nivelar as individualidades, exaltando quem se anula e repreendendo o arrogante.",
+                    "Promover rodízios de estantes baseados exclusivamente em sorteio aleatório.",
+                    "Delegar a resolução do problema ao spalla para preservar a imagem do mestre."
+                ],
+                correta: 2,
+                fund: "Para equilibrar o grupo, o líder deve atuar nos extremos: conter o arrogante e incentivar o retraído.",
+                loc: "Fonte: Página 32"
+            },
+            {
+                id: "cap1_21",
+                q: "No contexto da 'Autoridade Pessoal', assinale a alternativa INCORRETA:",
+                opcoes: [
+                    "A autoridade pessoal emana do reconhecimento tácito da competência profissional e do caráter.",
+                    "A autoridade institucional outorgada pelo cargo é, isoladamente, a garantia da mobilização construtiva e da sonoridade legítima de um grupo.",
+                    "O modo de ser, tratar e falar do mestre deve espelhar boa formação e informação aos liderados.",
+                    "Um bom regente deve ser capaz de compreender os fatos e antecipar consequências de futuras soluções.",
+                    "A autoridade pessoal deve nascer e se manifestar de forma espontânea e natural frente ao conjunto."
+                ],
+                correta: 1,
+                fund: "O autor afirma que a autoridade pessoal é independente da autoridade institucional e que a emanação desta última sozinha não garante a resposta do grupo.",
+                loc: "Fonte: Página 25"
+            },
+            {
+                id: "cap1_22",
+                q: "Sobre a qualidade do 'Autodomínio', é CORRETO afirmar que:",
+                opcoes: [
+                    "Espera-se do líder um comportamento temperamental para demonstrar intensidade artística.",
+                    "O regente deve tomar decisões pautadas por impulsos passionais em momentos de crise.",
+                    "Consiste no poder sobre si próprio, sobre as próprias paixões, emoções e apetites.",
+                    "O autodomínio é uma característica exclusivamente física ligada ao manguito rotador.",
+                    "Um líder com autodomínio deve ser imprevisível para manter o grupo em estado de alerta."
+                ],
+                correta: 2,
+                fund: "Rocha define autodomínio como o 'poder sobre si próprio... do líder espera-se um comportamento estável que seja referencial para o grupo'.",
+                loc: "Fonte: Página 25"
+            },
+            {
+                id: "cap1_23",
+                q: "Sobre a natureza do 'Patrimônio Próprio', é CORRETO afirmar que:",
+                opcoes: [
+                    "Ele é inalienável e intransferível; quando se tem, não se pode perder; quando não se tem, não se pode obter.",
+                    "É constituído exclusivamente por disciplinas acadêmicas como Harmonia, Contraponto e Análise.",
+                    "Refere-se a talentos que podem ser comprados ou impostos por decreto institucional do órgão mantenedor.",
+                    "É um bem acumulado e cultivado ao longo da vida técnica ou da vida profissional do músico.",
+                    "O patrimônio próprio pode ser transferido de mestre para aluno através de cursos de extensão."
+                ],
+                correta: 0,
+                fund: "Próprio: bem inalienável, intransferível, que quando se tem, não se pode perder. Quando não se tem, não se pode obter.",
+                loc: "Fonte: Página 19"
+            },
+            {
+                id: "cap1_24",
+                q: "No que tange à 'Administração de Conflitos', assinale a alternativa INCORRETA:",
+                opcoes: [
+                    "Crises usuais em grupos musicais originam-se do inchamento de egos e disparidade de produção.",
+                    "O mal dos boatos e fofocas exige a circulação imediata de informações completas e transparentes.",
+                    "O primeiro momento da superação é o reconhecimento do conflito e a localização de suas fontes.",
+                    "No combate às fofocas, o regente deve reter informações críticas para evitar que o conflito se expanda entre os naipes.",
+                    "A velocidade e a clareza são decisivas para o sucesso da ação de esclarecimento do líder."
+                ],
+                correta: 3,
+                fund: "O texto afirma o oposto: 'o que se precisa empreender é a circulação imediata de informações completas... as incompletas só agravam o clima de incerteza'.",
+                loc: "Fonte: Página 33"
+            },
+            {
+                id: "cap1_25",
+                q: "Sobre a 'Capacidade de Planejamento', é CORRETO afirmar que:",
+                opcoes: [
+                    "O líder deve evitar estabelecer metas claras para não engessar a espontaneidade dos artistas.",
+                    "Planejar é uma tarefa meramente tática que cabe exclusivamente à administração da orquestra.",
+                    "Estratégia refere-se ao plano específico de ação, enquanto Tática é a identificação das metas gerais.",
+                    "O regente não precisa saber aonde quer chegar, desde que domine a técnica mecânica de batuta.",
+                    "Cabe ao líder estabelecer um Plano de Metas, delegar responsabilidades e dar o start da mobilização."
+                ],
+                correta: 4,
+                fund: "Cabe ao líder estabelecer um Plano de Metas, delegar responsabilidades e, por fim... dar o start da mobilização total de todos para o trabalho.",
+                loc: "Fonte: Página 29"
+            },
+            {
+                id: "cap1_26",
+                q: "Quanto à 'Fórmula do Entusiasmo', assinale a alternativa INCORRETA:",
+                opcoes: [
+                    "A fórmula proposta pelo autor é resumida em: Comunicação + Responsabilidade = Entusiasmo.",
+                    "Sem informações completas sobre o projeto, o liderado não assume responsabilidade.",
+                    "A circulação de informações gera motivação e azeita a máquina operacional do grupo.",
+                    "O entusiasmo do grupo depende exclusivamente do talento inato do regente, independentemente da comunicação.",
+                    "A integração efetua-se pela descentralização e pela confiança do líder em cada integrante."
+                ],
+                correta: 3,
+                fund: "O autor vincula o entusiasmo diretamente à comunicação e à responsabilidade, e não apenas a um talento isolado.",
+                loc: "Fonte: Página 29"
+            },
+            {
+                id: "cap1_27",
+                q: "Sobre o 'Sentido de Reconhecimento', assinale a alternativa INCORRETA:",
+                opcoes: [
+                    "Urge que o regente reconheça e prestigie os que se destacam por empenho, qualidade ou lealdade.",
+                    "O ser humano é um mamífero de grande inteligência emocional movido por afeições.",
+                    "A falta de reconhecimento por contribuições reais prestadas provoca desânimo no colaborador.",
+                    "A percepção de uma situação de não-reconhecimento estimula os companheiros a trabalharem com mais afinco.",
+                    "Iniciativas exitosas e bom desempenho individual devem ser creditados exclusivamente ao cargo institucional do mestre."
+                ],
+                correta: 4,
+                fund: "Rocha afirma que cabe ao regente reconhecer e recompensar efetivamente o músico (gesto, palavra, prêmio) e que o não-reconhecimento é desastroso.",
+                loc: "Fonte: Página 28"
+            },
+            {
+                id: "cap1_28",
+                q: "Assinale a alternativa INCORRETA sobre a 'Formação Intelectual' do regente:",
+                opcoes: [
+                    "O mestre deve possuir uma sólida formação cultural que inclua Estética, História e línguas.",
+                    "Conhecimentos de Administração e Psicologia são necessários para o gerenciamento de negócios e conflitos.",
+                    "A formação intelectual do mestre deve restringir-se à técnica de batuta, ignorando o substrato ético e filosófico da sociedade.",
+                    "O 'Regente-Antropólogo' precisará conhecer Direito, Ética, Filosofia e Religião para lidar com pessoas.",
+                    "O maestro é alguém na posição de liderança de homens e mulheres maduros e cultos."
+                ],
+                correta: 2,
+                fund: "Convém que ele possua uma sólida formação cultural... precisará conhecer Direito, Ética, Filosofia e Religião... não se reduza ao conhecimento genérico da Estética.",
+                loc: "Fonte: Páginas 22 e 23"
+            },
+            {
+                id: "cap1_29",
+                q: "Quanto à 'Autoridade Pessoal', assinale a alternativa INCORRETA:",
+                opcoes: [
+                    "Ela emana do modo de ser, tratar e falar do mestre frente aos seus liderados.",
+                    "É uma característica física inata que pode ser comprada ou imposta por decreto institucional.",
+                    "Baseia-se no reconhecimento tácito da competência profissional e do caráter.",
+                    "Um regente culto deve saber se fazer entender em diferentes línguas e contextos socioculturais.",
+                    "O regente moderno deve evitar, a todo custo, atitudes de prepotência e arrogância."
+                ],
+                correta: 1,
+                fund: "O autor afirma que a autoridade pessoal 'deve nascer e se manifestar de forma espontânea e natural', não podendo ser comprada ou imposta.",
+                loc: "Fonte: Página 25"
+            },
+            {
+                id: "cap1_30",
+                q: "Sobre o relacionamento entre regente e grupo, assinale a alternativa CORRETA:",
+                opcoes: [
+                    "A relação construtiva depende de três fatores: postura/comportamento, implementação de planos e administração de conflitos.",
+                    "O mestre deve tratar os músicos como ferramentas mecânicas para evitar o 'inchamento de egos'.",
+                    "A administração de conflitos é uma tarefa burocrática que não impacta a sonoridade do conjunto.",
+                    "O líder deve manter o plano de metas em segredo para garantir o elemento surpresa durante os ensaios.",
+                    "O entusiasmo do grupo é fruto da rigidez militar e do autoritarismo sisudo do condutor musical."
+                ],
+                correta: 0,
+                fund: "A relação construtiva entre regente e grupo depende de três fatores: a postura e o comportamento do líder, a forma de condução... e a administração dos conflitos.",
+                loc: "Fonte: Página 24"
+            },
+            {
+                id: "cap1_31",
+                q: "Sobre as crises em agrupamentos humanos, assinale a alternativa INCORRETA:",
+                opcoes: [
+                    "A palavra crise, na cultura chinesa, carrega os significados de 'perigo' e 'oportunidade'.",
+                    "As fontes de crises são quase sempre semelhantes: egos, disparidade de produção e boatos.",
+                    "Crises são fenômenos anormais e destrutivos que sinalizam a falência vocacional irreversível do regente.",
+                    "Crises são naturais e importantes para o crescimento do grupo, se bem administradas pelo líder.",
+                    "A superação de crises dá-se através de três momentos: reconhecimento, reflexão/antídoto e ação preventiva."
+                ],
+                correta: 2,
+                fund: "Rocha afirma que crises são 'naturais em qualquer agrupamento humano' e que podem ser superadas através de administração correta.",
+                loc: "Fonte: Páginas 31 e 32"
+            },
+            {
+                id: "cap1_32",
+                q: "Quanto à 'Aptidão Física', assinale a alternativa INCORRETA:",
+                opcoes: [
+                    "O manguito rotador é um músculo estético do abdômen responsável apenas por sustentar a postura ereta.",
+                    "A regência é uma atividade que exige vigor físico para suportar a imensa carga de responsabilidades.",
+                    "O abdômen é o centro de todo o corpo e dele emana a energia que o regente possui.",
+                    "Após os 40 anos, o regente deve praticar musculação para combater a perda de massa muscular e óssea.",
+                    "Uma barriga flácida pode comprometer o desempenho expressivo e musical do condutor."
+                ],
+                correta: 0,
+                fund: "O manguito rotador é um conjunto de músculos responsáveis pela estabilização da cabeça umeral, localizado no complexo do ombro.",
+                loc: "Fonte: Páginas 23 e 24"
+            },
+            {
+                id: "cap1_33",
+                q: "Sobre a formação intelectual e o papel do 'Maestro', assinale a alternativa INCORRETA:",
+                opcoes: [
+                    "A palavra maestro remete etimologicamente a 'Mestre', alguém em posição de liderança.",
+                    "O regente deve estar preparado para responder a demandas administrativas, psicológicas e políticas.",
+                    "O espectro de conhecimento do mestre não deve se reduzir à música, abrangendo História e Estética.",
+                    "Conhecimentos de Administração são necessários para o gerenciamento dos negócios e da carreira.",
+                    "A autoridade do mestre emana exclusivamente do diploma universitário, dispensando o carisma pessoal."
+                ],
+                correta: 4,
+                fund: "O autor enfatiza que a autoridade real é pessoal e carismática, não se limitando ao cargo institucional ou ao diploma.",
+                loc: "Fonte: Páginas 22 e 159"
+            },
+            {
+                id: "cap1_34",
+                q: "Quanto ao comportamento do líder frente à modernidade, assinale a alternativa INCORRETA:",
+                opcoes: [
+                    "O regente moderno deve ser um referencial estável, decidindo com isenção e não por impulsos.",
+                    "No regente atual, o autodomínio exige o cultivo da rigidez, da sisudez e do autoritarismo sisudo.",
+                    "Já foi extinta a era do mestre temperamental e ditador, comportamentos típicos do final do século XIX.",
+                    "O brasileiro, em especial, não pode confundir autoridade com autoritarismo ou rigor com rigidez.",
+                    "Não se ganha mais nada 'no grito', mas através da tentativa de consenso e compreensão real."
+                ],
+                correta: 1,
+                fund: "O texto afirma categoricamente: 'o regente moderno... não pode mais confundir autoridade com autoritarismo, rigor com rigidez, seriedade com sisudez'.",
+                loc: "Fonte: Página 25"
+            },
+            {
+                id: "cap1_35",
+                q: "No contexto da 'Empatia e Mobilização', é CORRETO afirmar que:",
+                opcoes: [
+                    "A sonoridade de uma orquestra é invariável, independentemente do carisma do mestre.",
+                    "Confiança e respeito são obtidos através de promessas de sedução e manipulação emocional.",
+                    "Através do carisma, o líder 'tira o som do grupo', abrindo o 'santuário do espírito' de cada músico.",
+                    "A empatia é um processo burocrático que dispensa a coerência entre o que o mestre fala e faz.",
+                    "Mobilização construtiva significa obrigar os músicos a executarem as notas sob ameaça de demissão."
+                ],
+                correta: 2,
+                fund: "Através do carisma... o líder tira o som do grupo... abre como que o 'santuário do espírito' de cada um e cada um, então, lhe oferta o melhor.",
+                loc: "Fonte: Página 27"
+            },
+            {
+                id: "cap1_36",
+                q: "Sobre o 'Sentido de Reconhecimento', assinale a alternativa INCORRETA:",
+                opcoes: [
+                    "Reconhecer o esforço alheio gera estímulo nos companheiros e melhora o ambiente de trabalho.",
+                    "O reconhecimento deve ser exercido apenas por meio de recompensas financeiras diretas no pódio.",
+                    "O regente deve diferenciar esforço de resultado nas suas iniciativas de reconhecimento.",
+                    "A falta de percepção das contribuições reais por parte do líder provoca desânimo no grupo.",
+                    "Prestigiar quem se destaca é uma urgência, pois o ser humano é movido por afeições."
+                ],
+                correta: 1,
+                fund: "Isso poderá ser feito com um gesto, uma palavra elogiosa... um prêmio simbólico ou mesmo financeiro. O financeiro é apenas uma das opções.",
+                loc: "Fonte: Página 28"
+            },
+            {
+                id: "cap1_37",
+                q: "Sobre a condução do grupo e planejamento, é CORRETO afirmar que:",
+                opcoes: [
+                    "O mestre deve evitar delegar responsabilidades para manter o controle absoluto do projeto common.",
+                    " 'Para quem não tem direção, todos os ventos são contrários' é uma máxima de Mälzel sobre o metrônomo.",
+                    "Reuniões de balanço são instâncias de desgaste que devem ser evitadas para poupar tempo de ensaio.",
+                    "O líder deve estabelecer metas e criar meios eficazes para vencer as etapas necessárias ao projeto comum.",
+                    "O entusiasmo do grupo é inversamente proporcional ao nível de informações circulantes."
+                ],
+                correta: 3,
+                fund: "Cabe ao líder estabelecer metas e criar as estratégias e táticas eficazes que lhe possibilitem ir vencendo as etapas necessárias para a consecução dos objetivos.",
+                loc: "Fonte: Página 26"
+            },
+            {
+                id: "cap1_38",
+                q: "Quanto aos momentos da 'Administração de Conflitos', assinale a alternativa INCORRETA:",
+                opcoes: [
+                    "O reconhecimento do conflito e a localização de suas fontes é o primeiro momento indispensável.",
+                    "A utilização de antídotos indicados para cada tipo de crise compõe o segundo momento.",
+                    "O terceiro momento da administração de conflitos consiste na reflexão e na punição pública dos envolvidos.",
+                    "A ação preventiva é o estágio final, baseada na leitura de sinais e aferição do grau de satisfação.",
+                    "Crises usuais dão-se pelo inchamento de egos, boatos e diferenças de produção."
+                ],
+                correta: 2,
+                fund: "O terceiro momento é o 'empreendimento de uma ação preventiva', e não a punição pública.",
+                loc: "Fonte: Páginas 32 e 33"
+            },
+            {
+                id: "cap1_39",
+                q: "Sobre a 'Liderança' no Patrimônio Próprio, é CORRETO afirmar que:",
+                opcoes: [
+                    "Ela se expressa no carisma, no poder de comunicação, animação e na indução natural de entusiasmo.",
+                    "A liderança deve ser lastreada exclusivamente por conhecimentos em Direito e Administração de Negócios.",
+                    "Um regente com liderança inata dispensa o domínio vocacional da matéria musical para reger.",
+                    "A liderança sem talento musical tem valor real superior à liderança lastreada pela competência técnica.",
+                    "A liderança é uma habilidade que se perde rapidamente se o regente interromper o treino de solfejo."
+                ],
+                correta: 0,
+                fund: "A liderança se expressa no carisma... em seu poder de comunicação e, principalmente, de animação... de indução natural e geração de entusiasmo.",
+                loc: "Fonte: Página 20"
+            },
+            {
+                id: "cap1_40",
+                q: "No que se refere ao 'Investimento nas Virtudes', assinale a alternativa INCORRETA:",
+                opcoes: [
+                    "Investir na habilitação de pontos fracos leva à mediocridade do esforço e perda de tempo precioso.",
+                    "O líder deve localizar sonhos, habilidades e projetos de cada liderado para canalizá-los em harmonia.",
+                    "O que importa é o exercício do foco nas competências específicas e não no adestramento das inabilidades.",
+                    "A própria chance de felicidade na vida está na efetuação daquilo que trazemos como potência.",
+                    "O foco principal da liderança de excelência deve ser o adestramento intensivo das inabilidades naturais."
+                ],
+                correta: 4,
+                fund: "O texto diz exatamente o oposto: O que importa é o exercício do foco nas competências específicas e não o adestramento das inabilidades.",
+                loc: "Fonte: Página 31"
+            },
+            {
+                id: "cap1_41",
+                q: "Sobre o relacionamento entre regente e grupo, Ricardo Rocha postula que:",
+                opcoes: [
+                    "A autoridade pessoal e a emanação do carisma são a base da autoridade real.",
+                    "O projeto do líder deve ser imposto de forma ditatorial para garantir a 'limpeza' rítmica.",
+                    "O regente deve agir como um 'agente da opressão' para ser respeitado por seus músicos.",
+                    "A comunicação entre líder e liderado deve ser evitada para preservar o mistério da transcendência.",
+                    "O mestre deve seduzir os músicos com carisma enganoso para ocultar sua falta de técnica."
+                ],
+                correta: 0,
+                fund: "A autoridade real do mestre sustenta-se na emanação do carisma e da autoridade pessoal, superando o simples cargo.",
+                loc: "Fonte: Páginas 25 e 26"
+            },
+            {
+                id: "cap1_42",
+                q: "Quanto ao fator 'Postura e Comportamento do Líder', assinale a alternativa INCORRETA:",
+                opcoes: [
+                    "O regente precisa saber o que quer e como quer antes mesmo de chegar ao pódio.",
+                    "A fala do regente deve ser concisa e assertiva, jamais prolixa ou viciada em adjetivos.",
+                    "O autodomínio é vital para que as decisões do líder sejam isentas de impulsos passionais.",
+                    "Empatia exige sinceridade e coerência; o corpo do regente não pode mentir.",
+                    "No Fator 1, o mestre deve agir como um 'mamífero movido por afeições' que ignora as instâncias técnicas."
+                ],
+                correta: 4,
+                fund: "Embora o autor use o termo 'mamífero... movido por afeições' para descrever o ser humano, ele jamais diz que o regente deve ignorar a técnica em função disso.",
+                loc: "Fonte: Página 28"
+            },
+            {
+                id: "cap1_43",
+                q: "No Patrimônio Adquirido (Formação Musical), a matéria de maior importância é:",
+                opcoes: [
+                    "O solfejo e o ditado acadêmico, por serem exercícios brutos de condicionamento.",
+                    "A Análise, tanto estrutural como funcional, por permitir entender o pensamento do autor.",
+                    "O ouvido absoluto, que é um talento inalienável e impossível de ser cultivado.",
+                    "A técnica de composição original, exclusiva para regentes que pretendem ser autores.",
+                    "O domínio de línguas estrangeiras, substituindo a necessidade de tocar um instrumento."
+                ],
+                correta: 1,
+                fund: "Cabe ao estudante de regência dominar Harmonia e Contraponto... para a matéria de maior importância na regência: a Análise.",
+                loc: "Fonte: Página 21"
+            },
+            {
+                id: "cap1_44",
+                q: "Sobre a 'Administração de Conflitos' e a 'Ação Preventiva', assinale a alternativa INCORRETA:",
+                opcoes: [
+                    "Críticas anônimas podem ser aceitas em pesquisas de satisfação para abrir espaço ao diálogo sincero.",
+                    "Reuniões periódicas para aferição do grau de satisfação são medidas preventivas fundamentais.",
+                    "Pesquisas internas de satisfação devem ser públicas e nominais para garantir a lealdade dos músicos.",
+                    "O líder deve agir como 'antena receptora' de conflitos subterrâneos para evitar crises abertas.",
+                    "A satisfação individual e coletiva é fundamental para o êxito de todo e qualquer empreendimento."
+                ],
+                correta: 2,
+                fund: "Rocha recomenda expressamente que as pesquisas possam ter 'respostas apócrifas ou não' e 'críticas e propostas, igualmente anônimas ou não'.",
+                loc: "Fonte: Página 34"
+            },
+            {
+                id: "cap1_45",
+                q: "Sobre o papel do 'Mestre' (Formação Intelectual), Rocha defende que:",
+                opcoes: [
+                    "Sua autoridade emana exclusivamente do diploma de curso superior em regência orquestral.",
+                    "O regente deve ser um especialista técnico isolado que ignora as áreas administrativa e psicológica.",
+                    "A formação cultural deve restringir-se ao conhecimento das notas musicais de cada época.",
+                    "Ele deve ser um indivíduo culto, preparado para liderar homens e mulheres maduros.",
+                    "O mestre não precisa de autodomínio, pois o seu gênio artístico justifica explosões de paixão."
+                ],
+                correta: 3,
+                fund: "Sendo o regente um autêntico e vocacionado Maestro... alguém na posição de liderança de homens e mulheres maduros e cultos... convém que possua uma sólida formação cultural.",
+                loc: "Fonte: Página 22"
+            },
+            {
+                id: "cap1_46",
+                q: "Quanto às 'Fontes de Crise' citadas no Primeiro Momento, assinale a alternativa INCORRETA:",
+                opcoes: [
+                    "O inchamento de egos é uma fonte inevitável e comum em agrupamentos musicais.",
+                    "Boatos e fofocas geram desconfianças com alta carga tóxica para as relações interpessoais.",
+                    "Diferenças de qualidade e quantidade na produção dos músicos geram conflitos internos.",
+                    "A lentidão na circulação das informações agrava o clima de incerteza e insegurança no grupo.",
+                    "Crises em grupos musicais são fenômenos imprevisíveis causados exclusivamente pela economia global."
+                ],
+                correta: 4,
+                fund: "O autor lista fontes específicas e recorrentes: egos, disparidade de produção e boatos, e não apenas fatores econômicos externos.",
+                loc: "Fonte: Página 32"
+            },
+            {
+                id: "cap1_47",
+                q: "Sobre a 'Autoridade Pessoal', é CORRETO afirmar que:",
+                opcoes: [
+                    "Ela pode ser delegada ao spalla sempre que o mestre se sentir inseguro intelectualmente.",
+                    "Baseia-se no poder de punição financeira que o cargo institucional oferece ao condutor.",
+                    "Passa pela capacidade de compreender os fatos e as pessoas, antecipando soluções para futuros problemas.",
+                    "É desnecessária em orquestras profissionais, onde o músico deve obedecer apenas à batuta.",
+                    "Deve ser exercida com sisudez e arrogância para evitar o desrespeito dos músicos medíocres."
+                ],
+                correta: 2,
+                fund: "Sua autoridade pessoal dá-se... pela sua capacidade de compreender os fatos e as pessoas, relacionar causas e efeitos e antecipar conseqüências.",
+                loc: "Fonte: Página 25"
+            },
+            {
+                id: "cap1_48",
+                q: "Sobre o 'Fator 2' (Implementação dos planos), Rocha postula que:",
+                opcoes: [
+                    "O líder deve evitar delegar responsabilidades para manter o controle total do projeto comum.",
+                    "As pessoas produzem mais quando o plano de metas é mantido em segredo absoluto pelo mestre.",
+                    "O entusiasmo nasce exclusivamente da técnica de batuta, independentemente da comunicação clara.",
+                    "Para quem não tem direção, todos os ventos são contrários, o que exige um Plano de Metas claro.",
+                    "A responsabilidade é um dom inato que a circulação de informações não pode alterar."
+                ],
+                correta: 3,
+                fund: "As pessoas precisam de direção, pois, como diz o ditado, 'para quem não tem direção, todos os ventos são contrários'.",
+                loc: "Fonte: Página 29"
+            },
+            {
+                id: "cap1_49",
+                q: "Sobre a 'Aptidão Física' (Patrimônio Próprio), assinale a alternativa CORRETA:",
+                opcoes: [
+                    "A regência demanda alto poder de concentração e grande sofisticação da inteligência, gerando dispêndio de energia.",
+                    "É uma atividade física leve que dispensa o preparo atlético do manguito rotador após os 30 anos.",
+                    "O regente deve evitar a musculação para não comprometer a flexibilidade da 'visitação' espiritual.",
+                    "A saúde do mestre é um fator secundário que não impacta a indução rítmica da mensagem musical.",
+                    "Problemas físicos crônicos, como dores lombares, são atributos opcionais que embelezam o pódio."
+                ],
+                correta: 0,
+                fund: "Afinal, regência é arte ligada à dança e ao movimento corporal... demanda alto poder de concentração e grande sofisticação da inteligência. Daí o imenso dispêndio de energia física e mental.",
+                loc: "Fonte: Página 20"
+            },
+            {
+                id: "cap1_50",
+                q: "No que diz respeito à 'Capacidade de Mobilização', assinale a alternativa INCORRETA:",
+                opcoes: [
+                    "Através do carisma e da empatia, o líder 'tira o som do grupo' e abre o santuário do espírito.",
+                    "O líder deve tratar os músicos de forma desrespeitosa para extrair a melhor performance sob pressão rítmica.",
+                    "A sonoridade de uma orquestra é influenciada diretamente pelo grau de empatia estabelecido com o mestre.",
+                    "O maestro deve ser um porta-voz das obras musicais que escolhe conduzir, agregando valor à peça.",
+                    "A mobilização construtiva exige que o mestre inspire confiança, respeito e autoridade."
+                ],
+                correta: 1,
+                fund: "Rocha prega exatamente o oposto: o mestre deve inspirar confiança e respeito através de tratamento respeitoso e amigável.",
+                loc: "Fonte: Páginas 26 e 27"
             }
         ],
         "Capítulo 2": [
