@@ -38,7 +38,24 @@
             min-height: 100vh;
             padding: 20px;
         }
-
+.btn-tesoura {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #94a3b8;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    margin-right: 12px;
+    cursor: pointer;
+    z-index: 10;
+}
+.opcao-item.cortada {
+    opacity: 0.25;
+    filter: grayscale(1);
+}
+.opcao-item.cortada .texto-alternativa {
+    text-decoration: line-through;
+}
         .container {
             width: 100%;
             max-width: 480px;
@@ -1871,12 +1888,32 @@ function mostrarQuestao() {
     container.innerHTML = "";
     
     q.opcoes.forEach((opt, i) => {
-        const d = document.createElement('div');
-        d.className = 'opcao';
-        d.innerHTML = `<div class="letra-circulo">${"ABCDE"[i]}</div><span>${opt}</span>`;
-        d.onclick = () => validarResposta(i, d);
-        container.appendChild(d);
-    });
+    const div = document.createElement('div');
+    div.className = "opcao-item";
+    div.id = `opt-${i}`;
+    
+    // Inserção do botão da tesoura
+    const btnTesoura = document.createElement('button');
+    btnTesoura.className = "btn-tesoura";
+    btnTesoura.innerHTML = "✂️";
+    btnTesoura.onclick = (e) => {
+        e.stopPropagation(); // Impede de selecionar a questão
+        div.classList.toggle('cortada');
+        if(div.classList.contains('selected')) div.classList.remove('selected');
+    };
+
+    const span = document.createElement('span');
+    span.className = "texto-alternativa";
+    span.innerText = opt;
+
+    div.appendChild(btnTesoura);
+    div.appendChild(span);
+    
+    div.onclick = () => {
+        if(!div.classList.contains('cortada')) selecionarOpcao(i);
+    };
+    areaOpcoes.appendChild(div);
+});
 }
 
 function validarResposta(idx, elemento) {
