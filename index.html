@@ -1769,6 +1769,7 @@
     } // Fecha a Matéria
 }; // Fecha o bancoDados
 
+<script>
 let historyStack = ['home'];
 let materiaAtual = "";
 let questoesSessao = [];
@@ -1893,75 +1894,83 @@ function prepararSessao(lista, resetar) {
 }
 
 function mostrarQuestao() {
-        const q = questoesSessao[indexAtual];
-        const container = document.getElementById('opcoes-container');
-        const feedback = document.getElementById('feedback-box');
-        
-        feedback.classList.add('hide');
-        container.innerHTML = ""; 
-        document.getElementById('pergunta-texto').innerText = q.q;
-        
-        const total = questoesSessao.length;
-        const prog = ((indexAtual) / total) * 100;
-        document.getElementById('quiz-progress-bar').style.width = prog + "%";
-        document.getElementById('quiz-progress-text').innerText = `QUESTÃO ${indexAtual + 1} DE ${total}`;
+    const q = questoesSessao[indexAtual];
+    const container = document.getElementById('opcoes-container');
+    const feedback = document.getElementById('feedback-box');
+    
+    feedback.classList.add('hide');
+    container.innerHTML = ""; 
+    document.getElementById('pergunta-texto').innerText = q.q;
+    
+    const total = questoesSessao.length;
+    const prog = ((indexAtual) / total) * 100;
+    document.getElementById('quiz-progress-bar').style.width = prog + "%";
+    document.getElementById('quiz-progress-text').innerText = `QUESTÃO ${indexAtual + 1} DE ${total}`;
 
-        const letras = ["A", "B", "C", "D", "E"];
+    const letras = ["A", "B", "C", "D", "E"];
 
-        q.opcoes.forEach((texto, i) => {
-            const divOpcao = document.createElement('div');
-            divOpcao.className = 'opcao';
-            divOpcao.id = `opt-${i}`;
+    q.opcoes.forEach((texto, i) => {
+        const divOpcao = document.createElement('div');
+        divOpcao.className = 'opcao';
+        divOpcao.id = `opt-${i}`;
 
-            // Botão da Tesoura
-            const btnTesoura = document.createElement('button');
-            btnTesoura.className = 'btn-tesoura';
-            btnTesoura.type = 'button';
-            btnTesoura.innerHTML = '✂️';
-            btnTesoura.onclick = (e) => {
-                e.stopPropagation(); 
-                divOpcao.classList.toggle('cortada');
-            };
+        // Botão da Tesoura
+        const btnTesoura = document.createElement('button');
+        btnTesoura.className = 'btn-tesoura';
+        btnTesoura.type = 'button';
+        btnTesoura.innerHTML = '✂️';
+        btnTesoura.onclick = (e) => {
+            e.stopPropagation(); 
+            divOpcao.classList.toggle('cortada');
+        };
 
-            // Círculo da Letra
-            const divLetra = document.createElement('div');
-            divLetra.className = 'letra-circulo';
-            divLetra.innerText = letras[i];
+        // Círculo da Letra
+        const divLetra = document.createElement('div');
+        divLetra.className = 'letra-circulo';
+        divLetra.innerText = letras[i];
 
-            // Texto da Alternativa
-            const spanTexto = document.createElement('span');
-            spanTexto.className = 'texto-alternativa';
-            spanTexto.innerText = texto;
+        // Texto da Alternativa
+        const spanTexto = document.createElement('span');
+        spanTexto.className = 'texto-alternativa';
+        spanTexto.innerText = texto;
 
-            divOpcao.appendChild(btnTesoura);
-            divOpcao.appendChild(divLetra);
-            divOpcao.appendChild(spanTexto);
+        divOpcao.appendChild(btnTesoura);
+        divOpcao.appendChild(divLetra);
+        divOpcao.appendChild(spanTexto);
 
-            // AÇÃO DE CLIQUE: Passando a própria divOpcao para a função original
-            divOpcao.onclick = function() {
-                if(!divOpcao.classList.contains('cortada')) {
-                    // Chamando sua função original: verificarResposta(elemento, indice)
-                    verificarResposta(divOpcao, i);
-                }
-            };
+        // AÇÃO DE CLIQUE CORRIGIDA: Chama validarResposta com os parâmetros certos
+        divOpcao.onclick = function() {
+            if(!divOpcao.classList.contains('cortada')) {
+                validarResposta(i, divOpcao);
+            }
+        };
 
-            container.appendChild(divOpcao);
-        });
-    }
+        container.appendChild(divOpcao);
+    });
+}
+
 function validarResposta(idx, elemento) {
     const q = questoesSessao[indexAtual];
     const correto = idx === q.correta;
     const opcoes = document.querySelectorAll('.opcao');
 
+    // Trava as opções para evitar múltiplos cliques
     opcoes.forEach(o => o.style.pointerEvents = 'none');
-    elemento.classList.add(correto ? 'correta' : 'errada');
-    opcoes[q.correta].classList.add('correta');
 
+    // Feedback visual
     if(correto) {
+        elemento.classList.add('correta');
         acertosContador++;
         errosGlobal = errosGlobal.filter(e => e.id !== q.id);
-    } else if(!errosGlobal.find(e => e.id === q.id)) {
-        errosGlobal.push(q);
+    } else {
+        elemento.classList.add('errada');
+        // Destaca a correta automaticamente
+        const corretaEl = document.getElementById(`opt-${q.correta}`);
+        if(corretaEl) corretaEl.classList.add('correta');
+        
+        if(!errosGlobal.find(e => e.id === q.id)) {
+            errosGlobal.push(q);
+        }
     }
 
     if(!respondidasGlobal.includes(q.id)) respondidasGlobal.push(q.id);
@@ -2003,6 +2012,3 @@ if ('serviceWorker' in navigator) {
 
 atualizarStatsHome();
 </script>
-
-</body>
-</html>
