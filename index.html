@@ -1893,43 +1893,65 @@ function prepararSessao(lista, resetar) {
 }
 
 function mostrarQuestao() {
-    const q = questoesSessao[indexAtual];
-    document.getElementById('pergunta-texto').innerText = q.q;
-    document.getElementById('quiz-progress-text').innerText = `${indexAtual + 1} de ${questoesSessao.length}`;
-    document.getElementById('quiz-progress-bar').style.width = `${((indexAtual + 1) / questoesSessao.length) * 100}%`;
-    
-    document.getElementById('feedback-box').classList.add('hide');
-    const container = document.getElementById('opcoes-container');
-    container.innerHTML = "";
-    
-    q.opcoes.forEach((opt, i) => {
-    const div = document.createElement('div');
-    div.className = "opcao-item";
-    div.id = `opt-${i}`;
-    
-    // Inserção do botão da tesoura
-    const btnTesoura = document.createElement('button');
-    btnTesoura.className = "btn-tesoura";
-    btnTesoura.innerHTML = "✂️";
-    btnTesoura.onclick = (e) => {
-        e.stopPropagation(); // Impede de selecionar a questão
-        div.classList.toggle('cortada');
-        if(div.classList.contains('selected')) div.classList.remove('selected');
-    };
+        const q = questoesSessao[indexAtual];
+        const container = document.getElementById('opcoes-container');
+        const feedback = document.getElementById('feedback-box');
+        
+        feedback.classList.add('hide');
+        container.innerHTML = ""; // Limpa a questão anterior
+        document.getElementById('pergunta-texto').innerText = q.q;
+        
+        // Atualiza a barra de progresso e o texto
+        const total = questoesSessao.length;
+        const prog = ((indexAtual) / total) * 100;
+        document.getElementById('quiz-progress-bar').style.width = prog + "%";
+        document.getElementById('quiz-progress-text').innerText = `QUESTÃO ${indexAtual + 1} DE ${total}`;
 
-    const span = document.createElement('span');
-    span.className = "texto-alternativa";
-    span.innerText = opt;
+        const letras = ["A", "B", "C", "D", "E"];
 
-    div.appendChild(btnTesoura);
-    div.appendChild(span);
-    
-    div.onclick = () => {
-        if(!div.classList.contains('cortada')) selecionarOpcao(i);
-    };
-    areaOpcoes.appendChild(div);
-});
-}
+        q.opcoes.forEach((texto, i) => {
+            // Cria o container da opção
+            const divOpcao = document.createElement('div');
+            divOpcao.className = 'opcao';
+            divOpcao.id = `opt-${i}`;
+
+            // 1. Cria o Botão da Tesoura
+            const btnTesoura = document.createElement('button');
+            btnTesoura.className = 'btn-tesoura';
+            btnTesoura.type = 'button';
+            btnTesoura.innerHTML = '✂️';
+            btnTesoura.onclick = (e) => {
+                e.stopPropagation(); // Impede de marcar a questão como certa/errada
+                divOpcao.classList.toggle('cortada');
+            };
+
+            // 2. Cria o Círculo da Letra (A, B, C...)
+            const divLetra = document.createElement('div');
+            divLetra.className = 'letra-circulo';
+            divLetra.innerText = letras[i];
+
+            // 3. Cria o Texto da Alternativa
+            const spanTexto = document.createElement('span');
+            spanTexto.className = 'texto-alternativa';
+            spanTexto.innerText = texto;
+
+            // Monta tudo dentro da divOpcao na ordem correta
+            divOpcao.appendChild(btnTesoura);
+            divOpcao.appendChild(divLetra);
+            divOpcao.appendChild(spanTexto);
+
+            // Ação de clicar na alternativa para responder
+            divOpcao.onclick = () => {
+                // Só responde se a questão NÃO estiver cortada pela tesoura
+                if(!divOpcao.classList.contains('cortada')) {
+                    verificarResposta(i);
+                }
+            };
+
+            // Adiciona a opção pronta ao container da tela
+            container.appendChild(divOpcao);
+        });
+    }
 
 function validarResposta(idx, elemento) {
     const q = questoesSessao[indexAtual];
