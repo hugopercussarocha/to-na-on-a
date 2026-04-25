@@ -203,7 +203,17 @@
 </div>
 
 <script>
-    const bancoDados = {
+let historyStack = ['home'];
+let materiaAtual = "";
+let questoesSessao = [];
+let indexAtual = 0;
+
+let errosGlobal = JSON.parse(localStorage.getItem('erros_regencia')) || [];
+let respondidasGlobal = JSON.parse(localStorage.getItem('respondidas_regencia')) || [];
+let acertosContador = parseInt(localStorage.getItem('acertos_total')) || 0;
+
+// --- BANCO DE DADOS (Certifique-se de que ele está ANTES das funções que o usam) ---
+const bancoDados = {
     "Regência - Uma arte Complexa- Ricardo Rocha": {
         "Capítulo 1": [
             {
@@ -1769,17 +1779,6 @@
     } // Fecha a Matéria
 }; // Fecha o bancoDados
 
-<script>
-let historyStack = ['home'];
-let materiaAtual = "";
-let questoesSessao = [];
-let indexAtual = 0;
-
-let errosGlobal = JSON.parse(localStorage.getItem('erros_regencia')) || [];
-let respondidasGlobal = JSON.parse(localStorage.getItem('respondidas_regencia')) || [];
-let acertosContador = parseInt(localStorage.getItem('acertos_total')) || 0;
-
-// --- NAVEGAÇÃO ---
 function navegarPara(view, data = null) {
     const views = ['home', 'materias', 'capitulos', 'quiz'];
     views.forEach(v => {
@@ -1914,7 +1913,6 @@ function mostrarQuestao() {
         divOpcao.className = 'opcao';
         divOpcao.id = `opt-${i}`;
 
-        // Botão da Tesoura
         const btnTesoura = document.createElement('button');
         btnTesoura.className = 'btn-tesoura';
         btnTesoura.type = 'button';
@@ -1924,12 +1922,10 @@ function mostrarQuestao() {
             divOpcao.classList.toggle('cortada');
         };
 
-        // Círculo da Letra
         const divLetra = document.createElement('div');
         divLetra.className = 'letra-circulo';
         divLetra.innerText = letras[i];
 
-        // Texto da Alternativa
         const spanTexto = document.createElement('span');
         spanTexto.className = 'texto-alternativa';
         spanTexto.innerText = texto;
@@ -1938,7 +1934,7 @@ function mostrarQuestao() {
         divOpcao.appendChild(divLetra);
         divOpcao.appendChild(spanTexto);
 
-        // AÇÃO DE CLIQUE CORRIGIDA: Chama validarResposta com os parâmetros certos
+        // CORREÇÃO AQUI: Chamando validarResposta(indice, elemento)
         divOpcao.onclick = function() {
             if(!divOpcao.classList.contains('cortada')) {
                 validarResposta(i, divOpcao);
@@ -1954,17 +1950,15 @@ function validarResposta(idx, elemento) {
     const correto = idx === q.correta;
     const opcoes = document.querySelectorAll('.opcao');
 
-    // Trava as opções para evitar múltiplos cliques
     opcoes.forEach(o => o.style.pointerEvents = 'none');
-
-    // Feedback visual
+    
+    // Aplica classes de cores do seu CSS
     if(correto) {
         elemento.classList.add('correta');
         acertosContador++;
         errosGlobal = errosGlobal.filter(e => e.id !== q.id);
     } else {
         elemento.classList.add('errada');
-        // Destaca a correta automaticamente
         const corretaEl = document.getElementById(`opt-${q.correta}`);
         if(corretaEl) corretaEl.classList.add('correta');
         
