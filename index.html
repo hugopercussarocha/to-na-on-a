@@ -1898,10 +1898,9 @@ function mostrarQuestao() {
         const feedback = document.getElementById('feedback-box');
         
         feedback.classList.add('hide');
-        container.innerHTML = ""; // Limpa a questão anterior
+        container.innerHTML = ""; 
         document.getElementById('pergunta-texto').innerText = q.q;
         
-        // Atualiza a barra de progresso e o texto
         const total = questoesSessao.length;
         const prog = ((indexAtual) / total) * 100;
         document.getElementById('quiz-progress-bar').style.width = prog + "%";
@@ -1910,45 +1909,43 @@ function mostrarQuestao() {
         const letras = ["A", "B", "C", "D", "E"];
 
         q.opcoes.forEach((texto, i) => {
-            // Cria o container da opção
             const divOpcao = document.createElement('div');
             divOpcao.className = 'opcao';
             divOpcao.id = `opt-${i}`;
 
-            // 1. Cria o Botão da Tesoura
+            // Botão da Tesoura
             const btnTesoura = document.createElement('button');
             btnTesoura.className = 'btn-tesoura';
             btnTesoura.type = 'button';
             btnTesoura.innerHTML = '✂️';
             btnTesoura.onclick = (e) => {
-                e.stopPropagation(); // Impede de marcar a questão como certa/errada
+                e.stopPropagation(); 
                 divOpcao.classList.toggle('cortada');
             };
 
-            // 2. Cria o Círculo da Letra (A, B, C...)
+            // Círculo da Letra
             const divLetra = document.createElement('div');
             divLetra.className = 'letra-circulo';
             divLetra.innerText = letras[i];
 
-            // 3. Cria o Texto da Alternativa
+            // Texto da Alternativa
             const spanTexto = document.createElement('span');
             spanTexto.className = 'texto-alternativa';
             spanTexto.innerText = texto;
 
-            // Monta tudo dentro da divOpcao na ordem correta
             divOpcao.appendChild(btnTesoura);
             divOpcao.appendChild(divLetra);
             divOpcao.appendChild(spanTexto);
 
-            // Ação de clicar na alternativa para responder
+            // AÇÃO DE CLIQUE: 
+            // Aqui garantimos que ao clicar na div, a resposta seja processada
             divOpcao.onclick = () => {
-                // Só responde se a questão NÃO estiver cortada pela tesoura
                 if(!divOpcao.classList.contains('cortada')) {
-                    verificarResposta(i);
+                    // Chama a função que já existe no seu código original
+                    verificarResposta(i); 
                 }
             };
 
-            // Adiciona a opção pronta ao container da tela
             container.appendChild(divOpcao);
         });
     }
