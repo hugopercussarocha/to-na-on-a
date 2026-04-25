@@ -1937,12 +1937,13 @@ function mostrarQuestao() {
             divOpcao.appendChild(divLetra);
             divOpcao.appendChild(spanTexto);
 
-            // AÇÃO DE CLIQUE: 
-            // Aqui garantimos que ao clicar na div, a resposta seja processada
+            // AÇÃO DE CLIQUE AJUSTADA
             divOpcao.onclick = () => {
                 if(!divOpcao.classList.contains('cortada')) {
-                    // Chama a função que já existe no seu código original
-                    verificarResposta(i); 
+                    // No seu código original, a função verificarResposta 
+                    // usa o "this" ou espera o elemento. 
+                    // Passamos o elemento 'divOpcao' para ela.
+                    verificarResposta(divOpcao, i); 
                 }
             };
 
