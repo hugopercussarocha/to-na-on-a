@@ -38,24 +38,35 @@
             min-height: 100vh;
             padding: 20px;
         }
-.btn-tesoura {
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    color: #94a3b8;
-    width: 30px;
-    height: 30px;
-    border-radius: 6px;
-    margin-right: 12px;
-    cursor: pointer;
-    z-index: 10;
-}
-.opcao-item.cortada {
-    opacity: 0.25;
-    filter: grayscale(1);
-}
-.opcao-item.cortada .texto-alternativa {
-    text-decoration: line-through;
-}
+
+        /* Estilos da Tesoura e Corte */
+        .btn-tesoura {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            margin-right: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+        .btn-tesoura:hover { background: rgba(255, 255, 255, 0.2); color: #fff; }
+
+        /* Efeito visual de alternativa desconsiderada */
+        .opcao.cortada {
+            opacity: 0.2;
+            filter: grayscale(1);
+        }
+        .opcao.cortada .texto-alternativa {
+            text-decoration: line-through;
+        }
+
         .container {
             width: 100%;
             max-width: 480px;
@@ -118,16 +129,21 @@
         .progress-mini-fill { height: 100%; background: var(--primary-gradient); transition: width 0.8s ease; }
 
         .question-text { font-size: 1.15rem; line-height: 1.6; margin-bottom: 30px; }
+
         .opcao {
             display: flex; align-items: center; background: var(--card-bg);
             border: 1px solid var(--border-white); padding: 16px; border-radius: 18px;
             margin-bottom: 12px; cursor: pointer; transition: var(--transition);
         }
+
         .letra-circulo {
             width: 34px; height: 34px; border: 1px solid var(--border-white);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            margin-right: 15px; font-size: 13px; font-weight: 700;
+            margin-right: 15px; font-size: 13px; font-weight: 700; flex-shrink: 0;
         }
+
+        .texto-alternativa { flex: 1; pointer-events: none; }
+
         .opcao.correta { background: var(--success) !important; color: #000; font-weight: 600; }
         .opcao.errada { background: var(--danger) !important; color: #fff; }
 
@@ -187,8 +203,7 @@
 </div>
 
 <script>
-// --- BANCO DE DADOS ---
-const bancoDados = {
+    const bancoDados = {
     "Regência - Uma arte Complexa- Ricardo Rocha": {
         "Capítulo 1": [
             {
