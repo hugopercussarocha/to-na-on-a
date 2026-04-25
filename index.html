@@ -63,9 +63,11 @@
             opacity: 0.2;
             filter: grayscale(1);
         }
-        .opcao.cortada .texto-alternativa {
-            text-decoration: line-through;
-        }
+        .opcao.cortada {
+        opacity: 0.2; /* Fica bem clarinho */
+        filter: grayscale(1); /* Fica em preto e branco */
+        pointer-events: none; /* Impede cliques acidentais */
+    }
 
         .container {
             width: 100%;
@@ -144,8 +146,29 @@
 
         .texto-alternativa { flex: 1; pointer-events: none; }
 
-        .opcao.correta { background: var(--success) !important; color: #000; font-weight: 600; }
-        .opcao.errada { background: var(--danger) !important; color: #fff; }
+       .opcao.correta {
+        background: rgba(34, 197, 94, 0.2) !important;
+        border-color: #22c55e !important;
+        opacity: 1 !important; /* Força a volta da visibilidade */
+        filter: none !important; /* Remove o efeito de cinza */
+        transform: scale(1.02); /* Dá um leve destaque na resposta certa */
+    }
+
+    .opcao.correta .letra-circulo {
+        background: #22c55e !important;
+        color: white !important;
+    }
+
+    .opcao.errada {
+        background: rgba(239, 68, 68, 0.2) !important;
+        border-color: #ef4444 !important;
+    }
+
+    /* Esconde o ícone da tesoura assim que a resposta é revelada */
+    .opcao.correta .btn-tesoura, 
+    .opcao.errada .btn-tesoura {
+        display: none;
+    }
 
         .btn-nav { background: none; border: none; color: var(--text-sec); cursor: pointer; margin-bottom: 20px; }
     </style>
