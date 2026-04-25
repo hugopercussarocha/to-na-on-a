@@ -1937,20 +1937,17 @@ function mostrarQuestao() {
             divOpcao.appendChild(divLetra);
             divOpcao.appendChild(spanTexto);
 
-            // AÇÃO DE CLIQUE AJUSTADA
-            divOpcao.onclick = () => {
+            // AÇÃO DE CLIQUE: Passando a própria divOpcao para a função original
+            divOpcao.onclick = function() {
                 if(!divOpcao.classList.contains('cortada')) {
-                    // No seu código original, a função verificarResposta 
-                    // usa o "this" ou espera o elemento. 
-                    // Passamos o elemento 'divOpcao' para ela.
-                    verificarResposta(divOpcao, i); 
+                    // Chamando sua função original: verificarResposta(elemento, indice)
+                    verificarResposta(divOpcao, i);
                 }
             };
 
             container.appendChild(divOpcao);
         });
     }
-
 function validarResposta(idx, elemento) {
     const q = questoesSessao[indexAtual];
     const correto = idx === q.correta;
