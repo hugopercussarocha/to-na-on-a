@@ -1974,7 +1974,7 @@ function validarResposta(idx, elemento) {
     localStorage.setItem('acertos_total', acertosContador.toString());
 
     document.getElementById('feed-status').innerText = correto ? "✅ Excelente!" : "❌ Observação técnica";
-    document.getElementById('feed-fundamentacao').innerHTML = `${q.fund}<br><br><strong>${fonte:q.loc}</strong>`;
+    document.getElementById('feed-fundamentacao').innerHTML = `${q.fund}<br><br><strong>${:q.loc}</strong>`;
     document.getElementById('feedback-box').classList.remove('hide');
     atualizarStatsHome();
 }
