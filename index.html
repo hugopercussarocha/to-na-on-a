@@ -55,19 +55,28 @@
             font-size: 14px;
             transition: var(--transition);
             flex-shrink: 0;
+            z-index: 10; /* Garante que a tesoura fique sobre o clique da opção */
         }
-        .btn-tesoura:hover { background: rgba(255, 255, 255, 0.2); color: #fff; }
 
-        /* Efeito visual de alternativa desconsiderada */
-        .opcao.cortada {
-            opacity: 0.2;
-            filter: grayscale(1);
+        .btn-tesoura:hover { 
+            background: rgba(255, 255, 255, 0.2); 
+            color: #fff; 
         }
+
+        /* Efeito visual de alternativa desconsiderada (Permite desfazer) */
         .opcao.cortada {
-        opacity: 0.2; /* Fica bem clarinho */
-        filter: grayscale(1); /* Fica em preto e branco */
-        pointer-events: none; /* Impede cliques acidentais */
-    }
+    opacity: 0.3;
+    text-decoration: line-through;
+    filter: grayscale(1);
+    /* Removido o pointer-events para permitir clicar na tesoura de novo */
+    cursor: not-allowed;
+}
+
+.opcao.cortada .btn-tesoura {
+    opacity: 1;
+    filter: none;
+    cursor: pointer;
+}
 
         .container {
             width: 100%;
@@ -3636,8 +3645,10 @@ function mostrarQuestao() {
         btnTesoura.className = 'btn-tesoura';
         btnTesoura.type = 'button';
         btnTesoura.innerHTML = '✂️';
+        
+        // Função da Tesoura: Liga/Desliga o corte
         btnTesoura.onclick = (e) => {
-            e.stopPropagation(); 
+            e.stopPropagation(); // Impede que o clique selecione a resposta
             divOpcao.classList.toggle('cortada');
         };
 
@@ -3653,8 +3664,9 @@ function mostrarQuestao() {
         divOpcao.appendChild(divLetra);
         divOpcao.appendChild(spanTexto);
 
-        // CORREÇÃO AQUI: Chamando validarResposta(indice, elemento)
+        // Ação de selecionar a resposta
         divOpcao.onclick = function() {
+            // Só valida se a opção NÃO estiver cortada
             if(!divOpcao.classList.contains('cortada')) {
                 validarResposta(i, divOpcao);
             }
