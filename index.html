@@ -3502,13 +3502,14 @@ const bancoDados = {
         correta: 1,
         fund: "O autor descreve crise e desmonte de estruturas, contradizendo a ideia de crescimento infinito.",
         loc: "Fonte: Página 156"
-            },
-        ] // Fecha o Capítulo
-    } // Fecha a Matéria
-    {"A Arte da Regência - Ed. 2002)",
-    [
+        } // Fecha o objeto da questão 50
+    ] // Fecha o array de questões do livro anterior
+}, // VÍRGULA AQUI: Fecha o objeto do livro anterior e separa para o próximo
+{
+    titulo: "A Arte da Regência - Ed. 2002", // Defina uma chave 'titulo'
+    questoes: [ // Defina uma chave 'questoes' para o seu array
         {
-            id: 1,
+            id: "reg2002_1", // Sugestão: Use prefixo para evitar IDs repetidos
             q: "Sobre a regência no século XVIII, assinale a opção INCORRETA:",
             opcoes: [
                 "A direção era exercida de forma não autônoma, muitas vezes dividida entre o cravo e o primeiro violino.",
