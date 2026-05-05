@@ -4211,146 +4211,233 @@ const bancoDados = {
     } // Fecha a Matéria
 }; // Fecha o bancoDados
 
-let materiaAtual = "";
-let capituloAtual = "";
-let questoesAtuais = [];
-let indiceQuestao = 0;
-let erros = [];
-let modoRevisao = false;
-
-// --- FUNÇÕES DE NAVEGAÇÃO ---
-function navegarPara(telaId) {
-    // Esconde todas as telas
-    document.querySelectorAll('.container > div').forEach(div => div.classList.add('hide'));
-    // Mostra a tela desejada
-    document.getElementById('view-' + telaId).classList.remove('hide');
+function navegarPara(view, data = null) {
+    const views = ['home', 'materias', 'capitulos', 'quiz'];
+    views.forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        if(el) el.classList.add('hide');
+    });
     
-    if (telaId === 'materias') renderizarMaterias();
+    const targetView = document.getElementById(`view-${view}`);
+    if (targetView) {
+        targetView.classList.remove('hide');
+        if (historyStack[historyStack.length - 1] !== view) {
+            historyStack.push(view);
+        }
+    }
+
+    if(view === 'materias') renderMaterias();
+    if(view === 'capitulos') renderCapitulos(data);
 }
 
 function voltar() {
-    if (!document.getElementById('view-quiz').classList.contains('hide')) {
-        navegarPara('capitulos');
-    } else if (!document.getElementById('view-capitulos').classList.contains('hide')) {
-        navegarPara('materias');
-    } else {
-        navegarPara('home');
+    if(historyStack.length > 1) {
+        historyStack.pop();
+        const anterior = historyStack.pop();
+        navegarPara(anterior);
     }
 }
 
-// --- LÓGICA DO SIMULADOR ---
-function renderizarMaterias() {
-    const lista = document.getElementById('materias-list');
-    lista.innerHTML = "";
-    Object.keys(bancoDados).forEach(materia => {
+// --- RENDERIZADORES ---
+function renderMaterias() {
+    const list = document.getElementById('materias-list');
+    if(!list) return;
+    
+    list.innerHTML = "";
+    const materias = Object.keys(bancoDados);
+    
+    materias.forEach(mat => {
         const div = document.createElement('div');
         div.className = 'list-item';
-        div.innerHTML = `<span>${materia}</span>`;
-        div.onclick = () => {
-            materiaAtual = materia;
-            renderizarCapitulos();
-        };
-        lista.appendChild(div);
+        div.innerHTML = `<span>${mat}</span><span>›</span>`;
+        div.onclick = () => navegarPara('capitulos', mat);
+        list.appendChild(div);
     });
 }
 
-function renderizarCapitulos() {
-    navegarPara('capitulos');
-    const lista = document.getElementById('capitulos-list');
-    lista.innerHTML = "";
-    Object.keys(bancoDados[materiaAtual]).forEach(cap => {
-        const div = document.createElement('div');
-        div.className = 'list-item';
-        div.innerHTML = `<span>${cap}</span>`;
-        div.onclick = () => iniciarQuiz(cap);
-        lista.appendChild(div);
+function renderCapitulos(mat) {
+    if (!mat || !bancoDados[mat]) return;
+    materiaAtual = mat;
+    document.getElementById('cap-title-header').innerText = mat;
+    
+    const list = document.getElementById('capitulos-list');
+    list.innerHTML = "";
+    
+    let todasQuestoes = [];
+    Object.values(bancoDados[mat]).forEach(c => {
+        todasQuestoes = todasQuestoes.concat(c);
+    });
+    
+    list.appendChild(createCapCard("🔥 Mistão da Matéria", todasQuestoes, true));
+
+    Object.keys(bancoDados[mat]).forEach(cap => {
+        list.appendChild(createCapCard(cap, bancoDados[mat][cap]));
     });
 }
 
-function iniciarQuiz(capitulo) {
-    capituloAtual = capitulo;
-    questoesAtuais = [...bancoDados[materiaAtual][capitulo]];
-    indiceQuestao = 0;
-    erros = [];
-    modoRevisao = false;
+function createCapCard(label, lista, isMistao = false) {
+    const feitas = lista.filter(q => respondidasGlobal.includes(q.id)).length;
+    const total = lista.length;
+    const pct = total > 0 ? (feitas / total) * 100 : 0;
+    
+    const div = document.createElement('div');
+    div.className = 'list-item';
+    div.style.flexDirection = 'column';
+    div.style.alignItems = 'stretch';
+    div.onclick = () => isMistao ? iniciarMistao(materiaAtual) : iniciarQuiz(materiaAtual, label);
+
+    div.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; width: 100%;">
+            <div>
+                <p style="font-size:14px; font-weight:600;">${label}</p>
+                <p style="font-size:11px; color:var(--text-sec); margin-top:4px;">${feitas}/${total} questões</p>
+            </div>
+            <span style="color:var(--text-sec)">›</span>
+        </div>
+        <div class="progress-mini-bg"><div class="progress-mini-fill" style="width:${pct}%"></div></div>
+    `;
+    return div;
+}
+
+function iniciarQuiz(mat, cap) {
+    const lista = bancoDados[mat][cap];
+    const pendentes = lista.filter(q => !respondidasGlobal.includes(q.id));
+    prepararSessao(pendentes.length > 0 ? pendentes : lista, pendentes.length === 0);
+}
+
+function iniciarMistao(mat) {
+    let todas = [];
+    Object.values(bancoDados[mat]).forEach(c => todas = todas.concat(c));
+    const pendentes = todas.filter(q => !respondidasGlobal.includes(q.id));
+    prepararSessao(pendentes.length > 0 ? pendentes : todas, pendentes.length === 0);
+}
+
+function prepararSessao(lista, resetar) {
+    if(resetar) {
+        const idsParaResetar = lista.map(q => q.id);
+        respondidasGlobal = respondidasGlobal.filter(id => !idsParaResetar.includes(id));
+        localStorage.setItem('respondidas_regencia', JSON.stringify(respondidasGlobal));
+    }
+    questoesSessao = [...lista].sort(() => Math.random() - 0.5);
+    indexAtual = 0;
     navegarPara('quiz');
     mostrarQuestao();
 }
 
 function mostrarQuestao() {
-    const q = modoRevisao ? erros[indiceQuestao] : questoesAtuais[indiceQuestao];
-    document.getElementById('quiz-title').innerText = modoRevisao ? "Revisão de Erros" : capituloAtual;
-    document.getElementById('question-text').innerText = q.q;
-    document.getElementById('feedback-box').classList.add('hide');
+    const q = questoesSessao[indexAtual];
+    const container = document.getElementById('opcoes-container');
+    const feedback = document.getElementById('feedback-box');
     
-    const container = document.getElementById('options-container');
-    container.innerHTML = "";
+    feedback.classList.add('hide');
+    container.innerHTML = ""; 
+    document.getElementById('pergunta-texto').innerText = q.q;
+    
+    const total = questoesSessao.length;
+    const prog = ((indexAtual) / total) * 100;
+    document.getElementById('quiz-progress-bar').style.width = prog + "%";
+    document.getElementById('quiz-progress-text').innerText = `QUESTÃO ${indexAtual + 1} DE ${total}`;
 
-    q.opts.forEach((opt, index) => {
-        const btn = document.createElement('button');
-        btn.className = 'list-item opcao';
-        btn.innerText = opt;
-        btn.onclick = () => verificarResposta(index, q);
-        container.appendChild(btn);
+    const letras = ["A", "B", "C", "D", "E"];
+
+    q.opcoes.forEach((texto, i) => {
+        const divOpcao = document.createElement('div');
+        divOpcao.className = 'opcao';
+        divOpcao.id = `opt-${i}`;
+
+        const btnTesoura = document.createElement('button');
+        btnTesoura.className = 'btn-tesoura';
+        btnTesoura.type = 'button';
+        btnTesoura.innerHTML = '✂️';
+        
+        // Função da Tesoura: Liga/Desliga o corte
+        btnTesoura.onclick = (e) => {
+            e.stopPropagation(); // Impede que o clique selecione a resposta
+            divOpcao.classList.toggle('cortada');
+        };
+
+        const divLetra = document.createElement('div');
+        divLetra.className = 'letra-circulo';
+        divLetra.innerText = letras[i];
+
+        const spanTexto = document.createElement('span');
+        spanTexto.className = 'texto-alternativa';
+        spanTexto.innerText = texto;
+
+        divOpcao.appendChild(btnTesoura);
+        divOpcao.appendChild(divLetra);
+        divOpcao.appendChild(spanTexto);
+
+        // Ação de selecionar a resposta
+        divOpcao.onclick = function() {
+            // Só valida se a opção NÃO estiver cortada
+            if(!divOpcao.classList.contains('cortada')) {
+                validarResposta(i, divOpcao);
+            }
+        };
+
+        container.appendChild(divOpcao);
     });
 }
 
-function verificarResposta(index, questao) {
-    const botoes = document.querySelectorAll('.opcao');
-    const feedbackBox = document.getElementById('feedback-box');
-    const feedbackText = document.getElementById('feedback-text');
-    const fundamentacao = document.getElementById('fundamentacao-text');
+function validarResposta(idx, elemento) {
+    const q = questoesSessao[indexAtual];
+    const correto = idx === q.correta;
+    const opcoes = document.querySelectorAll('.opcao');
 
-    botoes.forEach(b => b.disabled = true);
-
-    if (index === questao.correct) {
-        botoes[index].classList.add('correta');
-        feedbackText.innerText = "Correto!";
-        feedbackText.style.color = "#2ecc71";
+    opcoes.forEach(o => o.style.pointerEvents = 'none');
+    
+    // Aplica classes de cores do seu CSS
+    if(correto) {
+        elemento.classList.add('correta');
+        acertosContador++;
+        errosGlobal = errosGlobal.filter(e => e.id !== q.id);
     } else {
-        botoes[index].classList.add('errada');
-        botoes[questao.correct].classList.add('correta');
-        feedbackText.innerText = "Incorreto!";
-        feedbackText.style.color = "#e74c3c";
-        if (!modoRevisao) erros.push(questao);
+        elemento.classList.add('errada');
+        const corretaEl = document.getElementById(`opt-${q.correta}`);
+        if(corretaEl) corretaEl.classList.add('correta');
+        
+        if(!errosGlobal.find(e => e.id === q.id)) {
+            errosGlobal.push(q);
+        }
     }
 
-    fundamentacao.innerText = questao.fund + " (" + questao.loc + ")";
-    feedbackBox.classList.remove('hide');
+    if(!respondidasGlobal.includes(q.id)) respondidasGlobal.push(q.id);
+    
+    localStorage.setItem('erros_regencia', JSON.stringify(errosGlobal));
+    localStorage.setItem('respondidas_regencia', JSON.stringify(respondidasGlobal));
+    localStorage.setItem('acertos_total', acertosContador.toString());
+
+    document.getElementById('feed-status').innerText = correto ? "✅ Excelente!" : "❌ Observação";
+    document.getElementById('feed-fundamentacao').innerHTML = `${q.fund}<br><br><strong>${q.loc}</strong>`;
+    document.getElementById('feedback-box').classList.remove('hide');
+    atualizarStatsHome();
 }
 
 function proximaQuestao() {
-    indiceQuestao++;
-    const lista = modoRevisao ? erros : questoesAtuais;
-
-    if (indiceQuestao < lista.length) {
-        mostrarQuestao();
-    } else {
-        finalizarQuiz();
-    }
+    indexAtual++;
+    if(indexAtual < questoesSessao.length) mostrarQuestao();
+    else { alert("Sessão concluída!"); navegarPara('home'); }
 }
 
-function finalizarQuiz() {
-    const container = document.getElementById('options-container');
-    document.getElementById('question-text').innerText = "Simulado Finalizado!";
-    document.getElementById('feedback-box').classList.add('hide');
-    
-    let html = `<p>Você acertou ${questoesAtuais.length - erros.length} de ${questoesAtuais.length} questões.</p>`;
-    
-    if (erros.length > 0) {
-        html += `<button class="list-item" onclick="iniciarRevisaoErros()">Revisar Erros (${erros.length})</button>`;
-    }
-    
-    html += `<button class="list-item" onclick="navegarPara('home')">Voltar ao Início</button>`;
-    container.innerHTML = html;
+function atualizarStatsHome() {
+    const elAcertos = document.getElementById('home-acertos');
+    const elErros = document.getElementById('home-erros');
+    if(elAcertos) elAcertos.innerText = acertosContador;
+    if(elErros) elErros.innerText = errosGlobal.length;
 }
 
 function iniciarRevisaoErros() {
-    modoRevisao = true;
-    indiceQuestao = 0;
-    mostrarQuestao();
+    if(errosGlobal.length === 0) return alert("Nenhum erro para revisar!");
+    prepararSessao(errosGlobal, false);
 }
 
-// Inicializa o App
-window.onload = () => navegarPara('home');
+// Registro do Service Worker (PWA)
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW fail:', err));
+    });
+}
+
+atualizarStatsHome();
 </script>
