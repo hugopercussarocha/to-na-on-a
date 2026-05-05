@@ -4212,56 +4212,67 @@ const bancoDados = {
 };
 }; // Fecha o bancoDados
 
-function navegarPara(view, data = null) {
-    const views = ['home', 'materias', 'capitulos', 'quiz'];
-    views.forEach(v => {
-        const el = document.getElementById(`view-${v}`);
-        if(el) el.classList.add('hide');
-    });
+function navegarPara(tela) {
+    // Esconde todas as views
+    document.querySelectorAll('.container > div').forEach(div => div.classList.add('hide'));
     
-    const targetView = document.getElementById(`view-${view}`);
+    // Mostra a tela desejada
+    const targetView = document.getElementById(`view-${tela}`);
     if (targetView) {
         targetView.classList.remove('hide');
-        if (historyStack[historyStack.length - 1] !== view) {
-            historyStack.push(view);
-        }
+        historyStack.push(tela);
     }
 
-    if(view === 'materias') renderMaterias();
-    if(view === 'capitulos') renderCapitulos(data);
+    // Se a tela for 'materias', renderiza a lista
+    if (tela === 'materias') {
+        renderizarMaterias();
+    }
 }
 
 function voltar() {
     if(historyStack.length > 1) {
-        historyStack.pop();
-        const anterior = historyStack.pop();
+        historyStack.pop(); // Tira a tela atual
+        const anterior = historyStack.pop(); // Pega a anterior
         navegarPara(anterior);
     }
 }
 
 // --- RENDERIZADORES ---
-function renderMaterias() {
-    const list = document.getElementById('materias-list');
-    if(!list) return;
-    
-    list.innerHTML = "";
-    const materias = Object.keys(bancoDados);
-    
-    materias.forEach(mat => {
-        const div = document.createElement('div');
-        div.className = 'list-item';
-        div.innerHTML = `<span>${mat}</span><span>›</span>`;
-        div.onclick = () => navegarPara('capitulos', mat);
-        list.appendChild(div);
+function renderizarMaterias() {
+    const lista = document.getElementById('materias-list');
+    if(!lista) return;
+    lista.innerHTML = ""; 
+
+    Object.keys(bancoDados).forEach(materia => {
+        const item = document.createElement('div');
+        item.className = 'list-item';
+        // Ajustado para chamar renderCapitulos e navegar
+        item.onclick = () => {
+            renderCapitulos(materia);
+            navegarPara('capitulos');
+        };
+        
+        item.innerHTML = `
+            <div>
+                <strong>${materia}</strong>
+                <div class="progress-mini-bg">
+                    <div class="progress-mini-fill" style="width: 0%"></div>
+                </div>
+            </div>
+            <span>›</span>
+        `;
+        lista.appendChild(item);
     });
 }
 
 function renderCapitulos(mat) {
     if (!mat || !bancoDados[mat]) return;
     materiaAtual = mat;
-    document.getElementById('cap-title-header').innerText = mat;
+    const titleHeader = document.getElementById('cap-title-header');
+    if(titleHeader) titleHeader.innerText = mat;
     
     const list = document.getElementById('capitulos-list');
+    if(!list) return;
     list.innerHTML = "";
     
     let todasQuestoes = [];
@@ -4269,8 +4280,10 @@ function renderCapitulos(mat) {
         todasQuestoes = todasQuestoes.concat(c);
     });
     
+    // Opção de Mistão
     list.appendChild(createCapCard("🔥 Mistão da Matéria", todasQuestoes, true));
 
+    // Capítulos individuais
     Object.keys(bancoDados[mat]).forEach(cap => {
         list.appendChild(createCapCard(cap, bancoDados[mat][cap]));
     });
@@ -4330,8 +4343,9 @@ function mostrarQuestao() {
     const container = document.getElementById('opcoes-container');
     const feedback = document.getElementById('feedback-box');
     
-    feedback.classList.add('hide');
-    container.innerHTML = ""; 
+    if(feedback) feedback.classList.add('hide');
+    if(container) container.innerHTML = ""; 
+    
     document.getElementById('pergunta-texto').innerText = q.q;
     
     const total = questoesSessao.length;
@@ -4351,9 +4365,8 @@ function mostrarQuestao() {
         btnTesoura.type = 'button';
         btnTesoura.innerHTML = '✂️';
         
-        // Função da Tesoura: Liga/Desliga o corte
         btnTesoura.onclick = (e) => {
-            e.stopPropagation(); // Impede que o clique selecione a resposta
+            e.stopPropagation(); 
             divOpcao.classList.toggle('cortada');
         };
 
@@ -4369,9 +4382,7 @@ function mostrarQuestao() {
         divOpcao.appendChild(divLetra);
         divOpcao.appendChild(spanTexto);
 
-        // Ação de selecionar a resposta
         divOpcao.onclick = function() {
-            // Só valida se a opção NÃO estiver cortada
             if(!divOpcao.classList.contains('cortada')) {
                 validarResposta(i, divOpcao);
             }
@@ -4388,7 +4399,6 @@ function validarResposta(idx, elemento) {
 
     opcoes.forEach(o => o.style.pointerEvents = 'none');
     
-    // Aplica classes de cores do seu CSS
     if(correto) {
         elemento.classList.add('correta');
         acertosContador++;
@@ -4417,8 +4427,12 @@ function validarResposta(idx, elemento) {
 
 function proximaQuestao() {
     indexAtual++;
-    if(indexAtual < questoesSessao.length) mostrarQuestao();
-    else { alert("Sessão concluída!"); navegarPara('home'); }
+    if(indexAtual < questoesSessao.length) {
+        mostrarQuestao();
+    } else { 
+        alert("Sessão concluída!"); 
+        navegarPara('home'); 
+    }
 }
 
 function atualizarStatsHome() {
@@ -4442,3 +4456,5 @@ if ('serviceWorker' in navigator) {
 
 atualizarStatsHome();
 </script>
+</body>
+</html>
