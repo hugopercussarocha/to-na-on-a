@@ -245,7 +245,8 @@ let respondidasGlobal = JSON.parse(localStorage.getItem('respondidas_regencia'))
 let acertosContador = parseInt(localStorage.getItem('acertos_total')) || 0;
 
 // --- BANCO DE DADOS (Certifique-se de que ele está ANTES das funções que o usam) ---
-const bancoDados = "A Arte da Regência - Ed. 2002": {
+const bancoDados = {
+    "A Arte da Regência - Sylvio Lago": {
         "CAPÍTULO 1": [
             {
                 id: "reg2002_1",
@@ -945,12 +946,10 @@ const bancoDados = "A Arte da Regência - Ed. 2002": {
             ],
             correta: 1,
             fund: "Wagner afirma que o compasso (tempo) conveniente é determinado pela natureza da interpretação exigida pela obra.",
-            loc: "Fonte: Página 123"
-            }
-
-        ]
-
-    },
+            loc: "Fonte: Página 12"
+            },
+        ] // Fecha o Capítulo
+    } // Fecha a Matéria
     "Regência - Uma arte Complexa- Ricardo Rocha": {
         "CAPÍTULO 1": [
             {
@@ -4207,10 +4206,10 @@ const bancoDados = "A Arte da Regência - Ed. 2002": {
         correta: 1,
         fund: "O autor descreve crise e desmonte de estruturas, contradizendo a ideia de crescimento infinito.",
         loc: "Fonte: Página 156"
-             }
-        ]
-    }, // <-- FECHA A MATÉRIA 1 CORRETAMENTE
-}; // <-- FECHA O OBJETO GLOBAL
+            },
+        ] // Fecha o Capítulo
+    } // Fecha a Matéria
+}; // Fecha o bancoDados
 
 let materiaAtual = "";
 let capituloAtual = "";
