@@ -3502,11 +3502,11 @@ const bancoDados = {
         correta: 1,
         fund: "O autor descreve crise e desmonte de estruturas, contradizendo a ideia de crescimento infinito.",
         loc: "Fonte: Página 156"
-        }
+            }
         ]
-    }, // <-- AQUI FECHA A MATÉRIA 1
-    {
-    "A Arte da Regência - Ed. 2002": {
+    }, // <-- FECHA A MATÉRIA 1 CORRETAMENTE
+
+    "A Arte da Regência - Ed. 2002": { // <-- MATÉRIA 2 COMEÇA DIRETO
         "CAPÍTULO 1": [
             {
                 id: "reg2002_1",
@@ -4207,9 +4207,10 @@ const bancoDados = {
             correta: 1,
             fund: "Wagner afirma que o compasso (tempo) conveniente é determinado pela natureza da interpretação exigida pela obra.",
             loc: "Fonte: Página 123"
-        }
-    ]
-};// Fecha o bancoDados
+            }
+        ]
+    } // <-- FECHA A MATÉRIA 2
+}; // <-- FECHA O OBJETO GLOBAL
 
 let materiaAtual = "";
 let capituloAtual = "";
