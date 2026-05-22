@@ -6481,14 +6481,20 @@ function iniciarMistao(mat) {
     prepararSessao(pendentes.length > 0 ? pendentes : todas, pendentes.length === 0);
 }
 
-function prepararSessao(listaQuestoes) {
-    // Garante que a lista de questões mantenha exatamente a ordem original do banco de dados
-    questoesSessao = [...listaQuestoes]; 
+function prepararSessao(lista, resetar, embaralhar = false) {
+    if(resetar) {
+        const idsParaResetar = lista.map(q => q.id);
+        respondidasGlobal = respondidasGlobal.filter(id => !idsParaResetar.includes(id));
+        localStorage.setItem('respondidas_regencia', JSON.stringify(respondidasGlobal));
+    }
     
-    indexAtual = 0;
-    mostrarQuestao(); // Ou a função que você usa para exibir a primeira pergunta
-}
-    questoesSessao = [...lista].sort(() => Math.random() - 0.5);
+    // CORREÇÃO AQUI: Se 'embaralhar' for true, ele mistura. Se for false (padrão), mantém a sequência original do banco de dados.
+    if (embaralhar) {
+        questoesSessao = [...lista].sort(() => Math.random() - 0.5);
+    } else {
+        questoesSessao = [...lista]; // Mantém na íntegra a sequência 1, 2, 3...
+    }
+    
     indexAtual = 0;
     navegarPara('quiz');
     mostrarQuestao();
