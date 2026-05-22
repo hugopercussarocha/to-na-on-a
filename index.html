@@ -6481,12 +6481,13 @@ function iniciarMistao(mat) {
     prepararSessao(pendentes.length > 0 ? pendentes : todas, pendentes.length === 0);
 }
 
-function prepararSessao(lista, resetar) {
-    if(resetar) {
-        const idsParaResetar = lista.map(q => q.id);
-        respondidasGlobal = respondidasGlobal.filter(id => !idsParaResetar.includes(id));
-        localStorage.setItem('respondidas_regencia', JSON.stringify(respondidasGlobal));
-    }
+function prepararSessao(listaQuestoes) {
+    // Garante que a lista de questões mantenha exatamente a ordem original do banco de dados
+    questoesSessao = [...listaQuestoes]; 
+    
+    indexAtual = 0;
+    mostrarQuestao(); // Ou a função que você usa para exibir a primeira pergunta
+}
     questoesSessao = [...lista].sort(() => Math.random() - 0.5);
     indexAtual = 0;
     navegarPara('quiz');
