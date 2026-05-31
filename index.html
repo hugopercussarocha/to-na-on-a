@@ -8362,7 +8362,7 @@ const SUPABASE_KEY = 'sb_publishable_1pwqO3t-peBJdgBj13aK5A_2xUXe2Ql';
 let supabase = null;
 
 // ==========================================
-// 2. INICIALIZAÇÃO DE SEGURANÇA E DISPARO (SUPABASE)
+// 2. INICIALIZAÇÃO FORÇADA DO SUPABASE
 // ==========================================
 function inicializarAplicativo() {
     try {
@@ -8373,23 +8373,22 @@ function inicializarAplicativo() {
             console.log("Supabase conectado com sucesso!");
             configurarPortaria();
         } else {
-            // Segunda checagem preventiva em caso de oscilação na carga do script
             setTimeout(() => {
                 const libRevalida = window.Supabase || window.supabase;
                 if (libRevalida && libRevalida.createClient) {
                     supabase = libRevalida.createClient(SUPABASE_URL, SUPABASE_KEY);
                     configurarPortaria();
                 } else {
-                    alert("Erro: A biblioteca Supabase não respondeu. Recarregue a página em modo anônimo para limpar o cache.");
+                    alert("A biblioteca do Supabase não carregou. Certifique-se de que removeu o 'defer' da linha 8.");
                 }
-            }, 500);
+            }, 600);
         }
     } catch (e) {
-        alert("Erro na carga inicial: " + e.message);
+        alert("Erro na carga inicial do Supabase: " + e.message);
     }
 }
 
-// Garante o disparo seguro independente do estado do ciclo de vida da página
+// Dispara a inicialização imediatamente
 if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", inicializarAplicativo);
 } else {
@@ -8397,7 +8396,7 @@ if (document.readyState === "loading") {
 }
 
 // ==========================================
-// 3. SISTEMA DE PORTARIA (LOGIN COORDENADO)
+// 3. SISTEMA DE PORTARIA (LOGIN PROTEGIDO)
 // ==========================================
 function configurarPortaria() {
     const btnEntrar = document.getElementById("btn-entrar");
@@ -8406,62 +8405,74 @@ function configurarPortaria() {
     const telaPortaria = document.getElementById("tela-portaria");
     const containerSimulador = document.querySelector(".container");
 
-    if (btnEntrar) {
-        // Remove ouvintes duplicados antigos antes de aplicar o definitivo
-        const novoBtn = btnEntrar.cloneNode(true);
-        btnEntrar.parentNode.replaceChild(novoBtn, btnEntrar);
+    if (!btnEntrar) {
+        alert("Erro Crítico: O botão 'btn-entrar' não foi encontrado no HTML.");
+        return;
+    }
 
-        novoBtn.addEventListener("click", async () => {
-            try {
-                const emailDigitado = inputEmail.value.trim().toLowerCase();
-                
-                if (!emailDigitado) {
-                    mostrarErro("Por favor, digite um e-mail válido.");
-                    return;
-                }
+    // Recria o botão para eliminar qualquer trava ou evento fantasma anterior
+    const novoBtn = btnEntrar.cloneNode(true);
+    btnEntrar.parentNode.replaceChild(novoBtn, btnEntrar);
 
-                novoBtn.innerText = "Verificando...";
-                novoBtn.disabled = true;
-                if (msgErro) msgErro.style.display = "none";
-
-                // Consulta segura à tabela de perfis
-                const { data, error } = await supabase
-                    .from('perfis')
-                    .select('assinatura_ativa, pago_ate')
-                    .eq('email', emailDigitado);
-
-                if (error) throw error;
-
-                if (!data || data.length === 0) {
-                    mostrarErro("E-mail não cadastrado. Verifique se digitou corretamente ou se o pagamento foi concluído.");
-                    novoBtn.innerText = "Liberar Meu Acesso";
-                    novoBtn.disabled = false;
-                    return;
-                }
-
-                const perfil = data[0];
-                const dataHoje = new Date();
-                const dataExpiracao = perfil.pago_ate ? new Date(perfil.pago_ate) : null;
-
-                // Liberação condicionada ao status e validade
-                if (perfil.assinatura_ativa === true && dataExpiracao && dataExpiracao > dataHoje) {
-                    if (telaPortaria) telaPortaria.style.display = "none"; 
-                    if (containerSimulador) containerSimulador.style.display = "block";
-                    
-                    localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
-                    navegarPara('home');
-                } else {
-                    mostrarErro("Sua assinatura está inativa ou expirou. Por favor, realize a renovação mensal.");
-                }
-
-            } catch (clickError) {
-                alert("Erro ao consultar banco de dados: " + clickError.message);
+    // TESTE DE VIDA DO BOTÃO: Se clicar, ele TEM que rodar isso aqui primeiro
+    novoBtn.addEventListener("click", async () => {
+        try {
+            console.log("Botão clicado com sucesso!");
+            
+            const emailDigitado = inputEmail ? inputEmail.value.trim().toLowerCase() : "";
+            
+            if (!emailDigitado) {
+                mostrarErro("Por favor, digite um e-mail válido.");
+                return;
             }
 
-            novoBtn.innerText = "Liberar Meu Acesso";
-            novoBtn.disabled = false;
-        });
-    }
+            novoBtn.innerText = "Verificando...";
+            novoBtn.disabled = true;
+            if (msgErro) msgErro.style.display = "none";
+
+            if (!supabase) {
+                alert("Erro: O cliente de banco de dados não foi inicializado. Verifique sua conexão.");
+                novoBtn.innerText = "Liberar Meu Acesso";
+                novoBtn.disabled = false;
+                return;
+            }
+
+            // Consulta ao Supabase
+            const { data, error } = await supabase
+                .from('perfis')
+                .select('assinatura_ativa, pago_ate')
+                .eq('email', emailDigitado);
+
+            if (error) throw error;
+
+            if (!data || data.length === 0) {
+                mostrarErro("E-mail não cadastrado. Verifique a digitação ou o pagamento.");
+                novoBtn.innerText = "Liberar Meu Acesso";
+                novoBtn.disabled = false;
+                return;
+            }
+
+            const perfil = data[0];
+            const dataHoje = new Date();
+            const dataExpiracao = perfil.pago_ate ? new Date(perfil.pago_ate) : null;
+
+            if (perfil.assinatura_ativa === true && dataExpiracao && dataExpiracao > dataHoje) {
+                if (telaPortaria) telaPortaria.style.display = "none"; 
+                if (containerSimulador) containerSimulador.style.display = "block";
+                
+                localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
+                navegarPara('home');
+            } else {
+                mostrarErro("Sua assinatura está inativa ou expirou.");
+            }
+
+        } catch (clickError) {
+            alert("Erro na requisição: " + clickError.message);
+        }
+
+        novoBtn.innerText = "Liberar Meu Acesso";
+        novoBtn.disabled = false;
+    });
 
     function mostrarErro(texto) {
         if (msgErro) {
@@ -8472,7 +8483,6 @@ function configurarPortaria() {
         }
     }
 
-    // Auto-preenchimento opcional se o usuário logou recentemente
     const usuarioSalvo = localStorage.getItem("usuario_autorizado_simulador");
     if (usuarioSalvo && inputEmail) {
         inputEmail.value = usuarioSalvo;
