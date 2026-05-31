@@ -261,7 +261,6 @@
 // ==========================================
 let bancoDados = {};
 try {
-    // Aqui você mudou o "const bancoDados =" para apenas "bancoDados ="
     bancoDados = {
     "A Arte da Regência - Sylvio Lago": {
         "Capítulo 1 - A Direção de Orquestra no Século XVIII e XIX": [
@@ -8350,8 +8349,6 @@ try {
     } // Fecha a Matéria
 }; // Fecha o objeto bancoDados
 } catch (erroBanco) {
-    // Se houver qualquer aspa, chave ou vírgula errada nas questões, 
-    // o app avisa o erro mas NÃO TRAVA a tela de login!
     console.error("Aviso: Há um erro de digitação nas questões: ", erroBanco.message);
 }
 
