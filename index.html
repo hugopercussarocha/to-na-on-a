@@ -8345,6 +8345,9 @@ const bancoDados = {
     } // Fecha a Matéria
 }; // Fecha o bancoDados
 
+Aqui está a segunda parte completa, sem cortes, pronta para substituir tudo o que está abaixo do seu banco de dados (a partir da linha `// ========================================== \n // 1. VARIÁVEIS GLOBAIS E BANCO LOCAL`):
+
+```javascript
 // ==========================================
 // 1. VARIÁVEIS GLOBAIS E BANCO LOCAL
 // ==========================================
@@ -8362,20 +8365,39 @@ const SUPABASE_KEY = 'sb_publishable_1pwqO3t-peBJdgBj13aK5A_2xUXe2Ql';
 let supabase = null;
 
 // ==========================================
-// 2. INICIALIZAÇÃO DE SEGURANÇA (SUPABASE)
+// 2. INICIALIZAÇÃO DE SEGURANÇA E DISPARO (SUPABASE)
 // ==========================================
-window.addEventListener('load', () => {
+function inicializarAplicativo() {
     try {
-        if (window.Supabase && window.Supabase.createClient) {
-            supabase = window.Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const libSupabase = window.Supabase || window.supabase;
+        
+        if (libSupabase && libSupabase.createClient) {
+            supabase = libSupabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            console.log("Supabase conectado com sucesso!");
             configurarPortaria();
         } else {
-            alert("Erro: A biblioteca Supabase não respondeu. Recarregue a página.");
+            // Segunda checagem preventiva em caso de oscilação na carga do script
+            setTimeout(() => {
+                const libRevalida = window.Supabase || window.supabase;
+                if (libRevalida && libRevalida.createClient) {
+                    supabase = libRevalida.createClient(SUPABASE_URL, SUPABASE_KEY);
+                    configurarPortaria();
+                } else {
+                    alert("Erro: A biblioteca Supabase não respondeu. Recarregue a página em modo anônimo para limpar o cache.");
+                }
+            }, 500);
         }
     } catch (e) {
         alert("Erro na carga inicial: " + e.message);
     }
-});
+}
+
+// Garante o disparo seguro independente do estado do ciclo de vida da página
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", inicializarAplicativo);
+} else {
+    inicializarAplicativo();
+}
 
 // ==========================================
 // 3. SISTEMA DE PORTARIA (LOGIN COORDENADO)
@@ -8388,7 +8410,11 @@ function configurarPortaria() {
     const containerSimulador = document.querySelector(".container");
 
     if (btnEntrar) {
-        btnEntrar.addEventListener("click", async () => {
+        // Remove ouvintes duplicados antigos antes de aplicar o definitivo
+        const novoBtn = btnEntrar.cloneNode(true);
+        btnEntrar.parentNode.replaceChild(novoBtn, btnEntrar);
+
+        novoBtn.addEventListener("click", async () => {
             try {
                 const emailDigitado = inputEmail.value.trim().toLowerCase();
                 
@@ -8397,8 +8423,8 @@ function configurarPortaria() {
                     return;
                 }
 
-                btnEntrar.innerText = "Verificando...";
-                btnEntrar.disabled = true;
+                novoBtn.innerText = "Verificando...";
+                novoBtn.disabled = true;
                 if (msgErro) msgErro.style.display = "none";
 
                 // Consulta segura à tabela de perfis
@@ -8411,8 +8437,8 @@ function configurarPortaria() {
 
                 if (!data || data.length === 0) {
                     mostrarErro("E-mail não cadastrado. Verifique se digitou corretamente ou se o pagamento foi concluído.");
-                    btnEntrar.innerText = "Liberar Meu Acesso";
-                    btnEntrar.disabled = false;
+                    novoBtn.innerText = "Liberar Meu Acesso";
+                    novoBtn.disabled = false;
                     return;
                 }
 
@@ -8435,8 +8461,8 @@ function configurarPortaria() {
                 alert("Erro ao consultar banco de dados: " + clickError.message);
             }
 
-            btnEntrar.innerText = "Liberar Meu Acesso";
-            btnEntrar.disabled = false;
+            novoBtn.innerText = "Liberar Meu Acesso";
+            novoBtn.disabled = false;
         });
     }
 
