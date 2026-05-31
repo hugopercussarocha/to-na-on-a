@@ -256,8 +256,13 @@
 
 <script>
 
-// --- BANCO DE DADOS (Certifique-se de que ele está ANTES das funções que o usam) ---
-const bancoDados = {
+// ==========================================
+// BLINDAGEM ANTI-TRAVA DO BANCO DE DADOS
+// ==========================================
+let bancoDados = {};
+try {
+    // Aqui você mudou o "const bancoDados =" para apenas "bancoDados ="
+    bancoDados = {
     "A Arte da Regência - Sylvio Lago": {
         "Capítulo 1 - A Direção de Orquestra no Século XVIII e XIX": [
             {
@@ -8343,7 +8348,12 @@ const bancoDados = {
             }
         ] // Fecha o Capítulo
     } // Fecha a Matéria
-}; // Fecha o bancoDados
+}; // Fecha o objeto bancoDados
+} catch (erroBanco) {
+    // Se houver qualquer aspa, chave ou vírgula errada nas questões, 
+    // o app avisa o erro mas NÃO TRAVA a tela de login!
+    console.error("Aviso: Há um erro de digitação nas questões: ", erroBanco.message);
+}
 
 // ==========================================
 // 1. VARIÁVEIS GLOBAIS E BANCO LOCAL
@@ -8364,80 +8374,71 @@ let supabase = null;
 // ==========================================
 // 2. INICIALIZAÇÃO FORÇADA DO SUPABASE
 // ==========================================
-function inicializarAplicativo() {
+(function() {
     try {
         const libSupabase = window.Supabase || window.supabase;
         
         if (libSupabase && libSupabase.createClient) {
             supabase = libSupabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            console.log("Supabase conectado com sucesso!");
-            configurarPortaria();
+            console.log("Supabase pronto.");
         } else {
-            setTimeout(() => {
-                const libRevalida = window.Supabase || window.supabase;
-                if (libRevalida && libRevalida.createClient) {
-                    supabase = libRevalida.createClient(SUPABASE_URL, SUPABASE_KEY);
-                    configurarPortaria();
-                } else {
-                    alert("A biblioteca do Supabase não carregou. Certifique-se de que removeu o 'defer' da linha 8.");
-                }
-            }, 600);
+            console.warn("Aguardando script externo do Supabase...");
         }
     } catch (e) {
-        alert("Erro na carga inicial do Supabase: " + e.message);
+        console.error("Erro na carga inicial do cliente: " + e.message);
     }
-}
-
-// Dispara a inicialização imediatamente
-if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", inicializarAplicativo);
-} else {
-    inicializarAplicativo();
-}
+    
+    // Força a ativação dos botões da tela de login imediatamente
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", ativarControlesPortaria);
+    } else {
+        ativarControlesPortaria();
+    }
+})();
 
 // ==========================================
-// 3. SISTEMA DE PORTARIA (LOGIN PROTEGIDO)
+// 3. SISTEMA DE PORTARIA (LOGIN INDEPENDENTE)
 // ==========================================
-function configurarPortaria() {
+function ativarControlesPortaria() {
     const btnEntrar = document.getElementById("btn-entrar");
     const inputEmail = document.getElementById("login-email");
     const msgErro = document.getElementById("mensagem-erro");
     const telaPortaria = document.getElementById("tela-portaria");
     const containerSimulador = document.querySelector(".container");
 
-    if (!btnEntrar) {
-        alert("Erro Crítico: O botão 'btn-entrar' não foi encontrado no HTML.");
-        return;
-    }
+    if (!btnEntrar) return;
 
-    // Recria o botão para eliminar qualquer trava ou evento fantasma anterior
-    const novoBtn = btnEntrar.cloneNode(true);
-    btnEntrar.parentNode.replaceChild(novoBtn, btnEntrar);
+    // Reseta clonando o botão para limpar travas de memória do navegador
+    const bkpBtn = btnEntrar.cloneNode(true);
+    btnEntrar.parentNode.replaceChild(bkpBtn, btnEntrar);
 
-    // TESTE DE VIDA DO BOTÃO: Se clicar, ele TEM que rodar isso aqui primeiro
-    novoBtn.addEventListener("click", async () => {
+    bkpBtn.onclick = async function(e) {
+        e.preventDefault();
+        
+        const emailDigitado = inputEmail ? inputEmail.value.trim().toLowerCase() : "";
+        
+        if (!emailDigitado) {
+            mostrarErro("Por favor, digite um e-mail válido.");
+            return;
+        }
+
+        bkpBtn.innerText = "Verificando...";
+        bkpBtn.disabled = true;
+        if (msgErro) msgErro.style.display = "none";
+
+        if (!supabase) {
+            const libRevalida = window.Supabase || window.supabase;
+            if (libRevalida && libRevalida.createClient) {
+                supabase = libRevalida.createClient(SUPABASE_URL, SUPABASE_KEY);
+            } else {
+                alert("Erro: O servidor de autenticação não respondeu. Recarregue a página.");
+                bkpBtn.innerText = "Liberar Meu Acesso";
+                bkpBtn.disabled = false;
+                return;
+            }
+        }
+
         try {
-            console.log("Botão clicado com sucesso!");
-            
-            const emailDigitado = inputEmail ? inputEmail.value.trim().toLowerCase() : "";
-            
-            if (!emailDigitado) {
-                mostrarErro("Por favor, digite um e-mail válido.");
-                return;
-            }
-
-            novoBtn.innerText = "Verificando...";
-            novoBtn.disabled = true;
-            if (msgErro) msgErro.style.display = "none";
-
-            if (!supabase) {
-                alert("Erro: O cliente de banco de dados não foi inicializado. Verifique sua conexão.");
-                novoBtn.innerText = "Liberar Meu Acesso";
-                novoBtn.disabled = false;
-                return;
-            }
-
-            // Consulta ao Supabase
             const { data, error } = await supabase
                 .from('perfis')
                 .select('assinatura_ativa, pago_ate')
@@ -8447,8 +8448,8 @@ function configurarPortaria() {
 
             if (!data || data.length === 0) {
                 mostrarErro("E-mail não cadastrado. Verifique a digitação ou o pagamento.");
-                novoBtn.innerText = "Liberar Meu Acesso";
-                novoBtn.disabled = false;
+                bkpBtn.innerText = "Liberar Meu Acesso";
+                bkpBtn.disabled = false;
                 return;
             }
 
@@ -8463,16 +8464,16 @@ function configurarPortaria() {
                 localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
                 navegarPara('home');
             } else {
-                mostrarErro("Sua assinatura está inativa ou expirou.");
+                mostrarErro("Sua assinatura está inativa ou expirou. Por favor, realize a renovação.");
             }
 
-        } catch (clickError) {
-            alert("Erro na requisição: " + clickError.message);
+        } catch (serverError) {
+            alert("Erro na comunicação com o banco de dados: " + serverError.message);
         }
 
-        novoBtn.innerText = "Liberar Meu Acesso";
-        novoBtn.disabled = false;
-    });
+        bkpBtn.innerText = "Liberar Meu Acesso";
+        bkpBtn.disabled = false;
+    };
 
     function mostrarErro(texto) {
         if (msgErro) {
@@ -8523,7 +8524,10 @@ function renderMaterias() {
     if(!list) return;
     
     list.innerHTML = "";
-    if (typeof bancoDados === 'undefined') return;
+    if (!bancoDados || Object.keys(bancoDados).length === 0) {
+        list.innerHTML = "<p style='padding:20px;color:var(--text-sec);text-align:center;'>Nenhuma matéria carregada ou erro no formato do banco.</p>";
+        return;
+    }
     const materias = Object.keys(bancoDados);
     
     materias.forEach(mat => {
@@ -8536,7 +8540,7 @@ function renderMaterias() {
 }
 
 function renderCapitulos(mat) {
-    if (typeof bancoDados === 'undefined' || !mat || !bancoDados[mat]) return;
+    if (!bancoDados || !mat || !bancoDados[mat]) return;
     materiaAtual = mat;
     document.getElementById('cap-title-header').innerText = mat;
     
@@ -8580,14 +8584,14 @@ function createCapCard(label, lista, isMistao = false) {
 }
 
 function iniciarQuiz(mat, cap) {
-    if (typeof bancoDados === 'undefined') return;
+    if (!bancoDados || !bancoDados[mat]) return;
     const lista = bancoDados[mat][cap];
     const pendentes = lista.filter(q => !respondidasGlobal.includes(q.id));
     prepararSessao(pendentes.length > 0 ? pendentes : lista, pendentes.length === 0);
 }
 
 function iniciarMistao(mat) {
-    if (typeof bancoDados === 'undefined') return;
+    if (!bancoDados || !bancoDados[mat]) return;
     let todas = [];
     Object.values(bancoDados[mat]).forEach(c => todas = todas.concat(c));
     const pendentes = todas.filter(q => !respondidasGlobal.includes(q.id));
@@ -8613,6 +8617,7 @@ function prepararSessao(lista, resetar, embaralhar = false) {
 }
 
 function mostrarQuestao() {
+    if(questoesSessao.length === 0) return;
     const q = questoesSessao[indexAtual];
     const container = document.getElementById('opcoes-container');
     const feedback = document.getElementById('feedback-box');
@@ -8726,7 +8731,6 @@ function iniciarRevisaoErros() {
     prepararSessao(errosGlobal, false);
 }
 
-// Registro estruturado do Service Worker para o PWA
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW fail:', err));
