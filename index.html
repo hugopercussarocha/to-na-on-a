@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Serei Músico Militar - Questões</title>
     
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f1115">
@@ -256,12 +256,8 @@
 
 <script>
 
-// ==========================================
-// BLINDAGEM ANTI-TRAVA DO BANCO DE DADOS
-// ==========================================
-let bancoDados = {};
-try {
-    bancoDados = {
+// --- BANCO DE DADOS (Certifique-se de que ele está ANTES das funções que o usam) ---
+const bancoDados = {
     "A Arte da Regência - Sylvio Lago": {
         "Capítulo 1 - A Direção de Orquestra no Século XVIII e XIX": [
             {
@@ -8344,13 +8340,10 @@ try {
     correta: 1,
     fund: "Bennett identifica Schoenberg, Berg e Webern como o núcleo central do Expressionismo, chamados de Segunda Escola de Viena.",
     fonte: "Roy Bennett, Página 72, parágrafo 2."
-            }
+            },
         ] // Fecha o Capítulo
     } // Fecha a Matéria
-}; // Fecha o objeto bancoDados
-} catch (erroBanco) {
-    console.error("Aviso: Há um erro de digitação nas questões: ", erroBanco.message);
-}
+}; // Fecha o bancoDados
 
 // ==========================================
 // 1. VARIÁVEIS GLOBAIS E BANCO LOCAL
@@ -8369,108 +8362,83 @@ const SUPABASE_KEY = 'sb_publishable_1pwqO3t-peBJdgBj13aK5A_2xUXe2Ql';
 let supabase = null;
 
 // ==========================================
-// 2. INICIALIZAÇÃO FORÇADA DO SUPABASE
+// 2. INICIALIZAÇÃO DE SEGURANÇA (SUPABASE)
 // ==========================================
-(function() {
+window.addEventListener('load', () => {
     try {
-        const libSupabase = window.Supabase || window.supabase;
-        
-        if (libSupabase && libSupabase.createClient) {
-            supabase = libSupabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            console.log("Supabase pronto.");
+        if (window.supabase && window.supabase.createClient) {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            configurarPortaria();
         } else {
-            console.warn("Aguardando script externo do Supabase...");
+            alert("Erro: A biblioteca Supabase não respondeu. Recarregue a página.");
         }
     } catch (e) {
-        console.error("Erro na carga inicial do cliente: " + e.message);
+        alert("Erro na carga inicial: " + e.message);
     }
-    
-    // Força a ativação dos botões da tela de login imediatamente
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", ativarControlesPortaria);
-    } else {
-        ativarControlesPortaria();
-    }
-})();
+});
 
 // ==========================================
-// 3. SISTEMA DE PORTARIA (LOGIN INDEPENDENTE)
+// 3. SISTEMA DE PORTARIA (LOGIN COORDENADO)
 // ==========================================
-function ativarControlesPortaria() {
+function configurarPortaria() {
     const btnEntrar = document.getElementById("btn-entrar");
     const inputEmail = document.getElementById("login-email");
     const msgErro = document.getElementById("mensagem-erro");
     const telaPortaria = document.getElementById("tela-portaria");
     const containerSimulador = document.querySelector(".container");
 
-    if (!btnEntrar) return;
-
-    // Reseta clonando o botão para limpar travas de memória do navegador
-    const bkpBtn = btnEntrar.cloneNode(true);
-    btnEntrar.parentNode.replaceChild(bkpBtn, btnEntrar);
-
-    bkpBtn.onclick = async function(e) {
-        e.preventDefault();
-        
-        const emailDigitado = inputEmail ? inputEmail.value.trim().toLowerCase() : "";
-        
-        if (!emailDigitado) {
-            mostrarErro("Por favor, digite um e-mail válido.");
-            return;
-        }
-
-        bkpBtn.innerText = "Verificando...";
-        bkpBtn.disabled = true;
-        if (msgErro) msgErro.style.display = "none";
-
-        if (!supabase) {
-            const libRevalida = window.Supabase || window.supabase;
-            if (libRevalida && libRevalida.createClient) {
-                supabase = libRevalida.createClient(SUPABASE_URL, SUPABASE_KEY);
-            } else {
-                alert("Erro: O servidor de autenticação não respondeu. Recarregue a página.");
-                bkpBtn.innerText = "Liberar Meu Acesso";
-                bkpBtn.disabled = false;
-                return;
-            }
-        }
-
-        try {
-            const { data, error } = await supabase
-                .from('perfis')
-                .select('assinatura_ativa, pago_ate')
-                .eq('email', emailDigitado);
-
-            if (error) throw error;
-
-            if (!data || data.length === 0) {
-                mostrarErro("E-mail não cadastrado. Verifique a digitação ou o pagamento.");
-                bkpBtn.innerText = "Liberar Meu Acesso";
-                bkpBtn.disabled = false;
-                return;
-            }
-
-            const perfil = data[0];
-            const dataHoje = new Date();
-            const dataExpiracao = perfil.pago_ate ? new Date(perfil.pago_ate) : null;
-
-            if (perfil.assinatura_ativa === true && dataExpiracao && dataExpiracao > dataHoje) {
-                if (telaPortaria) telaPortaria.style.display = "none"; 
-                if (containerSimulador) containerSimulador.style.display = "block";
+    if (btnEntrar) {
+        btnEntrar.addEventListener("click", async () => {
+            try {
+                const emailDigitado = inputEmail.value.trim().toLowerCase();
                 
-                localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
-                navegarPara('home');
-            } else {
-                mostrarErro("Sua assinatura está inativa ou expirou. Por favor, realize a renovação.");
+                if (!emailDigitado) {
+                    mostrarErro("Por favor, digite um e-mail válido.");
+                    return;
+                }
+
+                btnEntrar.innerText = "Verificando...";
+                btnEntrar.disabled = true;
+                if (msgErro) msgErro.style.display = "none";
+
+                // Consulta segura à tabela de perfis
+                const { data, error } = await supabase
+                    .from('perfis')
+                    .select('assinatura_ativa, pago_ate')
+                    .eq('email', emailDigitado);
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    mostrarErro("E-mail não cadastrado. Verifique se digitou corretamente ou se o pagamento foi concluído.");
+                    btnEntrar.innerText = "Liberar Meu Acesso";
+                    btnEntrar.disabled = false;
+                    return;
+                }
+
+                const perfil = data[0];
+                const dataHoje = new Date();
+                const dataExpiracao = perfil.pago_ate ? new Date(perfil.pago_ate) : null;
+
+                // Liberação condicionada ao status e validade
+                if (perfil.assinatura_ativa === true && dataExpiracao && dataExpiracao > dataHoje) {
+                    if (telaPortaria) telaPortaria.style.display = "none"; 
+                    if (containerSimulador) containerSimulador.style.display = "block";
+                    
+                    localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
+                    navegarPara('home');
+                } else {
+                    mostrarErro("Sua assinatura está inativa ou expirou. Por favor, realize a renovação mensal.");
+                }
+
+            } catch (clickError) {
+                alert("Erro ao consultar banco de dados: " + clickError.message);
             }
 
-        } catch (serverError) {
-            alert("Erro na comunicação com o banco de dados: " + serverError.message);
-        }
-
-        bkpBtn.innerText = "Liberar Meu Acesso";
-        bkpBtn.disabled = false;
-    };
+            btnEntrar.innerText = "Liberar Meu Acesso";
+            btnEntrar.disabled = false;
+        });
+    }
 
     function mostrarErro(texto) {
         if (msgErro) {
@@ -8481,6 +8449,7 @@ function ativarControlesPortaria() {
         }
     }
 
+    // Auto-preenchimento opcional se o usuário logou recentemente
     const usuarioSalvo = localStorage.getItem("usuario_autorizado_simulador");
     if (usuarioSalvo && inputEmail) {
         inputEmail.value = usuarioSalvo;
@@ -8521,10 +8490,7 @@ function renderMaterias() {
     if(!list) return;
     
     list.innerHTML = "";
-    if (!bancoDados || Object.keys(bancoDados).length === 0) {
-        list.innerHTML = "<p style='padding:20px;color:var(--text-sec);text-align:center;'>Nenhuma matéria carregada ou erro no formato do banco.</p>";
-        return;
-    }
+    if (typeof bancoDados === 'undefined') return;
     const materias = Object.keys(bancoDados);
     
     materias.forEach(mat => {
@@ -8537,7 +8503,7 @@ function renderMaterias() {
 }
 
 function renderCapitulos(mat) {
-    if (!bancoDados || !mat || !bancoDados[mat]) return;
+    if (typeof bancoDados === 'undefined' || !mat || !bancoDados[mat]) return;
     materiaAtual = mat;
     document.getElementById('cap-title-header').innerText = mat;
     
@@ -8581,14 +8547,14 @@ function createCapCard(label, lista, isMistao = false) {
 }
 
 function iniciarQuiz(mat, cap) {
-    if (!bancoDados || !bancoDados[mat]) return;
+    if (typeof bancoDados === 'undefined') return;
     const lista = bancoDados[mat][cap];
     const pendentes = lista.filter(q => !respondidasGlobal.includes(q.id));
     prepararSessao(pendentes.length > 0 ? pendentes : lista, pendentes.length === 0);
 }
 
 function iniciarMistao(mat) {
-    if (!bancoDados || !bancoDados[mat]) return;
+    if (typeof bancoDados === 'undefined') return;
     let todas = [];
     Object.values(bancoDados[mat]).forEach(c => todas = todas.concat(c));
     const pendentes = todas.filter(q => !respondidasGlobal.includes(q.id));
@@ -8614,7 +8580,6 @@ function prepararSessao(lista, resetar, embaralhar = false) {
 }
 
 function mostrarQuestao() {
-    if(questoesSessao.length === 0) return;
     const q = questoesSessao[indexAtual];
     const container = document.getElementById('opcoes-container');
     const feedback = document.getElementById('feedback-box');
@@ -8728,6 +8693,7 @@ function iniciarRevisaoErros() {
     prepararSessao(errosGlobal, false);
 }
 
+// Registro estruturado do Service Worker para o PWA
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW fail:', err));
