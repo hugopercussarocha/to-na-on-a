@@ -8360,6 +8360,101 @@ const bancoDados = {
     } // Fecha a Matéria
 }; // Fecha o bancoDados
 
+<script>
+// ==========================================
+// 1. CONFIGURAÇÃO E CONEXÃO COM O SUPABASE
+// ==========================================
+const SUPABASE_URL = 'https://orvfhxfpldkfrpzcsbhi.supabase.co/rest/v1/'; 
+const SUPABASE_KEY = 'sb_publishable_1pwqO3t-peBJdgBj13aK5A_2xUXe2Ql';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ==========================================
+// 2. SISTEMA DE PORTARIA E CONTROLE DE ACESSO
+// ==========================================
+document.addEventListener("DOMContentLoaded", () => {
+    const btnEntrar = document.getElementById("btn-entrar");
+    const inputEmail = document.getElementById("login-email");
+    const msgErro = document.getElementById("mensagem-erro");
+    const telaPortaria = document.getElementById("tela-portaria");
+    const containerSimulador = document.querySelector(".container");
+
+    // Executa a validação do e-mail no Banco de Dados
+    if (btnEntrar) {
+        btnEntrar.addEventListener("click", async () => {
+            const emailDigitado = inputEmail.value.trim().toLowerCase();
+            
+            if (!emailDigitado) {
+                mostrarErro("Por favor, digite um e-mail válido.");
+                return;
+            }
+
+            btnEntrar.innerText = "Verificando...";
+            btnEntrar.disabled = true;
+            msgErro.style.display = "none";
+
+            try {
+                // Consulta a tabela 'perfis' criada no Supabase
+                const { data, error } = await supabase
+                    .from('perfis')
+                    .select('assinatura_ativa, pago_ate')
+                    .eq('email', emailDigitado);
+
+                if (error) throw error;
+
+                // Caso o e-mail não exista na tabela
+                if (!data || data.length === 0) {
+                    mostrarErro("E-mail não cadastrado. Verifique se digitou corretamente ou se o pagamento foi concluído.");
+                    btnEntrar.innerText = "Liberar Meu Acesso";
+                    btnEntrar.disabled = false;
+                    return;
+                }
+
+                const perfil = data[0];
+                const dataHoje = new Date();
+                const dataExpiracao = perfil.pago_ate ? new Date(perfil.pago_ate) : null;
+
+                // Valida se a assinatura está ativa e dentro do prazo de validade (2026)
+                if (perfil.assinatura_ativa === true && dataExpiracao && dataExpiracao > dataHoje) {
+                    // SUCESSO! Libera o aplicativo
+                    telaPortaria.style.display = "none"; 
+                    if (containerSimulador) containerSimulador.style.display = "block";
+                    
+                    // Salva localmente para não exigir login toda vez que reabrir o PWA
+                    localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
+                    
+                    // Abre a tela inicial padrão do seu simulador
+                    navegarPara('home');
+                } else {
+                    mostrarErro("Sua assinatura está inativa ou expirou. Por favor, realize a renovação mensal.");
+                }
+
+            } catch (err) {
+                console.error(err);
+                mostrarErro("Erro ao conectar ao servidor. Tente novamente mais tarde.");
+            }
+
+            btnEntrar.innerText = "Liberar Meu Acesso";
+            btnEntrar.disabled = false;
+        });
+    }
+
+    function mostrarErro(texto) {
+        msgErro.innerText = texto;
+        msgErro.style.display = "block";
+    }
+
+    // VERIFICAÇÃO AUTOMÁTICA DE SESSÃO
+    const usuarioSalvo = localStorage.getItem("usuario_autorizado_simulador");
+    if (usuarioSalvo) {
+        if (inputEmail) inputEmail.value = usuarioSalvo;
+        // Se já houver um e-mail salvo anteriormente, tenta validar o acesso direto
+        if (btnEntrar) btnEntrar.click();
+    }
+});
+
+// ==========================================
+// 3. FUNÇÕES NATIVAS DO SEU SIMULADOR
+// ==========================================
 function navegarPara(view, data = null) {
     const views = ['home', 'materias', 'capitulos', 'quiz'];
     views.forEach(v => {
@@ -8468,11 +8563,10 @@ function prepararSessao(lista, resetar, embaralhar = false) {
         localStorage.setItem('respondidas_regencia', JSON.stringify(respondidasGlobal));
     }
     
-    // CORREÇÃO AQUI: Se 'embaralhar' for true, ele mistura. Se for false (padrão), mantém a sequência original do banco de dados.
     if (embaralhar) {
         questoesSessao = [...lista].sort(() => Math.random() - 0.5);
     } else {
-        questoesSessao = [...lista]; // Mantém na íntegra a sequência 1, 2, 3...
+        questoesSessao = [...lista]; 
     }
     
     indexAtual = 0;
@@ -8506,9 +8600,8 @@ function mostrarQuestao() {
         btnTesoura.type = 'button';
         btnTesoura.innerHTML = '✂️';
         
-        // Função da Tesoura: Liga/Desliga o corte
         btnTesoura.onclick = (e) => {
-            e.stopPropagation(); // Impede que o clique selecione a resposta
+            e.stopPropagation(); 
             divOpcao.classList.toggle('cortada');
         };
 
@@ -8524,9 +8617,7 @@ function mostrarQuestao() {
         divOpcao.appendChild(divLetra);
         divOpcao.appendChild(spanTexto);
 
-        // Ação de selecionar a resposta
         divOpcao.onclick = function() {
-            // Só valida se a opção NÃO estiver cortada
             if(!divOpcao.classList.contains('cortada')) {
                 validarResposta(i, divOpcao);
             }
@@ -8543,7 +8634,6 @@ function validarResposta(idx, elemento) {
 
     opcoes.forEach(o => o.style.pointerEvents = 'none');
     
-    // Aplica classes de cores do seu CSS
     if(correto) {
         elemento.classList.add('correta');
         acertosContador++;
