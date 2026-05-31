@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Serei Músico Militar - Questões</title>
     
-    <!-- O script do Supabase deve ficar aqui dentro -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f1115">
@@ -42,7 +41,6 @@
             padding: 20px;
         }
 
-        /* Estilos da Tesoura e Corte */
         .btn-tesoura {
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -58,7 +56,7 @@
             font-size: 14px;
             transition: var(--transition);
             flex-shrink: 0;
-            z-index: 10; /* Garante que a tesoura fique sobre o clique da opção */
+            z-index: 10;
         }
 
         .btn-tesoura:hover { 
@@ -66,20 +64,18 @@
             color: #fff; 
         }
 
-        /* Efeito visual de alternativa desconsiderada (Permite desfazer) */
         .opcao.cortada {
-    opacity: 0.3;
-    text-decoration: line-through;
-    filter: grayscale(1);
-    /* Removido o pointer-events para permitir clicar na tesoura de novo */
-    cursor: not-allowed;
-}
+            opacity: 0.3;
+            text-decoration: line-through;
+            filter: grayscale(1);
+            cursor: not-allowed;
+        }
 
-.opcao.cortada .btn-tesoura {
-    opacity: 1;
-    filter: none;
-    cursor: pointer;
-}
+        .opcao.cortada .btn-tesoura {
+            opacity: 1;
+            filter: none;
+            cursor: pointer;
+        }
 
         .container {
             width: 100%;
@@ -95,7 +91,6 @@
 
         .hide { display: none !important; }
 
-        /* --- DASHBOARD --- */
         .stats-card {
             background: var(--card-bg);
             border: 1px solid var(--border-white);
@@ -158,118 +153,108 @@
 
         .texto-alternativa { flex: 1; pointer-events: none; }
 
-       .opcao.correta {
-        background: rgba(34, 197, 94, 0.2) !important;
-        border-color: #22c55e !important;
-        opacity: 1 !important; /* Força a volta da visibilidade */
-        filter: none !important; /* Remove o efeito de cinza */
-        transform: scale(1.02); /* Dá um leve destaque na resposta certa */
-    }
+        .opcao.correta {
+            background: rgba(34, 197, 94, 0.2) !important;
+            border-color: #22c55e !important;
+            opacity: 1 !important;
+            filter: none !important;
+            transform: scale(1.02);
+        }
 
-    .opcao.correta .letra-circulo {
-        background: #22c55e !important;
-        color: white !important;
-    }
+        .opcao.correta .letra-circulo {
+            background: #22c55e !important;
+            color: white !important;
+        }
 
-    .opcao.errada {
-        background: rgba(239, 68, 68, 0.2) !important;
-        border-color: #ef4444 !important;
-    }
+        .opcao.errada {
+            background: rgba(239, 68, 68, 0.2) !important;
+            border-color: #ef4444 !important;
+        }
 
-    /* Esconde o ícone da tesoura assim que a resposta é revelada */
-    .opcao.correta .btn-tesoura, 
-    .opcao.errada .btn-tesoura {
-        display: none;
-    }
+        .opcao.correta .btn-tesoura, 
+        .opcao.errada .btn-tesoura {
+            display: none;
+        }
 
         .btn-nav { background: none; border: none; color: var(--text-sec); cursor: pointer; margin-bottom: 20px; }
     </style>
 </head>
 <body>
-<!-- TELA DE PORTARIA: APRESENTAÇÃO, VENDA E LOGIN -->
-    <div id="tela-portaria" style="font-family: sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; border: 1px solid #ccc; border-radius: 12px; background: #fff; text-align: center;">
+
+    <div id="tela-portaria" style="font-family: sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; border: 1px solid #ccc; border-radius: 12px; background: #fff; text-align: center; color: #333;">
         
         <h2>Simulador de Regência</h2>
-        <p>Prepare-se para concursos e aprofunde seus estudos teóricos com base na obra <strong>"Regência: Uma Arte Complexa"</strong> de Ricardo Rocha.</p>
+        <p style="margin-top: 10px; color: #666;">Prepare-se para concursos e aprofunde seus estudos teóricos com base na obra <strong>"Regência: Uma Arte Complexa"</strong> de Ricardo Rocha.</p>
         
-        <!-- Bloco de Vendas -->
-        <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 25px; border: 1px dashed #002244;">
+        <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-top: 20px; margin-bottom: 25px; border: 1px dashed #002244;">
             <h3>Assinatura Mensal</h3>
             <p style="font-size: 24px; color: #002244; font-weight: bold; margin: 10px 0;">R$ 29,90 <span style="font-size: 14px; font-weight: normal;">/mês</span></p>
             <p style="font-size: 13px; color: #666;">Acesso completo a todas as questões por capítulo, estatísticas de desempenho e simulados gerais.</p>
-            <a href="https://www.asaas.com/c/u26wlx9qad07di0n" target="_blank" style="display: inline-block; background: #00a1e4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">Quero Assinar Agora</a>
+            <a href="https://www.asaas.com/c/u26wlx9qad07di0n" target="_blank" style="display: inline-block; background: #0066ff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 10px;">Quero Assinar Agora</a>
         </div>
 
         <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
 
-        <!-- Formulário de Login -->
         <h3>Já é Assinante? Entre com seu e-mail</h3>
         <div style="margin-top: 15px; text-align: left;">
             <label style="display:block; margin-bottom: 5px; font-weight: bold; color: #333;">E-mail cadastrado:</label>
-            <input type="email" id="login-email" placeholder="seu-email@dominio.com" style="width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 15px;">
+            <input type="email" id="login-email" placeholder="seu-email@dominio.com" style="width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 15px; background: #fff; color: #000;">
             <button id="btn-entrar" style="width: 100%; background: #002244; color: white; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Liberar Meu Acesso</button>
         </div>
         <p id="mensagem-erro" style="color: red; font-size: 14px; margin-top: 10px; display: none;"></p>
     </div>
-<div class="container" style="display: none;">
-    <div id="view-home">
-        <div class="stats-card">
-            <div class="stat-group"><span style="color:var(--success)">✓</span><span id="home-acertos">0</span></div>
-            <div class="stat-group"><span style="color:var(--danger)">✕</span><span id="home-erros">0</span></div>
-        </div>
-        
-        <button class="btn-materias" onclick="navegarPara('materias')">
-            <span style="font-size: 32px;">📚</span>
-            <div style="text-align: left;">
-                <p style="font-size: 10px; font-weight: 700; letter-spacing: 2px; opacity: 0.8;">BIBLIOTECA</p>
-                <h2 style="font-size: 22px;">MATÉRIAS</h2>
+
+    <div class="container" style="display: none;">
+        <div id="view-home">
+            <div class="stats-card">
+                <div class="stat-group"><span style="color:var(--success)">✓</span><span id="home-acertos">0</span></div>
+                <div class="stat-group"><span style="color:var(--danger)">✕</span><span id="home-erros">0</span></div>
             </div>
-        </button>
+            
+            <button class="btn-materias" onclick="navegarPara('materias')">
+                <span style="font-size: 32px;">📚</span>
+                <div style="text-align: left;">
+                    <p style="font-size: 10px; font-weight: 700; letter-spacing: 2px; opacity: 0.8;">BIBLIOTECA</p>
+                    <h2 style="font-size: 22px;">MATÉRIAS</h2>
+                </div>
+            </button>
 
-        <button class="btn-revisao" onclick="iniciarRevisaoErros()">
-            <span style="color: #fbbf24;">⚠️</span> REVISÃO DE ERROS
-        </button>
-    </div>
+            <button class="btn-revisao" onclick="iniciarRevisaoErros()">
+                <span style="color: #fbbf24;">⚠️</span> REVISÃO DE ERROS
+            </button>
+        </div>
 
-    <div id="view-materias" class="hide">
-        <button class="btn-nav" onclick="voltar()">‹ Voltar</button>
-        <h2 style="margin-bottom: 25px;">Matérias</h2>
-        <div id="materias-list"></div>
-    </div>
+        <div id="view-materias" class="hide">
+            <button class="btn-nav" onclick="voltar()">‹ Voltar</button>
+            <h2 style="margin-bottom: 25px;">Matérias</h2>
+            <div id="materias-list"></div>
+        </div>
 
-    <div id="view-capitulos" class="hide">
-        <button class="btn-nav" onclick="voltar()">‹ Matérias</button>
-        <h2 id="cap-title-header" style="margin-bottom: 25px; font-size: 1.4rem;"></h2>
-        <div id="capitulos-list"></div>
-    </div>
+        <div id="view-capitulos" class="hide">
+            <button class="btn-nav" onclick="voltar()">‹ Matérias</button>
+            <h2 id="cap-title-header" style="margin-bottom: 25px; font-size: 1.4rem;"></h2>
+            <div id="capitulos-list"></div>
+        </div>
 
-    <div id="view-quiz" class="hide">
-        <div style="margin-bottom: 20px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                <span id="quiz-progress-text" style="font-size: 12px; font-weight: 700; color: var(--text-sec);"></span>
-                <span onclick="voltar()" style="cursor:pointer; color:var(--danger)">Sair ✕</span>
+        <div id="view-quiz" class="hide">
+            <div style="margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span id="quiz-progress-text" style="font-size: 12px; font-weight: 700; color: var(--text-sec);"></span>
+                    <span onclick="voltar()" style="cursor:pointer; color:var(--danger)">Sair ✕</span>
+                </div>
+                <div class="progress-mini-bg" style="height: 6px;"><div id="quiz-progress-bar" class="progress-mini-fill"></div></div>
             </div>
-            <div class="progress-mini-bg" style="height: 6px;"><div id="quiz-progress-bar" class="progress-mini-fill"></div></div>
-        </div>
-        <p id="pergunta-texto" class="question-text"></p>
-        <div id="opcoes-container"></div>
-        <div id="feedback-box" class="hide" style="margin-top:20px; padding:20px; background:rgba(255,255,255,0.02); border-radius:20px;">
-            <h3 id="feed-status" style="margin-bottom:10px;"></h3>
-            <p id="feed-fundamentacao" style="font-size:14px; color:var(--text-sec); margin-bottom:20px;"></p>
-            <button class="btn-materias" style="padding:15px; justify-content:center;" onclick="proximaQuestao()">Continuar</button>
+            <p id="pergunta-texto" class="question-text"></p>
+            <div id="opcoes-container"></div>
+            <div id="feedback-box" class="hide" style="margin-top:20px; padding:20px; background:rgba(255,255,255,0.02); border-radius:20px;">
+                <h3 id="feed-status" style="margin-bottom:10px;"></h3>
+                <p id="feed-fundamentacao" style="font-size:14px; color:var(--text-sec); margin-bottom:20px;"></p>
+                <button class="btn-materias" style="padding:15px; justify-content:center;" onclick="proximaQuestao()">Continuar</button>
+            </div>
         </div>
     </div>
-</div>
 
 <script>
-let historyStack = ['home'];
-let materiaAtual = "";
-let questoesSessao = [];
-let indexAtual = 0;
-
-let errosGlobal = JSON.parse(localStorage.getItem('erros_regencia')) || [];
-let respondidasGlobal = JSON.parse(localStorage.getItem('respondidas_regencia')) || [];
-let acertosContador = parseInt(localStorage.getItem('acertos_total')) || 0;
 
 // --- BANCO DE DADOS (Certifique-se de que ele está ANTES das funções que o usam) ---
 const bancoDados = {
@@ -8360,120 +8345,125 @@ const bancoDados = {
     } // Fecha a Matéria
 }; // Fecha o bancoDados
 
-<script>
 // ==========================================
-// 1. CONFIGURAÇÃO E CONEXÃO COM O SUPABASE
+// 1. VARIÁVEIS GLOBAIS E BANCO LOCAL
 // ==========================================
+let historyStack = ['home'];
+let materiaAtual = "";
+let questoesSessao = [];
+let indexAtual = 0;
+
+let errosGlobal = JSON.parse(localStorage.getItem('erros_regencia')) || [];
+let respondidasGlobal = JSON.parse(localStorage.getItem('respondidas_regencia')) || [];
+let acertosContador = parseInt(localStorage.getItem('acertos_total')) || 0;
+
 const SUPABASE_URL = 'https://orvfhxfpldkfrpzcsbhi.supabase.co/rest/v1/'; 
 const SUPABASE_KEY = 'sb_publishable_1pwqO3t-peBJdgBj13aK5A_2xUXe2Ql';
 let supabase = null;
 
-try {
-    if (window.Supabase && window.Supabase.createClient) {
-        supabase = window.Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    } else {
-        alert("Erro Crítico: A biblioteca do Supabase não carregou no HTML. Verifique a linha 9.");
-    }
-} catch (e) {
-    alert("Erro ao inicializar Supabase: " + e.message);
-}
-
 // ==========================================
-// 2. SISTEMA DE PORTARIA E CONTROLE DE ACESSO
+// 2. INICIALIZAÇÃO DE SEGURANÇA (SUPABASE)
 // ==========================================
-document.addEventListener("DOMContentLoaded", () => {
+window.addEventListener('load', () => {
     try {
-        const btnEntrar = document.getElementById("btn-entrar");
-        const inputEmail = document.getElementById("login-email");
-        const msgErro = document.getElementById("mensagem-erro");
-        const telaPortaria = document.getElementById("tela-portaria");
-        const containerSimulador = document.querySelector(".container");
-
-        if (btnEntrar) {
-            btnEntrar.addEventListener("click", async () => {
-                try {
-                    const emailDigitado = inputEmail.value.trim().toLowerCase();
-                    
-                    if (!emailDigitado) {
-                        mostrarErro("Por favor, digite um e-mail válido.");
-                        return;
-                    }
-
-                    btnEntrar.innerText = "Verificando...";
-                    btnEntrar.disabled = true;
-                    if (msgErro) msgErro.style.display = "none";
-
-                    if (!supabase) {
-                        alert("Erro: O cliente Supabase não está ativo.");
-                        btnEntrar.innerText = "Liberar Meu Acesso";
-                        btnEntrar.disabled = false;
-                        return;
-                    }
-
-                    // Consulta a tabela 'perfis' no Supabase
-                    const { data, error } = await supabase
-                        .from('perfis')
-                        .select('assinatura_ativa, pago_ate')
-                        .eq('email', emailDigitado);
-
-                    if (error) throw error;
-
-                    if (!data || data.length === 0) {
-                        mostrarErro("E-mail não cadastrado. Verifique se digitou corretamente.");
-                        btnEntrar.innerText = "Liberar Meu Acesso";
-                        btnEntrar.disabled = false;
-                        return;
-                    }
-
-                    const perfil = data[0];
-                    const dataHoje = new Date();
-                    const dataExpiracao = perfil.pago_ate ? new Date(perfil.pago_ate) : null;
-
-                    // Valida a assinatura ativa e prazo no banco de dados
-                    if (perfil.assinatura_ativa === true && dataExpiracao && dataExpiracao > dataHoje) {
-                        if (telaPortaria) telaPortaria.style.display = "none"; 
-                        if (containerSimulador) containerSimulador.style.display = "block";
-                        
-                        localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
-                        navegarPara('home');
-                    } else {
-                        mostrarErro("Sua assinatura está inativa ou expirou.");
-                    }
-
-                } catch (clickError) {
-                    alert("Erro interno ao clicar no botão: " + clickError.message);
-                }
-
-                btnEntrar.innerText = "Liberar Meu Acesso";
-                btnEntrar.disabled = false;
-            });
+        if (window.Supabase && window.Supabase.createClient) {
+            supabase = window.Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            configurarPortaria();
+        } else {
+            alert("Erro: A biblioteca Supabase não respondeu. Recarregue a página.");
         }
-
-        function mostrarErro(texto) {
-            if (msgErro) {
-                msgErro.innerText = texto;
-                msgErro.style.display = "block";
-            } else {
-                alert(texto);
-            }
-        }
-
-        // VERIFICAÇÃO AUTOMÁTICA DE SESSÃO COM SEGURANÇA
-        const usuarioSalvo = localStorage.getItem("usuario_autorizado_simulador");
-        if (usuarioSalvo && inputEmail) {
-            inputEmail.value = usuarioSalvo;
-        }
-    } catch (initError) {
-        alert("Erro na inicialização da portaria: " + initError.message);
+    } catch (e) {
+        alert("Erro na carga inicial: " + e.message);
     }
 });
 
 // ==========================================
-// 3. LÓGICA INTERNA DO SIMULADOR (SUAS FUNÇÕES)
+// 3. SISTEMA DE PORTARIA (LOGIN COORDENADO)
+// ==========================================
+function configurarPortaria() {
+    const btnEntrar = document.getElementById("btn-entrar");
+    const inputEmail = document.getElementById("login-email");
+    const msgErro = document.getElementById("mensagem-erro");
+    const telaPortaria = document.getElementById("tela-portaria");
+    const containerSimulador = document.querySelector(".container");
+
+    if (btnEntrar) {
+        btnEntrar.addEventListener("click", async () => {
+            try {
+                const emailDigitado = inputEmail.value.trim().toLowerCase();
+                
+                if (!emailDigitado) {
+                    mostrarErro("Por favor, digite um e-mail válido.");
+                    return;
+                }
+
+                btnEntrar.innerText = "Verificando...";
+                btnEntrar.disabled = true;
+                if (msgErro) msgErro.style.display = "none";
+
+                // Consulta segura à tabela de perfis
+                const { data, error } = await supabase
+                    .from('perfis')
+                    .select('assinatura_ativa, pago_ate')
+                    .eq('email', emailDigitado);
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    mostrarErro("E-mail não cadastrado. Verifique se digitou corretamente ou se o pagamento foi concluído.");
+                    btnEntrar.innerText = "Liberar Meu Acesso";
+                    btnEntrar.disabled = false;
+                    return;
+                }
+
+                const perfil = data[0];
+                const dataHoje = new Date();
+                const dataExpiracao = perfil.pago_ate ? new Date(perfil.pago_ate) : null;
+
+                // Liberação condicionada ao status e validade
+                if (perfil.assinatura_ativa === true && dataExpiracao && dataExpiracao > dataHoje) {
+                    if (telaPortaria) telaPortaria.style.display = "none"; 
+                    if (containerSimulador) containerSimulador.style.display = "block";
+                    
+                    localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
+                    navegarPara('home');
+                } else {
+                    mostrarErro("Sua assinatura está inativa ou expirou. Por favor, realize a renovação mensal.");
+                }
+
+            } catch (clickError) {
+                alert("Erro ao consultar banco de dados: " + clickError.message);
+            }
+
+            btnEntrar.innerText = "Liberar Meu Acesso";
+            btnEntrar.disabled = false;
+        });
+    }
+
+    function mostrarErro(texto) {
+        if (msgErro) {
+            msgErro.innerText = texto;
+            msgErro.style.display = "block";
+        } else {
+            alert(texto);
+        }
+    }
+
+    // Auto-preenchimento opcional se o usuário logou recentemente
+    const usuarioSalvo = localStorage.getItem("usuario_autorizado_simulador");
+    if (usuarioSalvo && inputEmail) {
+        inputEmail.value = usuarioSalvo;
+    }
+}
+
+// ==========================================
+// 4. LÓGICA DE NAVEGAÇÃO E SIMULADOR
 // ==========================================
 function navegarPara(view, data = null) {
-    const views = document.querySelectorAll('.view-section');
-    views.forEach(v => v.classList.add('hide'));
+    const views = document.querySelectorAll('.view-section, [id^="view-"]');
+    views.forEach(v => {
+        if(v.id !== "tela-portaria") v.classList.add('hide');
+    });
     
     const targetView = document.getElementById(`view-${view}`);
     if (targetView) {
@@ -8495,12 +8485,12 @@ function voltar() {
     }
 }
 
-// --- RENDERIZADORES ---
 function renderMaterias() {
     const list = document.getElementById('materias-list');
     if(!list) return;
     
     list.innerHTML = "";
+    if (typeof bancoDados === 'undefined') return;
     const materias = Object.keys(bancoDados);
     
     materias.forEach(mat => {
@@ -8513,7 +8503,7 @@ function renderMaterias() {
 }
 
 function renderCapitulos(mat) {
-    if (!mat || !bancoDados[mat]) return;
+    if (typeof bancoDados === 'undefined' || !mat || !bancoDados[mat]) return;
     materiaAtual = mat;
     document.getElementById('cap-title-header').innerText = mat;
     
@@ -8557,12 +8547,14 @@ function createCapCard(label, lista, isMistao = false) {
 }
 
 function iniciarQuiz(mat, cap) {
+    if (typeof bancoDados === 'undefined') return;
     const lista = bancoDados[mat][cap];
     const pendentes = lista.filter(q => !respondidasGlobal.includes(q.id));
     prepararSessao(pendentes.length > 0 ? pendentes : lista, pendentes.length === 0);
 }
 
 function iniciarMistao(mat) {
+    if (typeof bancoDados === 'undefined') return;
     let todas = [];
     Object.values(bancoDados[mat]).forEach(c => todas = todas.concat(c));
     const pendentes = todas.filter(q => !respondidasGlobal.includes(q.id));
@@ -8677,7 +8669,7 @@ function validarResposta(idx, elemento) {
     const feedBox = document.getElementById('feedback-box');
 
     if (feedStatus) feedStatus.innerText = correto ? "✅ Excelente!" : "❌ Observação";
-    if (feedFund) feedFund.innerHTML = `${q.fund}<br><br><strong>${q.loc}</strong>`;
+    if (feedFund) feedFund.innerHTML = `${q.fund}<br><br><strong>${q.loc || q.fonte || ''}</strong>`;
     if (feedBox) feedBox.classList.remove('hide');
     
     atualizarStatsHome();
@@ -8701,13 +8693,14 @@ function iniciarRevisaoErros() {
     prepararSessao(errosGlobal, false);
 }
 
-// Registro do Service Worker (PWA)
+// Registro estruturado do Service Worker para o PWA
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW fail:', err));
     });
 }
 
-// Inicialização das estatísticas da home
 atualizarStatsHome();
 </script>
+</body>
+</html>
