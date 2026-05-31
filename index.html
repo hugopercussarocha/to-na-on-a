@@ -8366,179 +8366,114 @@ const bancoDados = {
 // ==========================================
 const SUPABASE_URL = 'https://orvfhxfpldkfrpzcsbhi.supabase.co/rest/v1/'; 
 const SUPABASE_KEY = 'sb_publishable_1pwqO3t-peBJdgBj13aK5A_2xUXe2Ql';
-const supabase = window.Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let supabase = null;
+
+try {
+    if (window.Supabase && window.Supabase.createClient) {
+        supabase = window.Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    } else {
+        alert("Erro Crítico: A biblioteca do Supabase não carregou no HTML. Verifique a linha 9.");
+    }
+} catch (e) {
+    alert("Erro ao inicializar Supabase: " + e.message);
+}
 
 // ==========================================
 // 2. SISTEMA DE PORTARIA E CONTROLE DE ACESSO
 // ==========================================
 document.addEventListener("DOMContentLoaded", () => {
-    const btnEntrar = document.getElementById("btn-entrar");
-    const inputEmail = document.getElementById("login-email");
-    const msgErro = document.getElementById("mensagem-erro");
-    const telaPortaria = document.getElementById("tela-portaria");
-    const containerSimulador = document.querySelector(".container");
+    try {
+        const btnEntrar = document.getElementById("btn-entrar");
+        const inputEmail = document.getElementById("login-email");
+        const msgErro = document.getElementById("mensagem-erro");
+        const telaPortaria = document.getElementById("tela-portaria");
+        const containerSimulador = document.querySelector(".container");
 
-    // Executa a validação do e-mail no Banco de Dados
-    if (btnEntrar) {
-        btnEntrar.addEventListener("click", async () => {
-            const emailDigitado = inputEmail.value.trim().toLowerCase();
-            
-            if (!emailDigitado) {
-                mostrarErro("Por favor, digite um e-mail válido.");
-                return;
-            }
+        if (btnEntrar) {
+            btnEntrar.addEventListener("click", async () => {
+                try {
+                    const emailDigitado = inputEmail.value.trim().toLowerCase();
+                    
+                    if (!emailDigitado) {
+                        mostrarErro("Por favor, digite um e-mail válido.");
+                        return;
+                    }
 
-            btnEntrar.innerText = "Verificando...";
-            btnEntrar.disabled = true;
-            msgErro.style.display = "none";
+                    btnEntrar.innerText = "Verificando...";
+                    btnEntrar.disabled = true;
+                    if (msgErro) msgErro.style.display = "none";
 
-            try {
-                // Consulta a tabela 'perfis' criada no Supabase
-                const { data, error } = await supabase
-                    .from('perfis')
-                    .select('assinatura_ativa, pago_ate')
-                    .eq('email', emailDigitado);
+                    if (!supabase) {
+                        alert("Erro: O cliente Supabase não está ativo.");
+                        btnEntrar.innerText = "Liberar Meu Acesso";
+                        btnEntrar.disabled = false;
+                        return;
+                    }
 
-                if (error) throw error;
+                    // Consulta a tabela 'perfis' no Supabase
+                    const { data, error } = await supabase
+                        .from('perfis')
+                        .select('assinatura_ativa, pago_ate')
+                        .eq('email', emailDigitado);
 
-                // Caso o e-mail não exista na tabela
-                if (!data || data.length === 0) {
-                    mostrarErro("E-mail não cadastrado. Verifique se digitou corretamente ou se o pagamento foi concluído.");
-                    btnEntrar.innerText = "Liberar Meu Acesso";
-                    btnEntrar.disabled = false;
-                    return;
+                    if (error) throw error;
+
+                    if (!data || data.length === 0) {
+                        mostrarErro("E-mail não cadastrado. Verifique se digitou corretamente.");
+                        btnEntrar.innerText = "Liberar Meu Acesso";
+                        btnEntrar.disabled = false;
+                        return;
+                    }
+
+                    const perfil = data[0];
+                    const dataHoje = new Date();
+                    const dataExpiracao = perfil.pago_ate ? new Date(perfil.pago_ate) : null;
+
+                    // Valida a assinatura ativa e prazo no banco de dados
+                    if (perfil.assinatura_ativa === true && dataExpiracao && dataExpiracao > dataHoje) {
+                        if (telaPortaria) telaPortaria.style.display = "none"; 
+                        if (containerSimulador) containerSimulador.style.display = "block";
+                        
+                        localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
+                        navegarPara('home');
+                    } else {
+                        mostrarErro("Sua assinatura está inativa ou expirou.");
+                    }
+
+                } catch (clickError) {
+                    alert("Erro interno ao clicar no botão: " + clickError.message);
                 }
 
-                const perfil = data[0];
-                const dataHoje = new Date();
-                const dataExpiracao = perfil.pago_ate ? new Date(perfil.pago_ate) : null;
+                btnEntrar.innerText = "Liberar Meu Acesso";
+                btnEntrar.disabled = false;
+            });
+        }
 
-                // Valida se a assinatura está ativa e dentro do prazo de validade (2026)
-                if (perfil.assinatura_ativa === true && dataExpiracao && dataExpiracao > dataHoje) {
-                    // SUCESSO! Libera o aplicativo
-                    telaPortaria.style.display = "none"; 
-                    if (containerSimulador) containerSimulador.style.display = "block";
-                    
-                    // Salva localmente para não exigir login toda vez que reabrir o PWA
-                    localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
-                    
-                    // Abre a tela inicial padrão do seu simulador
-                    navegarPara('home');
-                } else {
-                    mostrarErro("Sua assinatura está inativa ou expirou. Por favor, realize a renovação mensal.");
-                }
-
-            } catch (err) {
-                console.error(err);
-                mostrarErro("Erro ao conectar ao servidor. Tente novamente mais tarde.");
+        function mostrarErro(texto) {
+            if (msgErro) {
+                msgErro.innerText = texto;
+                msgErro.style.display = "block";
+            } else {
+                alert(texto);
             }
+        }
 
-            btnEntrar.innerText = "Liberar Meu Acesso";
-            btnEntrar.disabled = false;
-        });
-    }
-
-    function mostrarErro(texto) {
-        msgErro.innerText = texto;
-        msgErro.style.display = "block";
-    }
-
-    // VERIFICAÇÃO AUTOMÁTICA DE SESSÃO
-    const usuarioSalvo = localStorage.getItem("usuario_autorizado_simulador");
-    if (usuarioSalvo) {
-        if (inputEmail) inputEmail.value = usuarioSalvo;
-        // Se já houver um e-mail salvo anteriormente, tenta validar o acesso direto
-        // ==========================================
-// 1. CONFIGURAÇÃO E CONEXÃO COM O SUPABASE
-// ==========================================
-const SUPABASE_URL = 'https://orvfhxfpldkfrpzcsbhi.supabase.co/rest/v1/'; 
-const SUPABASE_KEY = 'sb_publishable_1pwqO3t-peBJdgBj13aK5A_2xUXe2Ql';
-// AQUI: Mudamos para Supabase com "S" maiúsculo
-const supabase = window.Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// ==========================================
-// 2. SISTEMA DE PORTARIA E CONTROLE DE ACESSO
-// ==========================================
-document.addEventListener("DOMContentLoaded", () => {
-    const btnEntrar = document.getElementById("btn-entrar");
-    const inputEmail = document.getElementById("login-email");
-    const msgErro = document.getElementById("mensagem-erro");
-    const telaPortaria = document.getElementById("tela-portaria");
-    const containerSimulador = document.querySelector(".container");
-
-    // Executa a validação do e-mail no Banco de Dados
-    if (btnEntrar) {
-        btnEntrar.addEventListener("click", async () => {
-            const emailDigitado = inputEmail.value.trim().toLowerCase();
-            
-            if (!emailDigitado) {
-                mostrarErro("Por favor, digite um e-mail válido.");
-                return;
-            }
-
-            btnEntrar.innerText = "Verificando...";
-            btnEntrar.disabled = true;
-            msgErro.style.display = "none";
-
-            try {
-                // Consulta a tabela 'perfis' criada no Supabase
-                const { data, error } = await supabase
-                    .from('perfis')
-                    .select('assinatura_ativa, pago_ate')
-                    .eq('email', emailDigitado);
-
-                if (error) throw error;
-
-                // Caso o e-mail não exista na tabela
-                if (!data || data.length === 0) {
-                    mostrarErro("E-mail não cadastrado. Verifique se digitou corretamente ou se o pagamento foi concluído.");
-                    btnEntrar.innerText = "Liberar Meu Acesso";
-                    btnEntrar.disabled = false;
-                    return;
-                }
-
-                const perfil = data[0];
-                const dataHoje = new Date();
-                const dataExpiracao = perfil.pago_ate ? new Date(perfil.pago_ate) : null;
-
-                // Valida se a assinatura está ativa e dentro do prazo de validade (2026)
-                if (perfil.assinatura_ativa === true && dataExpiracao && dataExpiracao > dataHoje) {
-                    // SUCESSO! Libera o aplicativo
-                    telaPortaria.style.display = "none"; 
-                    if (containerSimulador) containerSimulador.style.display = "block";
-                    
-                    // Salva localmente para não exigir login toda vez que reabrir o PWA
-                    localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
-                    
-                    // Abre a tela inicial padrão do seu simulador
-                    navegarPara('home');
-                } else {
-                    mostrarErro("Sua assinatura está inativa ou expirou. Por favor, realize a renovação mensal.");
-                }
-
-            } catch (err) {
-                console.error(err);
-                mostrarErro("Erro ao conectar ao servidor. Tente novamente mais tarde.");
-            }
-
-            btnEntrar.innerText = "Liberar Meu Acesso";
-            btnEntrar.disabled = false;
-        });
-    }
-
-    function mostrarErro(texto) {
-        msgErro.innerText = texto;
-        msgErro.style.display = "block";
-    }
-
-    // VERIFICAÇÃO AUTOMÁTICA DE SESSÃO (AQUI ESTÁ O TRECHO CORRIGIDO)
-    const usuarioSalvo = localStorage.getItem("usuario_autorizado_simulador");
-    if (usuarioSalvo) {
-        if (inputEmail) inputEmail.value = usuarioSalvo;
-        // Comentei a linha abaixo para você testar o clique manual primeiro
-        // if (btnEntrar) btnEntrar.click();
+        // VERIFICAÇÃO AUTOMÁTICA DE SESSÃO COM SEGURANÇA
+        const usuarioSalvo = localStorage.getItem("usuario_autorizado_simulador");
+        if (usuarioSalvo && inputEmail) {
+            inputEmail.value = usuarioSalvo;
+        }
+    } catch (initError) {
+        alert("Erro na inicialização da portaria: " + initError.message);
     }
 });
+
+// ==========================================
+// 3. LÓGICA INTERNA DO SIMULADOR (SUAS FUNÇÕES)
+// ==========================================
+function navegarPara(view, data = null) {
+    const views = document.querySelectorAll('.view-section');
+    views.forEach(v => v.classList.add('hide'));
     
     const targetView = document.getElementById(`view-${view}`);
     if (targetView) {
@@ -8657,14 +8592,19 @@ function mostrarQuestao() {
     const container = document.getElementById('opcoes-container');
     const feedback = document.getElementById('feedback-box');
     
-    feedback.classList.add('hide');
-    container.innerHTML = ""; 
-    document.getElementById('pergunta-texto').innerText = q.q;
+    if (feedback) feedback.classList.add('hide');
+    if (container) container.innerHTML = ""; 
+    
+    const elPergunta = document.getElementById('pergunta-texto');
+    if (elPergunta) elPergunta.innerText = q.q;
     
     const total = questoesSessao.length;
     const prog = ((indexAtual) / total) * 100;
-    document.getElementById('quiz-progress-bar').style.width = prog + "%";
-    document.getElementById('quiz-progress-text').innerText = `QUESTÃO ${indexAtual + 1} DE ${total}`;
+    
+    const barraProgresso = document.getElementById('quiz-progress-bar');
+    const textoProgresso = document.getElementById('quiz-progress-text');
+    if (barraProgresso) barraProgresso.style.width = prog + "%";
+    if (textoProgresso) textoProgresso.innerText = `QUESTÃO ${indexAtual + 1} DE ${total}`;
 
     const letras = ["A", "B", "C", "D", "E"];
 
@@ -8701,7 +8641,7 @@ function mostrarQuestao() {
             }
         };
 
-        container.appendChild(divOpcao);
+        if (container) container.appendChild(divOpcao);
     });
 }
 
@@ -8732,9 +8672,14 @@ function validarResposta(idx, elemento) {
     localStorage.setItem('respondidas_regencia', JSON.stringify(respondidasGlobal));
     localStorage.setItem('acertos_total', acertosContador.toString());
 
-    document.getElementById('feed-status').innerText = correto ? "✅ Excelente!" : "❌ Observação";
-    document.getElementById('feed-fundamentacao').innerHTML = `${q.fund}<br><br><strong>${q.loc}</strong>`;
-    document.getElementById('feedback-box').classList.remove('hide');
+    const feedStatus = document.getElementById('feed-status');
+    const feedFund = document.getElementById('feed-fundamentacao');
+    const feedBox = document.getElementById('feedback-box');
+
+    if (feedStatus) feedStatus.innerText = correto ? "✅ Excelente!" : "❌ Observação";
+    if (feedFund) feedFund.innerHTML = `${q.fund}<br><br><strong>${q.loc}</strong>`;
+    if (feedBox) feedBox.classList.remove('hide');
+    
     atualizarStatsHome();
 }
 
@@ -8763,5 +8708,6 @@ if ('serviceWorker' in navigator) {
     });
 }
 
+// Inicialização das estatísticas da home
 atualizarStatsHome();
 </script>
