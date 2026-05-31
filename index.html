@@ -8359,7 +8359,7 @@ let acertosContador = parseInt(localStorage.getItem('acertos_total')) || 0;
 
 const SUPABASE_URL = 'https://orvfhxfpldkfrpzcsbhi.supabase.co/rest/v1/'; 
 const SUPABASE_KEY = 'sb_publishable_1pwqO3t-peBJdgBj13aK5A_2xUXe2Ql';
-let supabase = null;
+let supabaseClient = null;
 
 // ==========================================
 // 2. INICIALIZAÇÃO DE SEGURANÇA (SUPABASE)
@@ -8367,7 +8367,7 @@ let supabase = null;
 window.addEventListener('load', () => {
     try {
         if (window.supabase && window.supabase.createClient) {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             configurarPortaria();
         } else {
             alert("Erro: A biblioteca Supabase não respondeu. Recarregue a página.");
@@ -8402,8 +8402,7 @@ function configurarPortaria() {
                 if (msgErro) msgErro.style.display = "none";
 
                 // Consulta segura à tabela de perfis
-                const { data, error } = await supabase
-                    .from('perfis')
+                const { data, error } = await supabaseClient.from('perfis')
                     .select('assinatura_ativa, pago_ate')
                     .eq('email', emailDigitado);
 
