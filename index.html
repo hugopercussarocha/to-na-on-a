@@ -8358,8 +8358,22 @@ let respondidasGlobal = JSON.parse(localStorage.getItem('respondidas_regencia'))
 let acertosContador = parseInt(localStorage.getItem('acertos_total')) || 0;
 
 const SUPABASE_URL = 'https://orvfhxfpldkfrpzcsbhi.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_1pwqO3t-peBJdgBj13aK5A_2xUXe2Ql';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ydmZoeGZwbGRrZnJwemNzYmhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNzkxMzcsImV4cCI6MjA5NTc1NTEzN30.HJHJFb_bKmBYFrcfCR4s6WgE2m9pQSBahLAdrjWaLR8';
 let supabaseClient = null;
+
+// Garante que o Supabase vai inicializar de forma segura assim que a página carregar por completo
+window.addEventListener('load', () => {
+    try {
+        if (window.supabase && window.supabase.createClient) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            console.log("Supabase inicializado com sucesso em segundo plano.");
+        } else {
+            console.error("Aviso: A biblioteca Supabase ainda não respondeu no carregamento.");
+        }
+    } catch (e) {
+        console.error("Erro na carga inicial do Supabase: ", e.message);
+    }
+});
 
 // ==========================================
 // 2. INICIALIZAÇÃO DE SEGURANÇA (SUPABASE)
