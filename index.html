@@ -178,7 +178,6 @@
 
         .btn-nav { background: none; border: none; color: var(--text-sec); cursor: pointer; margin-bottom: 20px; }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -256,10 +255,6 @@
     </div>
 
 <script>
-    const SUPABASE_URL = "https://orvfhxfpldkfrpzcsbhi.supabase.co"; 
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ydmZoeGZwbGRrZnJwemNzYmhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNzkxMzcsImV4cCI6MjA5NTc1NTEzN30.HJHJFb_bKmBYFrcfCR4s6WgE2m9pQSBahLAdrjWaLR8"; // Substitua pelo seu token 'anon' 'public' do Supabase
-
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // --- BANCO DE DADOS (Certifique-se de que ele está ANTES das funções que o usam) ---
 const bancoDados = {
