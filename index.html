@@ -8395,6 +8395,7 @@ function configurarPortaria() {
     if (btnEntrar) {
         btnEntrar.addEventListener("click", async () => {
             try {
+                // Força o e-mail a ficar em minúsculas para bater com o Supabase
                 const emailDigitado = inputEmail.value.trim().toLowerCase();
                 
                 if (!emailDigitado) {
@@ -8402,36 +8403,38 @@ function configurarPortaria() {
                     return;
                 }
 
+                // Feedback visual de carregamento
                 btnEntrar.innerText = "Verificando...";
                 btnEntrar.disabled = true;
                 if (msgErro) msgErro.style.display = "none";
 
-                // Realiza o login real usando o sistema de autenticação nativo (Auth) do Supabase
+                // Chamada de login nativa do Supabase (Auth)
                 const { data, error } = await supabase.auth.signInWithPassword({
                     email: emailDigitado,
-                    password: emailDigitado // O Make foi configurado usando o e-mail/CPF como senha padrão
+                    password: emailDigitado // Como definimos no Make o e-mail também como senha
                 });
 
                 if (error) throw error;
 
-                // Se a autenticação foi um sucesso, libera o acesso imediatamente
+                // Se a autenticação foi um sucesso, libera o acesso
                 if (data && data.user) {
                     if (telaPortaria) telaPortaria.style.display = "none"; 
                     if (containerSimulador) containerSimulador.style.display = "block";
                     
-                    // Salva a sessão ativa no navegador e o e-mail do usuário
+                    // Salva as sessões no navegador
                     localStorage.setItem("user_session", JSON.stringify(data.session));
                     localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
                     
+                    // Executa a navegação interna do seu app
                     navegarPara('home');
                 }
 
             } catch (clickError) {
-                // Se o e-mail não estiver cadastrado no Auth ou a senha estiver incorreta, cairá aqui
-                mostrarErro("Acesso negado. Verifique se o e-mail digitado está correto ou se a sua assinatura está ativa na Hotmart.");
                 console.error("Erro na autenticação:", clickError.message);
+                mostrarErro("Acesso negado. Verifique se o e-mail digitado está correto ou se a sua assinatura está ativa.");
             }
 
+            // Restaura o botão caso falhe
             btnEntrar.innerText = "Liberar Meu Acesso";
             btnEntrar.disabled = false;
         });
