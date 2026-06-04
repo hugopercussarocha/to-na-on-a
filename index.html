@@ -8401,37 +8401,31 @@ function configurarPortaria() {
                 btnEntrar.disabled = true;
                 if (msgErro) msgErro.style.display = "none";
 
-                // Consulta segura à tabela de perfis
-                const { data, error } = await supabaseClient.from('perfis')
-                    .select('assinatura_ativa, pago_ate')
-                    .eq('email', emailDigitado);
+                // CHAMADA ATUALIZADA: Validação direta na tabela Auth (onde o Make cadastrou)
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: emailDigitado,
+                    password: emailDigitado // O Make definiu o e-mail como senha padrão
+                });
 
+                // Se o Supabase rejeitar as credenciais, o erro é jogado direto para o bloco catch abaixo
                 if (error) throw error;
 
-                if (!data || data.length === 0) {
-                    mostrarErro("E-mail não cadastrado. Verifique se digitou corretamente ou se o pagamento foi concluído.");
-                    btnEntrar.innerText = "Liberar Meu Acesso";
-                    btnEntrar.disabled = false;
-                    return;
-                }
-
-                const perfil = data[0];
-                const dataHoje = new Date();
-                const dataExpiracao = perfil.pago_ate ? new Date(perfil.pago_ate) : null;
-
-                // Liberação condicionada ao status e validade
-                if (perfil.assinatura_ativa === true && dataExpiracao && dataExpiracao > dataHoje) {
+                // Se o usuário existir e autenticar com sucesso:
+                if (data && data.user) {
                     if (telaPortaria) telaPortaria.style.display = "none"; 
                     if (containerSimulador) containerSimulador.style.display = "block";
                     
+                    // Salva as informações de sessão ativa no navegador
+                    localStorage.setItem("user_session", JSON.stringify(data.session));
                     localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
+                    
                     navegarPara('home');
-                } else {
-                    mostrarErro("Sua assinatura está inativa ou expirou. Por favor, realize a renovação mensal.");
                 }
 
             } catch (clickError) {
-                alert("Erro ao consultar banco de dados: " + clickError.message);
+                // Captura erro de e-mail inválido, senha incorreta ou falta de conexão
+                console.error("Erro retornado pelo Supabase Auth:", clickError.message);
+                mostrarErro("Acesso negado. Verifique se digitou o e-mail corretamente ou se o pagamento foi concluído.");
             }
 
             btnEntrar.innerText = "Liberar Meu Acesso";
