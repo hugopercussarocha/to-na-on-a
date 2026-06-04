@@ -8397,6 +8397,7 @@ window.addEventListener('load', () => {
 function configurarPortaria() {
     const btnEntrar = document.getElementById("btn-entrar");
     const inputEmail = document.getElementById("login-email");
+    const inputCPF = document.getElementById("login-cpf"); // Novo campo de CPF
     const msgErro = document.getElementById("mensagem-erro");
     const telaPortaria = document.getElementById("tela-portaria");
     const containerSimulador = document.querySelector(".container");
@@ -8405,9 +8406,16 @@ function configurarPortaria() {
         btnEntrar.addEventListener("click", async () => {
             try {
                 const emailDigitado = inputEmail.value.trim().toLowerCase();
+                // Captura o CPF digitado e remove pontos ou traços se o usuário colocar
+                const cpfDigitado = inputCPF ? inputCPF.value.trim().replace(/\D/g, '') : '';
                 
                 if (!emailDigitado) {
                     mostrarErro("Por favor, digite um e-mail válido.");
+                    return;
+                }
+
+                if (!cpfDigitado) {
+                    mostrarErro("Por favor, digite o seu CPF para acessar.");
                     return;
                 }
 
@@ -8415,23 +8423,20 @@ function configurarPortaria() {
                 btnEntrar.disabled = true;
                 if (msgErro) msgErro.style.display = "none";
 
-                // CHAMA A AUTENTICAÇÃO NATIVA (Onde o Make cadastra os usuários)
+                // CHAMA A AUTENTICAÇÃO NATIVA (Login = E-mail / Senha = CPF)
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email: emailDigitado,
-                    password: emailDigitado // O Make está configurando o e-mail como senha
+                    password: cpfDigitado // Usa o CPF limpo (apenas números) como senha
                 });
 
-                // Se houver erro de login/senha ou usuário não cadastrado, joga para o catch
                 if (error) throw error;
 
-                // Se logar com sucesso:
                 if (data && data.user) {
                     console.log('Acesso autorizado para:', data.user);
 
                     if (telaPortaria) telaPortaria.style.display = "none"; 
                     if (containerSimulador) containerSimulador.style.display = "block";
                     
-                    // Salva os dados de validação localmente
                     localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
                     localStorage.setItem("user_session", JSON.stringify(data.session));
                     
@@ -8439,8 +8444,8 @@ function configurarPortaria() {
                 }
 
             } catch (clickError) {
-                console.error("Erro retornado pela API Auth:", clickError.message);
-                mostrarErro("Acesso negado. Verifique se o e-mail está correto ou se a sua assinatura está ativa na Hotmart.");
+                console.error("Erro na autenticação:", clickError.message);
+                mostrarErro("Acesso negado. Verifique se o e-mail e o CPF estão corretos ou se sua assinatura está ativa.");
             }
 
             btnEntrar.innerText = "Liberar Meu Acesso";
@@ -8457,7 +8462,6 @@ function configurarPortaria() {
         }
     }
 
-    // Auto-preenchimento se o usuário logou recentemente
     const usuarioSalvo = localStorage.getItem("usuario_autorizado_simulador");
     if (usuarioSalvo && inputEmail) {
         inputEmail.value = usuarioSalvo;
