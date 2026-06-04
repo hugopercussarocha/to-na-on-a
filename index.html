@@ -8406,37 +8406,30 @@ function configurarPortaria() {
                 btnEntrar.disabled = true;
                 if (msgErro) msgErro.style.display = "none";
 
-                // Consulta segura à tabela de perfis
-                const { data, error } = await supabaseClient.from('perfis')
-                    .select('assinatura_ativa, pago_ate')
-                    .eq('email', emailDigitado);
+                // Realiza o login real usando o sistema de autenticação nativo (Auth) do Supabase
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: emailDigitado,
+                    password: emailDigitado // O Make foi configurado usando o e-mail/CPF como senha padrão
+                });
 
                 if (error) throw error;
 
-                if (!data || data.length === 0) {
-                    mostrarErro("E-mail não cadastrado. Verifique se digitou corretamente ou se o pagamento foi concluído.");
-                    btnEntrar.innerText = "Liberar Meu Acesso";
-                    btnEntrar.disabled = false;
-                    return;
-                }
-
-                const perfil = data[0];
-                const dataHoje = new Date();
-                const dataExpiracao = perfil.pago_ate ? new Date(perfil.pago_ate) : null;
-
-                // Liberação condicionada ao status e validade
-                if (perfil.assinatura_ativa === true && dataExpiracao && dataExpiracao > dataHoje) {
+                // Se a autenticação foi um sucesso, libera o acesso imediatamente
+                if (data && data.user) {
                     if (telaPortaria) telaPortaria.style.display = "none"; 
                     if (containerSimulador) containerSimulador.style.display = "block";
                     
+                    // Salva a sessão ativa no navegador e o e-mail do usuário
+                    localStorage.setItem("user_session", JSON.stringify(data.session));
                     localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
+                    
                     navegarPara('home');
-                } else {
-                    mostrarErro("Sua assinatura está inativa ou expirou. Por favor, realize a renovação mensal.");
                 }
 
             } catch (clickError) {
-                alert("Erro ao consultar banco de dados: " + clickError.message);
+                // Se o e-mail não estiver cadastrado no Auth ou a senha estiver incorreta, cairá aqui
+                mostrarErro("Acesso negado. Verifique se o e-mail digitado está correto ou se a sua assinatura está ativa na Hotmart.");
+                console.error("Erro na autenticação:", clickError.message);
             }
 
             btnEntrar.innerText = "Liberar Meu Acesso";
@@ -8453,7 +8446,7 @@ function configurarPortaria() {
         }
     }
 
-    // Auto-preenchimento opcional se o usuário logou recentemente
+    // Auto-preenchimento se o usuário logou recentemente
     const usuarioSalvo = localStorage.getItem("usuario_autorizado_simulador");
     if (usuarioSalvo && inputEmail) {
         inputEmail.value = usuarioSalvo;
