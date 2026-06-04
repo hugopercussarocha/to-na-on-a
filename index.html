@@ -8395,7 +8395,6 @@ function configurarPortaria() {
     if (btnEntrar) {
         btnEntrar.addEventListener("click", async () => {
             try {
-                // Força o e-mail a ficar em minúsculas para bater com o Supabase
                 const emailDigitado = inputEmail.value.trim().toLowerCase();
                 
                 if (!emailDigitado) {
@@ -8403,38 +8402,43 @@ function configurarPortaria() {
                     return;
                 }
 
-                // Feedback visual de carregamento
                 btnEntrar.innerText = "Verificando...";
                 btnEntrar.disabled = true;
                 if (msgErro) msgErro.style.display = "none";
 
-                // Chamada de login nativa do Supabase (Auth)
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email: emailDigitado,
-                    password: emailDigitado // Como definimos no Make o e-mail também como senha
-                });
+                // Consulta segura à tabela de perfis
+                const { data, error } = await supabaseClient.from('perfis')
+                    .select('assinatura_ativa, pago_ate')
+                    .eq('email', emailDigitado);
 
                 if (error) throw error;
 
-                // Se a autenticação foi um sucesso, libera o acesso
-                if (data && data.user) {
+                if (!data || data.length === 0) {
+                    mostrarErro("E-mail não cadastrado. Verifique se digitou corretamente ou se o pagamento foi concluído.");
+                    btnEntrar.innerText = "Liberar Meu Acesso";
+                    btnEntrar.disabled = false;
+                    return;
+                }
+
+                const perfil = data[0];
+                const dataHoje = new Date();
+                const dataExpiracao = perfil.pago_ate ? new Date(perfil.pago_ate) : null;
+
+                // Liberação condicionada ao status e validade
+                if (perfil.assinatura_ativa === true && dataExpiracao && dataExpiracao > dataHoje) {
                     if (telaPortaria) telaPortaria.style.display = "none"; 
                     if (containerSimulador) containerSimulador.style.display = "block";
                     
-                    // Salva as sessões no navegador
-                    localStorage.setItem("user_session", JSON.stringify(data.session));
                     localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
-                    
-                    // Executa a navegação interna do seu app
                     navegarPara('home');
+                } else {
+                    mostrarErro("Sua assinatura está inativa ou expirou. Por favor, realize a renovação mensal.");
                 }
 
             } catch (clickError) {
-                console.error("Erro na autenticação:", clickError.message);
-                mostrarErro("Acesso negado. Verifique se o e-mail digitado está correto ou se a sua assinatura está ativa.");
+                alert("Erro ao consultar banco de dados: " + clickError.message);
             }
 
-            // Restaura o botão caso falhe
             btnEntrar.innerText = "Liberar Meu Acesso";
             btnEntrar.disabled = false;
         });
@@ -8449,7 +8453,7 @@ function configurarPortaria() {
         }
     }
 
-    // Auto-preenchimento se o usuário logou recentemente
+    // Auto-preenchimento opcional se o usuário logou recentemente
     const usuarioSalvo = localStorage.getItem("usuario_autorizado_simulador");
     if (usuarioSalvo && inputEmail) {
         inputEmail.value = usuarioSalvo;
