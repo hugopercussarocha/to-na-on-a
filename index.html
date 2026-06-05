@@ -8358,21 +8358,17 @@ let respondidasGlobal = JSON.parse(localStorage.getItem('respondidas_regencia'))
 let acertosContador = parseInt(localStorage.getItem('acertos_total')) || 0;
 
 const SUPABASE_URL = 'https://orvfhxfpldkfrpzcsbhi.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ydmZoeGZwbGRrZnJwemNzYmhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNzkxMzcsImV4cCI6MjA5NTc1NTEzN30.HJHJFb_bKmBYFrcfCR4s6WgE2m9pQSBahLAdrjWaLR8';
+const SUPABASE_KEY = 'sb_publishable_1pwqO3t-peBJdgBj13aK5A_2xUXe2Ql';
 let supabaseClient = null;
 
 // ==========================================
-// 2. INICIALIZAÇÃO E PERSISTÊNCIA DE SESSÃO
+// 2. INICIALIZAÇÃO DE SEGURANÇA (SUPABASE)
 // ==========================================
-window.addEventListener('load', async () => {
+window.addEventListener('load', () => {
     try {
         if (window.supabase && window.supabase.createClient) {
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            console.log("Supabase inicializado com sucesso.");
-            
-            atualizarStatsHome();
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             configurarPortaria();
-            verificarSessaoExistente();
         } else {
             alert("Erro: A biblioteca Supabase não respondeu. Recarregue a página.");
         }
@@ -8381,67 +8377,61 @@ window.addEventListener('load', async () => {
     }
 });
 
-function verificarSessaoExistente() {
-    const usuarioAutorizado = localStorage.getItem("usuario_autorizado_simulador");
-    const sessionStr = localStorage.getItem("user_session");
-    const telaPortaria = document.getElementById("tela-portaria");
-    const containerSimulador = document.querySelector(".container");
-
-    if (usuarioAutorizado && sessionStr) {
-        if (telaPortaria) telaPortaria.style.display = "none";
-        if (containerSimulador) containerSimulador.style.display = "block";
-        console.log("Sessão persistente restaurada para:", usuarioAutorizado);
-    }
-}
-
 // ==========================================
-// 3. SISTEMA DE PORTARIA (CORRIGIDO E BLINDADO)
+// 3. SISTEMA DE PORTARIA (LOGIN COORDENADO)
 // ==========================================
 function configurarPortaria() {
     const btnEntrar = document.getElementById("btn-entrar");
     const inputEmail = document.getElementById("login-email");
-    const inputSenha = document.getElementById("login-senha"); // Certifique-se de que este ID existe no seu HTML
     const msgErro = document.getElementById("mensagem-erro");
     const telaPortaria = document.getElementById("tela-portaria");
     const containerSimulador = document.querySelector(".container");
 
     if (btnEntrar) {
         btnEntrar.addEventListener("click", async () => {
-            const emailDigitado = inputEmail.value.trim().toLowerCase();
-            const senhaDigitada = inputSenha.value.trim().replace(/\D/g, ''); // Limpa o CPF para apenas números
-
-            if (!emailDigitado || !senhaDigitada) {
-                mostrarErro("Por favor, preencha o e-mail e o CPF.");
-                return;
-            }
-
-            btnEntrar.innerText = "Verificando...";
-            btnEntrar.disabled = true;
-            if (msgErro) msgErro.style.display = "none";
-
             try {
-                // Tenta autenticar diretamente no Auth do Supabase
-                const { data, error } = await supabaseClient.auth.signInWithPassword({
-                    email: emailDigitado,
-                    password: senhaDigitada
-                });
+                const emailDigitado = inputEmail.value.trim().toLowerCase();
+                
+                if (!emailDigitado) {
+                    mostrarErro("Por favor, digite um e-mail válido.");
+                    return;
+                }
+
+                btnEntrar.innerText = "Verificando...";
+                btnEntrar.disabled = true;
+                if (msgErro) msgErro.style.display = "none";
+
+                // Consulta segura à tabela de perfis
+                const { data, error } = await supabaseClient.from('perfis')
+                    .select('assinatura_ativa, pago_ate')
+                    .eq('email', emailDigitado);
 
                 if (error) throw error;
 
-                // Se chegou aqui, o login foi validado pelo Supabase
-                if (data.user) {
+                if (!data || data.length === 0) {
+                    mostrarErro("E-mail não cadastrado. Verifique se digitou corretamente ou se o pagamento foi concluído.");
+                    btnEntrar.innerText = "Liberar Meu Acesso";
+                    btnEntrar.disabled = false;
+                    return;
+                }
+
+                const perfil = data[0];
+                const dataHoje = new Date();
+                const dataExpiracao = perfil.pago_ate ? new Date(perfil.pago_ate) : null;
+
+                // Liberação condicionada ao status e validade
+                if (perfil.assinatura_ativa === true && dataExpiracao && dataExpiracao > dataHoje) {
                     if (telaPortaria) telaPortaria.style.display = "none"; 
                     if (containerSimulador) containerSimulador.style.display = "block";
                     
                     localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
-                    localStorage.setItem("user_session", JSON.stringify(data.session));
-                    
                     navegarPara('home');
+                } else {
+                    mostrarErro("Sua assinatura está inativa ou expirou. Por favor, realize a renovação mensal.");
                 }
 
             } catch (clickError) {
-                console.error("Erro de login:", clickError.message);
-                mostrarErro("Acesso negado. Verifique se o e-mail e o CPF estão corretos.");
+                alert("Erro ao consultar banco de dados: " + clickError.message);
             }
 
             btnEntrar.innerText = "Liberar Meu Acesso";
@@ -8456,6 +8446,12 @@ function configurarPortaria() {
         } else {
             alert(texto);
         }
+    }
+
+    // Auto-preenchimento opcional se o usuário logou recentemente
+    const usuarioSalvo = localStorage.getItem("usuario_autorizado_simulador");
+    if (usuarioSalvo && inputEmail) {
+        inputEmail.value = usuarioSalvo;
     }
 }
 
@@ -8702,3 +8698,8 @@ if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW fail:', err));
     });
 }
+
+atualizarStatsHome();
+</script>
+</body>
+</html>
