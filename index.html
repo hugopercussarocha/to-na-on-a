@@ -195,16 +195,10 @@
 
         <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
 
-        <h3>Já é Assinante? Entre com seus dados</h3>
+        <h3>Já é Assinante? Entre com seu e-mail</h3>
         <div style="margin-top: 15px; text-align: left;">
-            <!-- CAMPO DO E-MAIL -->
             <label style="display:block; margin-bottom: 5px; font-weight: bold; color: #333;">E-mail cadastrado:</label>
             <input type="email" id="login-email" placeholder="seu-email@dominio.com" style="width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 15px; background: #fff; color: #000;">
-            
-            <!-- NOVO CAMPO DA SENHA (CPF) -->
-            <label style="display:block; margin-bottom: 5px; font-weight: bold; color: #333;">Senha Inicial (Seu CPF):</label>
-            <input type="password" id="login-senha" placeholder="Apenas números, sem pontos ou traço" style="width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 20px; background: #fff; color: #000;">
-            
             <button id="btn-entrar" style="width: 100%; background: #002244; color: white; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Liberar Meu Acesso</button>
         </div>
         <p id="mensagem-erro" style="color: red; font-size: 14px; margin-top: 10px; display: none;"></p>
@@ -8405,83 +8399,53 @@ function verificarSessaoExistente() {
 // ==========================================
 function configurarPortaria() {
     const btnEntrar = document.getElementById("btn-entrar");
-    const inputEmail = document.getElementById("login-email"); 
-    const inputSenha = document.getElementById("login-senha"); 
+    const inputEmail = document.getElementById("login-email");
+    const inputSenha = document.getElementById("login-senha"); // Certifique-se de que este ID existe no seu HTML
     const msgErro = document.getElementById("mensagem-erro");
     const telaPortaria = document.getElementById("tela-portaria");
     const containerSimulador = document.querySelector(".container");
 
     if (btnEntrar) {
-        // 🔥 CORREÇÃO: Remove clones antigos do botão para evitar duplicação de cliques na memória
-        const novoBtnEntrar = btnEntrar.cloneNode(true);
-        btnEntrar.parentNode.replaceChild(novoBtnEntrar, btnEntrar);
-
-        novoBtnEntrar.addEventListener("click", async (e) => {
-            e.preventDefault(); // 🔥 Evita que a página recarregue sumindo com o fluxo
-
+        btnEntrar.addEventListener("click", async () => {
             const emailDigitado = inputEmail.value.trim().toLowerCase();
-            const senhaBruta = inputSenha.value.trim();
-            
-            if (!emailDigitado || !senhaBruta) {
-                mostrarErro("Por favor, preencha o e-mail e a senha.");
+            const senhaDigitada = inputSenha.value.trim().replace(/\D/g, ''); // Limpa o CPF para apenas números
+
+            if (!emailDigitado || !senhaDigitada) {
+                mostrarErro("Por favor, preencha o e-mail e o CPF.");
                 return;
             }
 
-            novoBtnEntrar.innerText = "Verificando...";
-            novoBtnEntrar.disabled = true;
+            btnEntrar.innerText = "Verificando...";
+            btnEntrar.disabled = true;
             if (msgErro) msgErro.style.display = "none";
 
-            let dadosSessao = null;
-            let erroAutenticacao = null;
-
-            // 1ª Tentativa: Tenta logar tratando a senha como CPF (apenas números)
             try {
-                const cpfLimpo = senhaBruta.replace(/\D/g, '');
-                if (cpfLimpo.length > 0) {
-                    const { data, error } = await supabaseClient.auth.signInWithPassword({
-                        email: emailDigitado,
-                        password: cpfLimpo
-                    });
-                    if (!error && data?.user) dadosSessao = data;
-                    else erroAutenticacao = error;
+                // Tenta autenticar diretamente no Auth do Supabase
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: emailDigitado,
+                    password: senhaDigitada
+                });
+
+                if (error) throw error;
+
+                // Se chegou aqui, o login foi validado pelo Supabase
+                if (data.user) {
+                    if (telaPortaria) telaPortaria.style.display = "none"; 
+                    if (containerSimulador) containerSimulador.style.display = "block";
+                    
+                    localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
+                    localStorage.setItem("user_session", JSON.stringify(data.session));
+                    
+                    navegarPara('home');
                 }
-            } catch (err) {
-                erroAutenticacao = err;
+
+            } catch (clickError) {
+                console.error("Erro de login:", clickError.message);
+                mostrarErro("Acesso negado. Verifique se o e-mail e o CPF estão corretos.");
             }
 
-            // 2ª Tentativa (Contingência): Se falhar, tenta logar com a senha bruta/e-mail (Caso do erro do Make)
-            if (!dadosSessao) {
-                try {
-                    const { data, error } = await supabaseClient.auth.signInWithPassword({
-                        email: emailDigitado,
-                        password: senhaBruta // Tenta o texto literal (ex: e-mail)
-                    });
-                    if (!error && data?.user) dadosSessao = data;
-                    else erroAutenticacao = error;
-                } catch (err) {
-                    erroAutenticacao = err;
-                }
-            }
-
-            // Resposta do Fluxo de Login
-            if (dadosSessao && dadosSessao.user) {
-                console.log("Login efetuado com sucesso para:", emailDigitado);
-                if (telaPortaria) telaPortaria.style.display = "none"; 
-                if (containerSimulador) containerSimulador.style.display = "block";
-                
-                localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
-                localStorage.setItem("user_session", JSON.stringify(dadosSessao.session));
-                
-                if (typeof atualizarStatsHome === "function") {
-                    atualizarStatsHome();
-                }
-            } else {
-                console.error("Erro final de autenticação:", erroAutenticacao?.message);
-                mostrarErro("Acesso negado. Verifique os dados ou se sua assinatura está ativa.");
-            }
-
-            novoBtnEntrar.innerText = "Liberar Meu Acesso";
-            novoBtnEntrar.disabled = false;
+            btnEntrar.innerText = "Liberar Meu Acesso";
+            btnEntrar.disabled = false;
         });
     }
 
@@ -8490,7 +8454,7 @@ function configurarPortaria() {
             msgErro.innerText = texto;
             msgErro.style.display = "block";
         } else {
-            alert(texto); // Garante o fallback caso a div sumpa do HTML
+            alert(texto);
         }
     }
 }
