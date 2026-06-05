@@ -8451,6 +8451,57 @@ function configurarPortaria() {
             btnEntrar.innerText = "Liberar Meu Acesso";
             btnEntrar.disabled = false;
         });
+    }function configurarPortaria() {
+    const btnEntrar = document.getElementById("btn-entrar");
+    const inputEmail = document.getElementById("login-email");
+    const msgErro = document.getElementById("mensagem-erro");
+    const telaPortaria = document.getElementById("tela-portaria");
+    const containerSimulador = document.querySelector(".container");
+
+    if (btnEntrar) {
+        btnEntrar.addEventListener("click", async () => {
+            try {
+                const emailDigitado = inputEmail.value.trim().toLowerCase();
+                
+                if (!emailDigitado) {
+                    mostrarErro("Por favor, digite um e-mail válido.");
+                    return;
+                }
+
+                btnEntrar.innerText = "Verificando...";
+                btnEntrar.disabled = true;
+                if (msgErro) msgErro.style.display = "none";
+
+                // Tenta logar usando o E-mail tanto no login quanto na senha
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: emailDigitado,
+                    password: emailDigitado
+                });
+
+                if (error) throw error;
+
+                if (data && data.user) {
+                    console.log('Acesso autorizado para:', data.user);
+
+                    if (telaPortaria) telaPortaria.style.display = "none"; 
+                    if (containerSimulador) containerSimulador.style.display = "block";
+                    
+                    localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
+                    localStorage.setItem("user_session", JSON.stringify(data.session));
+                    
+                    if (typeof atualizarStatsHome === "function") {
+                        atualizarStatsHome();
+                    }
+                }
+
+            } catch (clickError) {
+                console.error("Erro na autenticação:", clickError.message);
+                mostrarErro("Acesso negado. Verifique seu e-mail ou se sua assinatura está ativa.");
+            }
+
+            btnEntrar.innerText = "Liberar Meu Acesso";
+            btnEntrar.disabled = false;
+        });
     }
 
     function mostrarErro(texto) {
