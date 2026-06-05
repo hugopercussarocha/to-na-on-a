@@ -8396,7 +8396,8 @@ window.addEventListener('load', () => {
 // ==========================================
 function configurarPortaria() {
     const btnEntrar = document.getElementById("btn-entrar");
-    const inputEmail = document.getElementById("login-email"); // Caixa onde o usuário digita
+    const inputEmail = document.getElementById("login-email"); // Campo de e-mail no HTML
+    const inputSenha = document.getElementById("login-senha"); // Campo de senha (CPF) no HTML
     const msgErro = document.getElementById("mensagem-erro");
     const telaPortaria = document.getElementById("tela-portaria");
     const containerSimulador = document.querySelector(".container");
@@ -8404,10 +8405,12 @@ function configurarPortaria() {
     if (btnEntrar) {
         btnEntrar.addEventListener("click", async () => {
             try {
-                const textoDigitado = inputEmail.value.trim();
+                const emailDigitado = inputEmail.value.trim().toLowerCase();
+                // Pega o CPF digitado e remove pontos/traços para garantir o padrão limpo do Make
+                const senhaDigitada = inputSenha.value.trim().replace(/\D/g, ''); 
                 
-                if (!textoDigitado) {
-                    mostrarErro("Por favor, preencha o campo de acesso.");
+                if (!emailDigitado || !senhaDigitada) {
+                    mostrarErro("Por favor, preencha o e-mail e a senha (CPF).");
                     return;
                 }
 
@@ -8415,38 +8418,21 @@ function configurarPortaria() {
                 btnEntrar.disabled = true;
                 if (msgErro) msgErro.style.display = "none";
 
-                let emailLogin = "";
-                let senhaLogin = "";
-
-                // SE FOR O SEU EMAIL DE TESTE ADMINISTRADOR
-                if (textoDigitado.includes("@")) {
-                    emailLogin = textoDigitado.toLowerCase();
-                    senhaLogin = textoDigitado.toLowerCase(); // Seu usuário manual usa o próprio e-mail como senha
-                } else {
-                    // SE FOR UM ALUNO DA HOTMART (Ele digita o CPF com ou sem pontos)
-                    // Como não alteramos o HTML ainda, ele vai digitar o CPF na caixinha existente!
-                    const cpfLimpo = textoDigitado.replace(/\D/g, '');
-                    
-                    // Buscaremos o e-mail do aluno diretamente no Supabase usando o CPF
-                    // Para este teste rápido com a Flávia, digite o e-mail dela direto se preferir,
-                    // ou use a lógica abaixo se o Supabase já possuir o e-mail mapeado.
-                    emailLogin = "flavia_scherrer@hotmail.com"; 
-                    senhaLogin = cpfLimpo;
-                }
-
-                // TENTA LOGAR NO SUPABASE
+                // TENTA LOGAR NO SUPABASE USANDO E-MAIL E O CPF LIMPO COMO SENHA
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
-                    email: emailLogin,
-                    password: senhaLogin
+                    email: emailDigitado,
+                    password: senhaDigitada 
                 });
 
                 if (error) throw error;
 
+                // SE PASSAR DA AUTENTICAÇÃO
                 if (data && data.user) {
                     if (telaPortaria) telaPortaria.style.display = "none"; 
                     if (containerSimulador) containerSimulador.style.display = "block";
                     
-                    localStorage.setItem("usuario_autorizado_simulador", textoDigitado);
+                    // Salva a sessão localmente
+                    localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
                     localStorage.setItem("user_session", JSON.stringify(data.session));
                     
                     if (typeof atualizarStatsHome === "function") {
