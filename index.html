@@ -8,15 +8,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0f1115">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
         :root { --primary-gradient: linear-gradient(135deg, #22d3ee, #818cf8); --bg-dark: #0f1115; --text-main: #f8fafc; --text-sec: #94a3b8; --danger: #f87171; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        
-        /* Estilo da tela de login moderna */
         .login-wrapper { width: 100%; max-width: 400px; }
         .login-card { background: rgba(255, 255, 255, 0.03); padding: 40px; border-radius: 32px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); }
         .input-group { text-align: left; margin-bottom: 20px; }
@@ -37,7 +34,7 @@
                 <input type="email" id="login-email" placeholder="seu@email.com">
             </div>
             <div class="input-group">
-                <label>Senha</label>
+                <label>Senha (CPF)</label>
                 <input type="password" id="login-senha" placeholder="Apenas números">
             </div>
             <button id="btn-entrar" class="btn-login">Acessar Simulador</button>
@@ -48,28 +45,31 @@
     <div class="container hide">
         <div id="view-home">
              <h1>Bem-vindo!</h1>
-             </div>
+        </div>
     </div>
 
     <script>
-        // 1. INICIALIZAÇÃO
-        const supabase = supabase.createClient('https://orvfhxfpldkfrpzcsbhi.supabase.co', 'sb_publishable_1pwqO3t-peBJdgBj13aK5A_2xUXe2Ql');
+        // 1. Inicialização do Supabase (Acesso global)
+        const supabase = window.supabase.createClient('https://orvfhxfpldkfrpzcsbhi.supabase.co', 'sb_publishable_1pwqO3t-peBJdgBj13aK5A_2xUXe2Ql');
 
-        // 2. LÓGICA DO BOTÃO
-        document.getElementById("btn-entrar").addEventListener("click", async () => {
-            const email = document.getElementById("login-email").value.trim().toLowerCase();
-            const senha = document.getElementById("login-senha").value.trim().replace(/\D/g, '');
-            const msgErro = document.getElementById("mensagem-erro");
+        // 2. Lógica de Login (O botão só funciona quando a página estiver totalmente carregada)
+        window.addEventListener('load', () => {
+            document.getElementById("btn-entrar").onclick = async () => {
+                const email = document.getElementById("login-email").value.trim().toLowerCase();
+                const senha = document.getElementById("login-senha").value.trim().replace(/\D/g, '');
+                const msgErro = document.getElementById("mensagem-erro");
 
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha });
-
-            if (error) {
-                msgErro.innerText = "E-mail ou CPF inválidos.";
-                msgErro.style.display = "block";
-            } else {
-                document.getElementById("tela-portaria").classList.add("hide");
-                document.querySelector(".container").classList.remove("hide");
-            }
+                try {
+                    const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha });
+                    if (error) throw error;
+                    
+                    document.getElementById("tela-portaria").classList.add("hide");
+                    document.querySelector(".container").classList.remove("hide");
+                } catch (e) {
+                    msgErro.innerText = "E-mail ou CPF inválidos.";
+                    msgErro.style.display = "block";
+                }
+            };
         });
 
 // --- BANCO DE DADOS (Certifique-se de que ele está ANTES das funções que o usam) ---
@@ -8161,3 +8161,350 @@ const bancoDados = {
     } // Fecha a Matéria
 }; // Fecha o bancoDados
 
+// ==========================================
+// 1. VARIÁVEIS GLOBAIS E BANCO LOCAL
+// ==========================================
+let historyStack = ['home'];
+let materiaAtual = "";
+let questoesSessao = [];
+let indexAtual = 0;
+
+let errosGlobal = JSON.parse(localStorage.getItem('erros_regencia')) || [];
+let respondidasGlobal = JSON.parse(localStorage.getItem('respondidas_regencia')) || [];
+let acertosContador = parseInt(localStorage.getItem('acertos_total')) || 0;
+
+const SUPABASE_URL = 'https://orvfhxfpldkfrpzcsbhi.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_1pwqO3t-peBJdgBj13aK5A_2xUXe2Ql';
+let supabaseClient = null;
+
+// ==========================================
+// 2. INICIALIZAÇÃO DE SEGURANÇA (SUPABASE)
+// ==========================================
+window.addEventListener('load', () => {
+    try {
+        if (window.supabase && window.supabase.createClient) {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            configurarPortaria();
+        } else {
+            alert("Erro: A biblioteca Supabase não respondeu. Recarregue a página.");
+        }
+    } catch (e) {
+        alert("Erro na carga inicial: " + e.message);
+    }
+});
+
+// ==========================================
+// 3. SISTEMA DE PORTARIA (LOGIN COM E-MAIL E CPF)
+// ==========================================
+function configurarPortaria() {
+    const btnEntrar = document.getElementById("btn-entrar");
+    const inputEmail = document.getElementById("login-email");
+    const inputSenha = document.getElementById("login-senha"); // Certifique-se que este ID existe no seu HTML
+    const msgErro = document.getElementById("mensagem-erro");
+    const telaPortaria = document.getElementById("tela-portaria");
+    const containerSimulador = document.querySelector(".container");
+
+    if (btnEntrar) {
+        btnEntrar.addEventListener("click", async () => {
+            const emailDigitado = inputEmail.value.trim().toLowerCase();
+            // A linha abaixo limpa o CPF para garantir que só números sejam enviados
+            const cpfDigitado = inputSenha.value.trim().replace(/\D/g, ''); 
+            
+            if (!emailDigitado || !cpfDigitado) {
+                mostrarErro("Por favor, digite o e-mail e o CPF.");
+                return;
+            }
+
+            btnEntrar.innerText = "Verificando...";
+            btnEntrar.disabled = true;
+            if (msgErro) msgErro.style.display = "none";
+
+            try {
+                // Aqui está a MÁGICA: O Supabase autentica e-mail + senha (CPF)
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: emailDigitado,
+                    password: cpfDigitado
+                });
+
+                if (error) throw error;
+
+                // Se o login for bem-sucedido:
+                if (data.user) {
+                    if (telaPortaria) telaPortaria.style.display = "none"; 
+                    if (containerSimulador) containerSimulador.style.display = "block";
+                    
+                    localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
+                    navegarPara('home');
+                }
+
+            } catch (clickError) {
+                // Se der erro de senha incorreta ou usuário inexistente
+                mostrarErro("E-mail ou CPF incorretos. Tente novamente.");
+            }
+
+            btnEntrar.innerText = "Liberar Meu Acesso";
+            btnEntrar.disabled = false;
+        });
+    }
+
+    function mostrarErro(texto) {
+        if (msgErro) {
+            msgErro.innerText = texto;
+            msgErro.style.display = "block";
+        } else {
+            alert(texto);
+        }
+    }
+}
+// ==========================================
+// 4. LÓGICA DE NAVEGAÇÃO E SIMULADOR
+// ==========================================
+function navegarPara(view, data = null) {
+    const views = document.querySelectorAll('.view-section, [id^="view-"]');
+    views.forEach(v => {
+        if(v.id !== "tela-portaria") v.classList.add('hide');
+    });
+    
+    const targetView = document.getElementById(`view-${view}`);
+    if (targetView) {
+        targetView.classList.remove('hide');
+        if (historyStack[historyStack.length - 1] !== view) {
+            historyStack.push(view);
+        }
+    }
+
+    if(view === 'materias') renderMaterias();
+    if(view === 'capitulos') renderCapitulos(data);
+}
+
+function voltar() {
+    if(historyStack.length > 1) {
+        historyStack.pop();
+        const anterior = historyStack.pop();
+        navegarPara(anterior);
+    }
+}
+
+function renderMaterias() {
+    const list = document.getElementById('materias-list');
+    if(!list) return;
+    
+    list.innerHTML = "";
+    if (typeof bancoDados === 'undefined') return;
+    const materias = Object.keys(bancoDados);
+    
+    materias.forEach(mat => {
+        const div = document.createElement('div');
+        div.className = 'list-item';
+        div.innerHTML = `<span>${mat}</span><span>›</span>`;
+        div.onclick = () => navegarPara('capitulos', mat);
+        list.appendChild(div);
+    });
+}
+
+function renderCapitulos(mat) {
+    if (typeof bancoDados === 'undefined' || !mat || !bancoDados[mat]) return;
+    materiaAtual = mat;
+    document.getElementById('cap-title-header').innerText = mat;
+    
+    const list = document.getElementById('capitulos-list');
+    list.innerHTML = "";
+    
+    let todasQuestoes = [];
+    Object.values(bancoDados[mat]).forEach(c => {
+        todasQuestoes = todasQuestoes.concat(c);
+    });
+    
+    list.appendChild(createCapCard("🔥 Mistão da Matéria", todasQuestoes, true));
+
+    Object.keys(bancoDados[mat]).forEach(cap => {
+        list.appendChild(createCapCard(cap, bancoDados[mat][cap]));
+    });
+}
+
+function createCapCard(label, lista, isMistao = false) {
+    const feitas = lista.filter(q => respondidasGlobal.includes(q.id)).length;
+    const total = lista.length;
+    const pct = total > 0 ? (feitas / total) * 100 : 0;
+    
+    const div = document.createElement('div');
+    div.className = 'list-item';
+    div.style.flexDirection = 'column';
+    div.style.alignItems = 'stretch';
+    div.onclick = () => isMistao ? iniciarMistao(materiaAtual) : iniciarQuiz(materiaAtual, label);
+
+    div.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; width: 100%;">
+            <div>
+                <p style="font-size:14px; font-weight:600;">${label}</p>
+                <p style="font-size:11px; color:var(--text-sec); margin-top:4px;">${feitas}/${total} questões</p>
+            </div>
+            <span style="color:var(--text-sec)">›</span>
+        </div>
+        <div class="progress-mini-bg"><div class="progress-mini-fill" style="width:${pct}%"></div></div>
+    `;
+    return div;
+}
+
+function iniciarQuiz(mat, cap) {
+    if (typeof bancoDados === 'undefined') return;
+    const lista = bancoDados[mat][cap];
+    const pendentes = lista.filter(q => !respondidasGlobal.includes(q.id));
+    prepararSessao(pendentes.length > 0 ? pendentes : lista, pendentes.length === 0);
+}
+
+function iniciarMistao(mat) {
+    if (typeof bancoDados === 'undefined') return;
+    let todas = [];
+    Object.values(bancoDados[mat]).forEach(c => todas = todas.concat(c));
+    const pendentes = todas.filter(q => !respondidasGlobal.includes(q.id));
+    prepararSessao(pendentes.length > 0 ? pendentes : todas, pendentes.length === 0);
+}
+
+function prepararSessao(lista, resetar, embaralhar = false) {
+    if(resetar) {
+        const idsParaResetar = lista.map(q => q.id);
+        respondidasGlobal = respondidasGlobal.filter(id => !idsParaResetar.includes(id));
+        localStorage.setItem('respondidas_regencia', JSON.stringify(respondidasGlobal));
+    }
+    
+    if (embaralhar) {
+        questoesSessao = [...lista].sort(() => Math.random() - 0.5);
+    } else {
+        questoesSessao = [...lista]; 
+    }
+    
+    indexAtual = 0;
+    navegarPara('quiz');
+    mostrarQuestao();
+}
+
+function mostrarQuestao() {
+    const q = questoesSessao[indexAtual];
+    const container = document.getElementById('opcoes-container');
+    const feedback = document.getElementById('feedback-box');
+    
+    if (feedback) feedback.classList.add('hide');
+    if (container) container.innerHTML = ""; 
+    
+    const elPergunta = document.getElementById('pergunta-texto');
+    if (elPergunta) elPergunta.innerText = q.q;
+    
+    const total = questoesSessao.length;
+    const prog = ((indexAtual) / total) * 100;
+    
+    const barraProgresso = document.getElementById('quiz-progress-bar');
+    const textoProgresso = document.getElementById('quiz-progress-text');
+    if (barraProgresso) barraProgresso.style.width = prog + "%";
+    if (textoProgresso) textoProgresso.innerText = `QUESTÃO ${indexAtual + 1} DE ${total}`;
+
+    const letras = ["A", "B", "C", "D", "E"];
+
+    q.opcoes.forEach((texto, i) => {
+        const divOpcao = document.createElement('div');
+        divOpcao.className = 'opcao';
+        divOpcao.id = `opt-${i}`;
+
+        const btnTesoura = document.createElement('button');
+        btnTesoura.className = 'btn-tesoura';
+        btnTesoura.type = 'button';
+        btnTesoura.innerHTML = '✂️';
+        
+        btnTesoura.onclick = (e) => {
+            e.stopPropagation(); 
+            divOpcao.classList.toggle('cortada');
+        };
+
+        const divLetra = document.createElement('div');
+        divLetra.className = 'letra-circulo';
+        divLetra.innerText = letras[i];
+
+        const spanTexto = document.createElement('span');
+        spanTexto.className = 'texto-alternativa';
+        spanTexto.innerText = texto;
+
+        divOpcao.appendChild(btnTesoura);
+        divOpcao.appendChild(divLetra);
+        divOpcao.appendChild(spanTexto);
+
+        divOpcao.onclick = function() {
+            if(!divOpcao.classList.contains('cortada')) {
+                validarResposta(i, divOpcao);
+            }
+        };
+
+        if (container) container.appendChild(divOpcao);
+    });
+}
+
+function validarResposta(idx, elemento) {
+    const q = questoesSessao[indexAtual];
+    const correto = idx === q.correta;
+    const opcoes = document.querySelectorAll('.opcao');
+
+    opcoes.forEach(o => o.style.pointerEvents = 'none');
+    
+    if(correto) {
+        elemento.classList.add('correta');
+        acertosContador++;
+        errosGlobal = errosGlobal.filter(e => e.id !== q.id);
+    } else {
+        elemento.classList.add('errada');
+        const corretaEl = document.getElementById(`opt-${q.correta}`);
+        if(corretaEl) corretaEl.classList.add('correta');
+        
+        if(!errosGlobal.find(e => e.id === q.id)) {
+            errosGlobal.push(q);
+        }
+    }
+
+    if(!respondidasGlobal.includes(q.id)) respondidasGlobal.push(q.id);
+    
+    localStorage.setItem('erros_regencia', JSON.stringify(errosGlobal));
+    localStorage.setItem('respondidas_regencia', JSON.stringify(respondidasGlobal));
+    localStorage.setItem('acertos_total', acertosContador.toString());
+
+    const feedStatus = document.getElementById('feed-status');
+    const feedFund = document.getElementById('feed-fundamentacao');
+    const feedBox = document.getElementById('feedback-box');
+
+    if (feedStatus) feedStatus.innerText = correto ? "✅ Excelente!" : "❌ Observação";
+    if (feedFund) feedFund.innerHTML = `${q.fund}<br><br><strong>${q.loc || q.fonte || ''}</strong>`;
+    if (feedBox) feedBox.classList.remove('hide');
+    
+    atualizarStatsHome();
+}
+
+function proximaQuestao() {
+    indexAtual++;
+    if(indexAtual < questoesSessao.length) mostrarQuestao();
+    else { alert("Sessão concluída!"); navegarPara('home'); }
+}
+
+function atualizarStatsHome() {
+    const elAcertos = document.getElementById('home-acertos');
+    const elErros = document.getElementById('home-erros');
+    if(elAcertos) elAcertos.innerText = acertosContador;
+    if(elErros) elErros.innerText = errosGlobal.length;
+}
+
+function iniciarRevisaoErros() {
+    if(errosGlobal.length === 0) return alert("Nenhum erro para revisar!");
+    prepararSessao(errosGlobal, false);
+}
+
+// Registro estruturado do Service Worker para o PWA
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW fail:', err));
+    });
+}
+
+atualizarStatsHome();
+</script>
+</body>
+</html>
+
+    </script>
+</body>
+</html>
