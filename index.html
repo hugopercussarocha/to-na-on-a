@@ -7,9 +7,7 @@
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <link rel="manifest" href="manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
     <style>
         :root { --primary-gradient: linear-gradient(135deg, #22d3ee, #818cf8); --bg-dark: #0f1115; --text-main: #f8fafc; --text-sec: #94a3b8; --danger: #f87171; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -28,14 +26,11 @@
     <div id="tela-portaria" class="login-wrapper">
         <div class="login-card">
             <h2>Serei Músico Militar</h2>
-            <p style="color:var(--text-sec); margin-bottom:20px;">Faça login para continuar.</p>
             <div class="input-group">
-                <label>E-mail</label>
-                <input type="email" id="login-email" placeholder="seu@email.com">
+                <input type="email" id="login-email" placeholder="E-mail">
             </div>
             <div class="input-group">
-                <label>Senha (CPF)</label>
-                <input type="password" id="login-senha" placeholder="Apenas números">
+                <input type="password" id="login-senha" placeholder="Senha (CPF)">
             </div>
             <button id="btn-entrar" class="btn-login">Acessar Simulador</button>
             <p id="mensagem-erro" style="color:var(--danger); margin-top:15px; display:none;"></p>
@@ -49,28 +44,30 @@
     </div>
 
     <script>
-        // 1. Inicialização do Supabase (Acesso global)
+        // 1. INICIALIZAÇÃO SEGURA
         const supabase = window.supabase.createClient('https://orvfhxfpldkfrpzcsbhi.supabase.co', 'sb_publishable_1pwqO3t-peBJdgBj13aK5A_2xUXe2Ql');
 
-        // 2. Lógica de Login (O botão só funciona quando a página estiver totalmente carregada)
-        window.addEventListener('load', () => {
-            document.getElementById("btn-entrar").onclick = async () => {
-                const email = document.getElementById("login-email").value.trim().toLowerCase();
-                const senha = document.getElementById("login-senha").value.trim().replace(/\D/g, '');
-                const msgErro = document.getElementById("mensagem-erro");
+        // 2. LÓGICA DE LOGIN (Direta)
+        document.getElementById("btn-entrar").onclick = async () => {
+            const btn = document.getElementById("btn-entrar");
+            const email = document.getElementById("login-email").value.trim().toLowerCase();
+            const senha = document.getElementById("login-senha").value.trim().replace(/\D/g, '');
+            const msg = document.getElementById("mensagem-erro");
 
-                try {
-                    const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha });
-                    if (error) throw error;
-                    
-                    document.getElementById("tela-portaria").classList.add("hide");
-                    document.querySelector(".container").classList.remove("hide");
-                } catch (e) {
-                    msgErro.innerText = "E-mail ou CPF inválidos.";
-                    msgErro.style.display = "block";
-                }
-            };
-        });
+            btn.innerText = "Conectando...";
+            
+            try {
+                const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
+                if (error) throw error;
+                
+                document.getElementById("tela-portaria").classList.add("hide");
+                document.querySelector(".container").classList.remove("hide");
+            } catch (e) {
+                msg.innerText = "Acesso negado.";
+                msg.style.display = "block";
+                btn.innerText = "Acessar Simulador";
+            }
+        };
 
 // --- BANCO DE DADOS (Certifique-se de que ele está ANTES das funções que o usam) ---
 const bancoDados = {
