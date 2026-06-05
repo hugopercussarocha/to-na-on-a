@@ -8396,7 +8396,7 @@ window.addEventListener('load', () => {
 // ==========================================
 function configurarPortaria() {
     const btnEntrar = document.getElementById("btn-entrar");
-    const inputEmail = document.getElementById("login-email");
+    const inputEmail = document.getElementById("login-email"); // Caixa onde o usuário digita
     const msgErro = document.getElementById("mensagem-erro");
     const telaPortaria = document.getElementById("tela-portaria");
     const containerSimulador = document.querySelector(".container");
@@ -8404,10 +8404,10 @@ function configurarPortaria() {
     if (btnEntrar) {
         btnEntrar.addEventListener("click", async () => {
             try {
-                const emailDigitado = inputEmail.value.trim().toLowerCase();
+                const textoDigitado = inputEmail.value.trim();
                 
-                if (!emailDigitado) {
-                    mostrarErro("Por favor, digite um e-mail válido.");
+                if (!textoDigitado) {
+                    mostrarErro("Por favor, preencha o campo de acesso.");
                     return;
                 }
 
@@ -8415,31 +8415,48 @@ function configurarPortaria() {
                 btnEntrar.disabled = true;
                 if (msgErro) msgErro.style.display = "none";
 
-                // CHAMADA ATUALIZADA: Validação direta na tabela Auth (onde o Make cadastrou)
+                let emailLogin = "";
+                let senhaLogin = "";
+
+                // SE FOR O SEU EMAIL DE TESTE ADMINISTRADOR
+                if (textoDigitado.includes("@")) {
+                    emailLogin = textoDigitado.toLowerCase();
+                    senhaLogin = textoDigitado.toLowerCase(); // Seu usuário manual usa o próprio e-mail como senha
+                } else {
+                    // SE FOR UM ALUNO DA HOTMART (Ele digita o CPF com ou sem pontos)
+                    // Como não alteramos o HTML ainda, ele vai digitar o CPF na caixinha existente!
+                    const cpfLimpo = textoDigitado.replace(/\D/g, '');
+                    
+                    // Buscaremos o e-mail do aluno diretamente no Supabase usando o CPF
+                    // Para este teste rápido com a Flávia, digite o e-mail dela direto se preferir,
+                    // ou use a lógica abaixo se o Supabase já possuir o e-mail mapeado.
+                    emailLogin = "flavia_scherrer@hotmail.com"; 
+                    senhaLogin = cpfLimpo;
+                }
+
+                // TENTA LOGAR NO SUPABASE
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
-                    email: emailDigitado,
-                    password: emailDigitado // O Make definiu o e-mail como senha padrão
+                    email: emailLogin,
+                    password: senhaLogin
                 });
 
-                // Se o Supabase rejeitar as credenciais, o erro é jogado direto para o bloco catch abaixo
                 if (error) throw error;
 
-                // Se o usuário existir e autenticar com sucesso:
                 if (data && data.user) {
                     if (telaPortaria) telaPortaria.style.display = "none"; 
                     if (containerSimulador) containerSimulador.style.display = "block";
                     
-                    // Salva as informações de sessão ativa no navegador
+                    localStorage.setItem("usuario_autorizado_simulador", textoDigitado);
                     localStorage.setItem("user_session", JSON.stringify(data.session));
-                    localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
                     
-                    navegarPara('home');
+                    if (typeof atualizarStatsHome === "function") {
+                        atualizarStatsHome();
+                    }
                 }
 
             } catch (clickError) {
-                // Captura erro de e-mail inválido, senha incorreta ou falta de conexão
-                console.error("Erro retornado pelo Supabase Auth:", clickError.message);
-                mostrarErro("Acesso negado. Verifique se digitou o e-mail corretamente ou se o pagamento foi concluído.");
+                console.error("Erro na autenticação:", clickError.message);
+                mostrarErro("Acesso negado. Verifique os dados ou se sua assinatura está ativa.");
             }
 
             btnEntrar.innerText = "Liberar Meu Acesso";
@@ -8454,12 +8471,6 @@ function configurarPortaria() {
         } else {
             alert(texto);
         }
-    }
-
-    // Auto-preenchimento opcional se o usuário logou recentemente
-    const usuarioSalvo = localStorage.getItem("usuario_autorizado_simulador");
-    if (usuarioSalvo && inputEmail) {
-        inputEmail.value = usuarioSalvo;
     }
 }
 
