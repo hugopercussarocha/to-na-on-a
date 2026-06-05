@@ -5,128 +5,87 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Serei Músico Militar - Questões</title>
     
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --primary-glow: rgba(34, 211, 238, 0.4);
             --primary-gradient: linear-gradient(135deg, #22d3ee, #818cf8);
             --bg-dark: #0f1115;
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --border-white: rgba(255, 255, 255, 0.05);
             --text-main: #f8fafc;
             --text-sec: #94a3b8;
-            --success: #4ade80;
             --danger: #f87171;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-main); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-
-        /* Estilo da Tela de Login Moderna */
-        .login-wrapper { width: 100%; max-width: 400px; }
-        .login-card { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-white); padding: 40px; border-radius: 32px; text-align: center; backdrop-filter: blur(20px); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
-        .header h2 { font-size: 24px; margin-bottom: 8px; color: #fff; }
-        .header p { color: var(--text-sec); margin-bottom: 30px; font-size: 14px; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .login-wrapper { width: 100%; max-width: 400px; padding: 20px; }
+        .login-card { background: rgba(255, 255, 255, 0.03); padding: 40px; border-radius: 32px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1); }
         .input-group { text-align: left; margin-bottom: 20px; }
-        .input-group label { display: block; margin-bottom: 8px; color: #f8fafc; font-size: 13px; font-weight: 500; }
-        .input-group input { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border-white); background: rgba(0,0,0,0.2); color: white; font-size: 16px; transition: var(--transition); }
-        .input-group input:focus { border-color: #22d3ee; outline: none; }
-        .btn-login { width: 100%; padding: 15px; background: var(--primary-gradient); border: none; border-radius: 12px; color: white; font-weight: 600; cursor: pointer; font-size: 16px; margin-top: 10px; }
-        .error-msg { color: var(--danger); font-size: 13px; margin-top: 15px; display: none; }
+        .input-group input { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(0,0,0,0.2); color: white; }
+        .btn-login { width: 100%; padding: 15px; background: var(--primary-gradient); border: none; border-radius: 12px; color: white; font-weight: 600; cursor: pointer; }
         .hide { display: none !important; }
-
-        /* Estilos originais do simulador */
-        .container { width: 100%; max-width: 480px; background: rgba(15, 17, 21, 0.8); backdrop-filter: blur(30px); border: 1px solid var(--border-white); border-radius: 32px; padding: 30px 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
-        .stats-card { background: var(--card-bg); border: 1px solid var(--border-white); border-radius: 20px; padding: 15px 25px; display: flex; justify-content: space-around; margin-bottom: 30px; }
-        .stat-group { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
-        .btn-materias { background: var(--primary-gradient); padding: 35px 25px; border-radius: 24px; display: flex; align-items: center; gap: 15px; cursor: pointer; border: none; width: 100%; color: white; margin-bottom: 15px; transition: var(--transition); }
-        .btn-revisao { background: var(--card-bg); border: 1px solid var(--border-white); padding: 20px; border-radius: 20px; width: 100%; color: var(--text-main); font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; }
-        .question-text { font-size: 1.15rem; line-height: 1.6; margin-bottom: 30px; }
-        .opcao { display: flex; align-items: center; background: var(--card-bg); border: 1px solid var(--border-white); padding: 16px; border-radius: 18px; margin-bottom: 12px; cursor: pointer; }
-        .letra-circulo { width: 34px; height: 34px; border: 1px solid var(--border-white); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-size: 13px; font-weight: 700; }
-        .btn-nav { background: none; border: none; color: var(--text-sec); cursor: pointer; margin-bottom: 20px; }
-        .progress-mini-fill { height: 100%; background: var(--primary-gradient); }
     </style>
 </head>
 <body>
 
     <div id="tela-portaria" class="login-wrapper">
         <div class="login-card">
-            <div class="header">
-                <h2>Serei Músico Militar</h2>
-                <p>Faça login para continuar seus estudos.</p>
-            </div>
+            <h2>Serei Músico Militar</h2>
+            <p style="color:var(--text-sec); margin-bottom:20px;">Faça login para continuar.</p>
             <div class="input-group">
                 <label>E-mail</label>
-                <input type="email" id="login-email" placeholder="seu-email@dominio.com">
+                <input type="email" id="login-email" placeholder="seu@email.com">
             </div>
             <div class="input-group">
                 <label>Senha (CPF)</label>
                 <input type="password" id="login-senha" placeholder="Apenas números">
             </div>
             <button id="btn-entrar" class="btn-login">Acessar Simulador</button>
-            <p id="mensagem-erro" class="error-msg"></p>
-            <p style="margin-top: 25px; color: #666; font-size: 12px;">
-                Não é assinante? <a href="https://pay.hotmart.com/Q106077550U" style="color: #22d3ee; text-decoration: none;">Assine aqui</a>
-            </p>
+            <p id="mensagem-erro" style="color:var(--danger); margin-top:15px; display:none;"></p>
         </div>
     </div>
 
     <div class="container hide">
-        <div id="view-home">
-            <div class="stats-card">
-                <div class="stat-group"><span style="color:var(--success)">✓</span><span id="home-acertos">0</span></div>
-                <div class="stat-group"><span style="color:var(--danger)">✕</span><span id="home-erros">0</span></div>
-            </div>
-            <button class="btn-materias" onclick="navegarPara('materias')">
-                <span style="font-size: 32px;">📚</span>
-                <div style="text-align: left;">
-                    <p style="font-size: 10px; font-weight: 700; letter-spacing: 2px; opacity: 0.8;">BIBLIOTECA</p>
-                    <h2 style="font-size: 22px;">MATÉRIAS</h2>
-                </div>
-            </button>
-            <button class="btn-revisao" onclick="iniciarRevisaoErros()">
-                <span style="color: #fbbf24;">⚠️</span> REVISÃO DE ERROS
-            </button>
+        <h1>Bem-vindo!</h1>
         </div>
-        <div id="view-materias" class="hide"><button class="btn-nav" onclick="voltar()">‹ Voltar</button><h2>Matérias</h2><div id="materias-list"></div></div>
-        <div id="view-capitulos" class="hide"><button class="btn-nav" onclick="voltar()">‹ Matérias</button><h2 id="cap-title-header"></h2><div id="capitulos-list"></div></div>
-        <div id="view-quiz" class="hide">
-            <div id="quiz-progress-text"></div>
-            <p id="pergunta-texto"></p>
-            <div id="opcoes-container"></div>
-        </div>
-    </div>
 
     <script>
-        // Inicialização Supabase
-        const SUPABASE_URL = 'https://orvfhxfpldkfrpzcsbhi.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_1pwqO3t-peBJdgBj13aK5A_2xUXe2Ql';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Inicialização
+        const supabase = supabase.createClient('https://orvfhxfpldkfrpzcsbhi.supabase.co', 'sb_publishable_1pwqO3t-peBJdgBj13aK5A_2xUXe2Ql');
 
-        // Lógica de Login
-        document.getElementById("btn-entrar").addEventListener("click", async () => {
-            const email = document.getElementById("login-email").value.trim().toLowerCase();
-            const senha = document.getElementById("login-senha").value.trim().replace(/\D/g, '');
-            const msgErro = document.getElementById("mensagem-erro");
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById("btn-entrar");
+            
+            btn.addEventListener("click", async () => {
+                const email = document.getElementById("login-email").value.trim().toLowerCase();
+                const senha = document.getElementById("login-senha").value.trim().replace(/\D/g, '');
+                const msgErro = document.getElementById("mensagem-erro");
 
-            if(!email || !senha) { msgErro.innerText = "Preencha todos os campos."; msgErro.style.display = "block"; return; }
+                if (!email || !senha) {
+                    msgErro.innerText = "Preencha e-mail e CPF.";
+                    msgErro.style.display = "block";
+                    return;
+                }
 
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha });
+                btn.innerText = "Autenticando...";
+                
+                try {
+                    const { data, error } = await supabase.auth.signInWithPassword({
+                        email: email,
+                        password: senha
+                    });
 
-            if (error) {
-                msgErro.innerText = "E-mail ou CPF inválidos.";
-                msgErro.style.display = "block";
-            } else {
-                document.getElementById("tela-portaria").classList.add("hide");
-                document.querySelector(".container").classList.remove("hide");
-                // Aqui você chamaria sua função de carregar o app, ex: iniciarApp();
-            }
+                    if (error) throw error;
+
+                    // Sucesso:
+                    document.getElementById("tela-portaria").classList.add("hide");
+                    document.querySelector(".container").classList.remove("hide");
+                } catch (e) {
+                    msgErro.innerText = "E-mail ou CPF inválidos.";
+                    msgErro.style.display = "block";
+                    btn.innerText = "Acessar Simulador";
+                }
+            });
         });
-<script>
 
 // --- BANCO DE DADOS (Certifique-se de que ele está ANTES das funções que o usam) ---
 const bancoDados = {
