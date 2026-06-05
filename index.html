@@ -195,10 +195,16 @@
 
         <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
 
-        <h3>Já é Assinante? Entre com seu e-mail</h3>
+        <h3>Já é Assinante? Entre com seus dados</h3>
         <div style="margin-top: 15px; text-align: left;">
+            <!-- CAMPO DO E-MAIL -->
             <label style="display:block; margin-bottom: 5px; font-weight: bold; color: #333;">E-mail cadastrado:</label>
             <input type="email" id="login-email" placeholder="seu-email@dominio.com" style="width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 15px; background: #fff; color: #000;">
+            
+            <!-- NOVO CAMPO DA SENHA (CPF) -->
+            <label style="display:block; margin-bottom: 5px; font-weight: bold; color: #333;">Senha Inicial (Seu CPF):</label>
+            <input type="password" id="login-senha" placeholder="Apenas números, sem pontos ou traço" style="width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 20px; background: #fff; color: #000;">
+            
             <button id="btn-entrar" style="width: 100%; background: #002244; color: white; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Liberar Meu Acesso</button>
         </div>
         <p id="mensagem-erro" style="color: red; font-size: 14px; margin-top: 10px; display: none;"></p>
@@ -8361,28 +8367,18 @@ const SUPABASE_URL = 'https://orvfhxfpldkfrpzcsbhi.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ydmZoeGZwbGRrZnJwemNzYmhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNzkxMzcsImV4cCI6MjA5NTc1NTEzN30.HJHJFb_bKmBYFrcfCR4s6WgE2m9pQSBahLAdrjWaLR8';
 let supabaseClient = null;
 
-// Garante que o Supabase vai inicializar de forma segura assim que a página carregar por completo
-window.addEventListener('load', () => {
+// ==========================================
+// 2. INICIALIZAÇÃO E PERSISTÊNCIA DE SESSÃO
+// ==========================================
+window.addEventListener('load', async () => {
     try {
         if (window.supabase && window.supabase.createClient) {
             supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            console.log("Supabase inicializado com sucesso em segundo plano.");
-        } else {
-            console.error("Aviso: A biblioteca Supabase ainda não respondeu no carregamento.");
-        }
-    } catch (e) {
-        console.error("Erro na carga inicial do Supabase: ", e.message);
-    }
-});
-
-// ==========================================
-// 2. INICIALIZAÇÃO DE SEGURANÇA (SUPABASE)
-// ==========================================
-window.addEventListener('load', () => {
-    try {
-        if (window.supabase && window.supabase.createClient) {
-    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            console.log("Supabase inicializado com sucesso.");
+            
+            atualizarStatsHome();
             configurarPortaria();
+            verificarSessaoExistente();
         } else {
             alert("Erro: A biblioteca Supabase não respondeu. Recarregue a página.");
         }
@@ -8391,13 +8387,27 @@ window.addEventListener('load', () => {
     }
 });
 
+function verificarSessaoExistente() {
+    const usuarioAutorizado = localStorage.getItem("usuario_autorizado_simulador");
+    const sessionStr = localStorage.getItem("user_session");
+    const telaPortaria = document.getElementById("tela-portaria");
+    const containerSimulador = document.querySelector(".container");
+
+    // Se o aluno já logou anteriormente, pula a portaria direto
+    if (usuarioAutorizado && sessionStr) {
+        if (telaPortaria) telaPortaria.style.display = "none";
+        if (containerSimulador) containerSimulador.style.display = "block";
+        console.log("Sessão persistente restaurada para:", usuarioAutorizado);
+    }
+}
+
 // ==========================================
 // 3. SISTEMA DE PORTARIA (LOGIN COORDENADO)
 // ==========================================
 function configurarPortaria() {
     const btnEntrar = document.getElementById("btn-entrar");
-    const inputEmail = document.getElementById("login-email"); // Campo de e-mail no HTML
-    const inputSenha = document.getElementById("login-senha"); // Campo de senha (CPF) no HTML
+    const inputEmail = document.getElementById("login-email"); 
+    const inputSenha = document.getElementById("login-senha"); 
     const msgErro = document.getElementById("mensagem-erro");
     const telaPortaria = document.getElementById("tela-portaria");
     const containerSimulador = document.querySelector(".container");
@@ -8431,7 +8441,7 @@ function configurarPortaria() {
                     if (telaPortaria) telaPortaria.style.display = "none"; 
                     if (containerSimulador) containerSimulador.style.display = "block";
                     
-                    // Salva a sessão localmente
+                    // Salva a sessão localmente para persistência
                     localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
                     localStorage.setItem("user_session", JSON.stringify(data.session));
                     
@@ -8703,8 +8713,3 @@ if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW fail:', err));
     });
 }
-
-atualizarStatsHome();
-</script>
-</body>
-</html>
