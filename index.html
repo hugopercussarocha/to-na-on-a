@@ -8378,60 +8378,52 @@ window.addEventListener('load', () => {
 });
 
 // ==========================================
-// 3. SISTEMA DE PORTARIA (LOGIN COORDENADO)
+// 3. SISTEMA DE PORTARIA (LOGIN COM E-MAIL E CPF)
 // ==========================================
 function configurarPortaria() {
     const btnEntrar = document.getElementById("btn-entrar");
     const inputEmail = document.getElementById("login-email");
+    const inputSenha = document.getElementById("login-senha"); // Certifique-se que este ID existe no seu HTML
     const msgErro = document.getElementById("mensagem-erro");
     const telaPortaria = document.getElementById("tela-portaria");
     const containerSimulador = document.querySelector(".container");
 
     if (btnEntrar) {
         btnEntrar.addEventListener("click", async () => {
+            const emailDigitado = inputEmail.value.trim().toLowerCase();
+            // A linha abaixo limpa o CPF para garantir que só números sejam enviados
+            const cpfDigitado = inputSenha.value.trim().replace(/\D/g, ''); 
+            
+            if (!emailDigitado || !cpfDigitado) {
+                mostrarErro("Por favor, digite o e-mail e o CPF.");
+                return;
+            }
+
+            btnEntrar.innerText = "Verificando...";
+            btnEntrar.disabled = true;
+            if (msgErro) msgErro.style.display = "none";
+
             try {
-                const emailDigitado = inputEmail.value.trim().toLowerCase();
-                
-                if (!emailDigitado) {
-                    mostrarErro("Por favor, digite um e-mail válido.");
-                    return;
-                }
-
-                btnEntrar.innerText = "Verificando...";
-                btnEntrar.disabled = true;
-                if (msgErro) msgErro.style.display = "none";
-
-                // Consulta segura à tabela de perfis
-                const { data, error } = await supabaseClient.from('perfis')
-                    .select('assinatura_ativa, pago_ate')
-                    .eq('email', emailDigitado);
+                // Aqui está a MÁGICA: O Supabase autentica e-mail + senha (CPF)
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: emailDigitado,
+                    password: cpfDigitado
+                });
 
                 if (error) throw error;
 
-                if (!data || data.length === 0) {
-                    mostrarErro("E-mail não cadastrado. Verifique se digitou corretamente ou se o pagamento foi concluído.");
-                    btnEntrar.innerText = "Liberar Meu Acesso";
-                    btnEntrar.disabled = false;
-                    return;
-                }
-
-                const perfil = data[0];
-                const dataHoje = new Date();
-                const dataExpiracao = perfil.pago_ate ? new Date(perfil.pago_ate) : null;
-
-                // Liberação condicionada ao status e validade
-                if (perfil.assinatura_ativa === true && dataExpiracao && dataExpiracao > dataHoje) {
+                // Se o login for bem-sucedido:
+                if (data.user) {
                     if (telaPortaria) telaPortaria.style.display = "none"; 
                     if (containerSimulador) containerSimulador.style.display = "block";
                     
                     localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
                     navegarPara('home');
-                } else {
-                    mostrarErro("Sua assinatura está inativa ou expirou. Por favor, realize a renovação mensal.");
                 }
 
             } catch (clickError) {
-                alert("Erro ao consultar banco de dados: " + clickError.message);
+                // Se der erro de senha incorreta ou usuário inexistente
+                mostrarErro("E-mail ou CPF incorretos. Tente novamente.");
             }
 
             btnEntrar.innerText = "Liberar Meu Acesso";
@@ -8447,14 +8439,7 @@ function configurarPortaria() {
             alert(texto);
         }
     }
-
-    // Auto-preenchimento opcional se o usuário logou recentemente
-    const usuarioSalvo = localStorage.getItem("usuario_autorizado_simulador");
-    if (usuarioSalvo && inputEmail) {
-        inputEmail.value = usuarioSalvo;
-    }
 }
-
 // ==========================================
 // 4. LÓGICA DE NAVEGAÇÃO E SIMULADOR
 // ==========================================
