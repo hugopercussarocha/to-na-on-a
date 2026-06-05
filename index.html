@@ -8416,7 +8416,7 @@ function configurarPortaria() {
         btnEntrar.addEventListener("click", async () => {
             try {
                 const emailDigitado = inputEmail.value.trim().toLowerCase();
-                // Pega o CPF digitado e remove pontos/traços para garantir o padrão limpo do Make
+                // Limpa o CPF tirando pontos e traços
                 const senhaDigitada = inputSenha.value.trim().replace(/\D/g, ''); 
                 
                 if (!emailDigitado || !senhaDigitada) {
@@ -8428,7 +8428,7 @@ function configurarPortaria() {
                 btnEntrar.disabled = true;
                 if (msgErro) msgErro.style.display = "none";
 
-                // TENTA LOGAR NO SUPABASE USANDO E-MAIL E O CPF LIMPO COMO SENHA
+                // 🔥 LOGA NO SUPABASE USANDO OS DADOS DO CLIENTE OFICIAL
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email: emailDigitado,
                     password: senhaDigitada 
@@ -8436,12 +8436,12 @@ function configurarPortaria() {
 
                 if (error) throw error;
 
-                // SE PASSAR DA AUTENTICAÇÃO
+                // SE PASSAR DA AUTENTICAÇÃO, ALTERNA AS TELAS NA MESMA PÁGINA
                 if (data && data.user) {
                     if (telaPortaria) telaPortaria.style.display = "none"; 
                     if (containerSimulador) containerSimulador.style.display = "block";
                     
-                    // Salva a sessão localmente para persistência
+                    // Salva para não pedir login no F5
                     localStorage.setItem("usuario_autorizado_simulador", emailDigitado);
                     localStorage.setItem("user_session", JSON.stringify(data.session));
                     
