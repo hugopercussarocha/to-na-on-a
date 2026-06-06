@@ -3,92 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Serei Músico Militar - Questões</title>
-    
+    <title>Serei Músico Militar</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0f1115">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Serei Músico Militar - Questões">
-    <link rel="apple-touch-icon" href="icon-192.png">
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#0a0a0a">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-glow: rgba(34, 211, 238, 0.4);
-            --primary-gradient: linear-gradient(135deg, #22d3ee, #818cf8);
-            --bg-dark: #0f1115;
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --border-white: rgba(255, 255, 255, 0.05);
-            --text-main: #f8fafc;
+            --gold: #d4af37;
+            --bg: #0a0a0a;
+            --card: #121212;
+            --border: #333;
+            --text: #ffffff;
             --text-sec: #94a3b8;
-            --success: #4ade80;
-            --danger: #f87171;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .btn-tesoura {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #94a3b8;
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            margin-right: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            transition: var(--transition);
-            flex-shrink: 0;
-            z-index: 10;
-        }
-
-        .btn-tesoura:hover { 
-            background: rgba(255, 255, 255, 0.2); 
-            color: #fff; 
-        }
-
-        .opcao.cortada {
-            opacity: 0.3;
-            text-decoration: line-through;
-            filter: grayscale(1);
-            cursor: not-allowed;
-        }
-
-        .opcao.cortada .btn-tesoura {
-            opacity: 1;
-            filter: none;
-            cursor: pointer;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 480px;
-            background: rgba(15, 17, 21, 0.8);
-            backdrop-filter: blur(30px);
-            border: 1px solid var(--border-white);
-            border-radius: 32px;
-            padding: 30px 20px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            height: fit-content;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
+        
+        /* Portaria - Estilo fiel à imagem */
+        #tela-portaria { width: 100%; max-width: 400px; text-align: center; display: flex; flex-direction: column; justify-content: center; }
+        .logo-lira { font-size: 80px; color: var(--gold); margin-bottom: 10px; }
+        h2 { font-size: 28px; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; }
+        .sub-title { color: var(--text-sec); margin-bottom: 30px; }
+        
+        .input-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 15px; text-align: left; }
+        .input-box label { display: block; color: var(--gold); font-size: 12px; margin-bottom: 5px; }
+        .input-box input { background: transparent; border: none; color: white; width: 100%; outline: none; font-size: 16px; }
+        
+        #btn-entrar { background: linear-gradient(to right, #d4af37, #f3d460); color: black; border: none; padding: 16px; border-radius: 12px; font-weight: 800; font-size: 16px; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
+        .esqueci-senha { color: var(--gold); text-align: right; margin-top: -10px; margin-bottom: 20px; font-size: 14px; cursor: pointer; }
+        .divider { color: var(--text-sec); margin: 20px 0; }
+        
+        .btn-criar { background: var(--card); border: 1px solid var(--border); color: var(--gold); padding: 16px; border-radius: 12px; font-weight: 600; cursor: pointer; }
+        
+        /* Funcionalidades mantidas do seu app */
+        .container { width: 100%; max-width: 480px; }
         .hide { display: none !important; }
 
         .stats-card {
