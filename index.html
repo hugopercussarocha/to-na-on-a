@@ -10,22 +10,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-        --bg-dark: #0f1115;
-        --card-bg: rgba(22, 24, 30, 0.7);
-        --text-main: #ffffff;
-        --text-sec: #94a3b8;
-        --accent-grad: linear-gradient(135deg, #22d3ee, #818cf8);
-        --border-color: rgba(255, 255, 255, 0.08);
-    }
+            --gold: #d4af37;
+            --bg: #0a0a0a;
+            --card: #121212;
+            --border: #333;
+            --text: #ffffff;
+            --text-sec: #94a3b8;
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-       body {
-        background-color: var(--bg-dark);
-        font-family: 'Inter', sans-serif;
-        color: var(--text-main);
-        display: flex;
-        justify-content: center;
-        min-height: 100vh;
-    } 
+        body { background: var(--bg); color: var(--text); display: flex; justify-content: center; min-height: 100vh; padding: 20px; }
+        
         /* Portaria - Estilo fiel à imagem */
         #tela-portaria { width: 100%; max-width: 400px; text-align: center; display: flex; flex-direction: column; justify-content: center; }
         .logo-lira { font-size: 80px; color: var(--gold); margin-bottom: 10px; }
@@ -43,51 +37,43 @@
         .btn-criar { background: var(--card); border: 1px solid var(--border); color: var(--gold); padding: 16px; border-radius: 12px; font-weight: 600; cursor: pointer; }
         
         /* Funcionalidades mantidas do seu app */
-        .container {
-        width: 100%;
-        max-width: 450px;
-        padding: 20px;
-    }
+        .container { width: 100%; max-width: 480px; }
         .hide { display: none !important; }
 
         .stats-card {
-        background: var(--card-bg);
-        border: 1px solid var(--border-color);
-        border-radius: 24px;
-        padding: 20px;
-        display: flex;
-        justify-content: space-between;
-        backdrop-filter: blur(10px);
-        margin-bottom: 24px;
-    }
+            background: var(--card-bg);
+            border: 1px solid var(--border-white);
+            border-radius: 20px;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+        }
         .stat-group { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
 
         .btn-materias {
-        background: var(--accent-grad);
-        width: 100%;
-        padding: 30px;
-        border-radius: 28px;
-        border: none;
-        display: flex;
-        align-items: center;
-        gap: 20px;
-        cursor: pointer;
-        transition: transform 0.2s;
-        color: white;
-        text-align: left;
-    }
-        .btn-materias:hover { transform: scale(1.02); }
+            background: var(--primary-gradient);
+            padding: 35px 25px;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: var(--transition);
+            box-shadow: 0 10px 20px -5px var(--primary-glow);
+            border: none; width: 100%; color: white;
+        }
+        .btn-materias:hover { transform: translateY(-3px); }
 
         .btn-revisao {
-        background: var(--card-bg);
-        border: 1px solid var(--border-color);
-        padding: 20px;
-        border-radius: 20px;
-        width: 100%;
-        color: var(--text-main);
-        margin-top: 15px;
-        cursor: pointer;
-    }
+            background: var(--card-bg);
+            border: 1px solid var(--border-white);
+            padding: 20px; border-radius: 20px; width: 100%;
+            color: var(--text-main); font-weight: 600;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            cursor: pointer; transition: var(--transition);
+        }
 
         .list-item {
             background: var(--card-bg);
