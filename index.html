@@ -39,7 +39,93 @@
         /* Funcionalidades mantidas do seu app */
         .container { width: 100%; max-width: 480px; }
         .hide { display: none !important; }
-        /* ... (O restante do seu CSS original para o App segue abaixo, garantindo compatibilidade) ... */
+
+        .stats-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-white);
+            border-radius: 20px;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+        }
+        .stat-group { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
+
+        .btn-materias {
+            background: var(--primary-gradient);
+            padding: 35px 25px;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: var(--transition);
+            box-shadow: 0 10px 20px -5px var(--primary-glow);
+            border: none; width: 100%; color: white;
+        }
+        .btn-materias:hover { transform: translateY(-3px); }
+
+        .btn-revisao {
+            background: var(--card-bg);
+            border: 1px solid var(--border-white);
+            padding: 20px; border-radius: 20px; width: 100%;
+            color: var(--text-main); font-weight: 600;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            cursor: pointer; transition: var(--transition);
+        }
+
+        .list-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-white);
+            padding: 20px; border-radius: 20px; margin-bottom: 12px;
+            cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+            transition: var(--transition);
+        }
+        
+        .progress-mini-bg { width: 100%; height: 4px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-top: 10px; overflow: hidden; }
+        .progress-mini-fill { height: 100%; background: var(--primary-gradient); transition: width 0.8s ease; }
+
+        .question-text { font-size: 1.15rem; line-height: 1.6; margin-bottom: 30px; }
+
+        .opcao {
+            display: flex; align-items: center; background: var(--card-bg);
+            border: 1px solid var(--border-white); padding: 16px; border-radius: 18px;
+            margin-bottom: 12px; cursor: pointer; transition: var(--transition);
+        }
+
+        .letra-circulo {
+            width: 34px; height: 34px; border: 1px solid var(--border-white);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            margin-right: 15px; font-size: 13px; font-weight: 700; flex-shrink: 0;
+        }
+
+        .texto-alternativa { flex: 1; pointer-events: none; }
+
+        .opcao.correta {
+            background: rgba(34, 197, 94, 0.2) !important;
+            border-color: #22c55e !important;
+            opacity: 1 !important;
+            filter: none !important;
+            transform: scale(1.02);
+        }
+
+        .opcao.correta .letra-circulo {
+            background: #22c55e !important;
+            color: white !important;
+        }
+
+        .opcao.errada {
+            background: rgba(239, 68, 68, 0.2) !important;
+            border-color: #ef4444 !important;
+        }
+
+        .opcao.correta .btn-tesoura, 
+        .opcao.errada .btn-tesoura {
+            display: none;
+        }
+
+        .btn-nav { background: none; border: none; color: var(--text-sec); cursor: pointer; margin-bottom: 20px; }
     </style>
 </head>
 <body>
